@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Διαμεσολάβησης - Παναγιώτης Ζαρογουλίδης</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΠΑΝΑΓΙΩΤΗΣ ΖΑΡΟΓΟΥΛΙΔΗΣ | Σύστημα Δικογράφων</div>
+    <div style="font-size: 0.9rem; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3);">ΑΜΔ 2341</div>
+</header>
+
+<nav>
+    <button class="nav-btn active" onclick="setTab('docs', this)">📝 ΣΥΝΤΑΞΗ ΕΓΓΡΑΦΩΝ</button>
+    <button class="nav-btn" onclick="setTab('library', this)">📚 ΝΟΜΟΘΕΣΙΑ & ΘΕΩΡΙΑ</button>
+</nav>
+
+<main>
+    <!-- Tab: Document Drafting -->
+    <div id="docs" class="tab-content active">
+        <div class="grid">
+            <div class="form-panel">
+                <div class="group-header" style="margin-top:0;">💰 ΟΙΚΟΝΟΜΙΚΑ ΣΤΟΙΧΕΙΑ</div>
+                <div class="form-group"><label>Ποσό Αμοιβής</label><input type="text" id="m_fee" value="75 ευρώ πλέον ΦΠΑ 24% (σύνολο €93) ανά μέρος" oninput="draw()"></div>
+
+                <div class="group-header">
+                    <span>Α. ΕΠΙΣΠΕΥΔΟΝ ΜΕΡΟΣ</span>
+                    <button class="btn-add" onclick="addReq()">+ Προσθήκη</button>
+                </div>
+                <div id="req_container"></div>
+
+                <div class="group-header">
+                    <span>Β. ΕΤΕΡΟ ΜΕΡΟΣ</span>
+                    <button class="btn-add" onclick="addResp()">+ Προσθήκη</button>
+                </div>
+                <div id="resp_container"></div>
+
+                <div class="group-header">📋 ΣΤΟΙΧΕΙΑ ΑΓΩΓΗΣ</div>
+                <div class="form-group"><label>Σύντομο Αντικείμενο</label><textarea id="p_subj" rows="3" oninput="draw()"></textarea></div>
+                <div class="form-group"><label>Δικαστήριο</label><input type="text" id="p_court" placeholder="π.χ. ΜΟΝΟΜΕΛΕΣ ΠΡΩΤΟΔΙΚΕΙΟ ΕΔΕΣΣΑΣ" oninput="draw()"></div>
+                <div class="row-2">
+                    <div class="form-group"><label>Ημερ. Αγωγής</label><input type="text" id="p_court_d" oninput="draw()"></div>
+                    <div class="form-group"><label>Αρ. Κατάθεσης</label><input type="text" id="p_court_n" oninput="draw()"></div>
+                </div>
+
+                <div class="group-header">🌐 ΣΥΝΕΔΡΙΑ (ZOOM) & ΕΓΓΡΑΦΑ</div>
+                <div class="row-2">
+                    <div class="form-group"><label>Ημερομηνία ΥΑΣ</label><input type="date" id="yas_date" oninput="draw()"></div>
+                    <div class="form-group"><label>Ώρα ΥΑΣ</label><input type="time" id="yas_time" oninput="draw()"></div>
+                </div>
+                <div class="form-group"><label>Link Τηλεδιάσκεψης</label><input type="text" id="z_link" oninput="draw()"></div>
+                <div class="row-2">
+                    <div class="form-group"><label>Meeting ID</label><input type="text" id="z_id" oninput="draw()"></div>
+                    <div class="form-group"><label>Passcode</label><input type="text" id="z_pass" oninput="draw()"></div>
+                </div>
+                <div class="row-2" style="margin-top:10px;">
+                    <div class="form-group"><label>Ημερομηνία Γνωστοποίησης</label><input type="date" id="notify_date" oninput="draw()"></div>
+                    <div class="form-group"><label>Ημερομηνία Σύνταξης</label><input type="text" id="doc_date" oninput="draw()"></div>
+                </div>
+
+                <div class="group-header">📄 ΤΥΠΟΣ ΕΓΓΡΑΦΟΥ</div>
+                <select id="doc_type" onchange="draw()" style="background: #eff6ff; font-weight:800; padding: 14px; border: 2px solid #bfdbfe;">
+                    <option value="email">1. Πρώτο Email Ενημέρωσης</option>
+                    <option value="enarktiri">2. Εναρκτήρια Δήλωση ΥΑΣ</option>
+                    <option value="prosklisi">3. Έντυπο 3: Γνωστοποίηση (Ατομική)</option>
+                    <option value="praktiko">4. Πρακτικό Περάτωσης ΥΑΣ</option>
+                </select>
+
+                <div id="party_select_container">
+                    <div class="form-group" style="margin:0;">
+                        <label style="color: #92400e;">Επιλογή Παραλήπτη για Έντυπο 3:</label>
+                        <select id="party_select" onchange="changeParty()" style="border: 2px solid #fbbf24;"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <div class="doc-viewer">
+                    <div id="preview" class="printable"></div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-word" onclick="exportToWord()">📘 ΕΞΑΓΩΓΗ ΣΕ WORD (.doc)</button>
+                    <button class="btn btn-print" onclick="window.print()">🖨️ ΕΚΤΥΠΩΣΗ / PDF</button>
+                    <button class="btn btn-export" onclick="downloadMailTemplate()">📧 ΠΑΡΑΓΩΓΗ INDEX.HTML</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Library / Theory -->
+    <div id="library" class="tab-content">
+        <div class="lib-grid">
+            <div class="lib-menu">
+                <div class="lib-section-title">Θεωρία των Συγκρούσεων</div>
+                <div class="lib-item active" onclick="loadTheory('conflict_methodology', this)">Μεθοδολογία (Ψυχολογία & Πράξη)</div>
+                <div class="lib-item" onclick="loadTheory('conflict_moore', this)">Ο Κύκλος των Συγκρούσεων (C. Moore)</div>
+                <div class="lib-item" onclick="loadTheory('conflict_intro', this)">Φύση & Ορισμός της Σύγκρουσης</div>
+                <div class="lib-item" onclick="loadTheory('conflict_escalation', this)">Κλιμάκωση (Μοντέλο Glasl)</div>
+                <div class="lib-item" onclick="loadTheory('conflict_resolution', this)">Στυλ Επίλυσης (Thomas-Kilmann)</div>
+                
+                <div class="lib-section-title" style="margin-top: 20px;">Νομοθεσία Διαμεσολάβησης</div>
+                <div class="lib-item" onclick="loadTheory('law_4640', this)">Ν. 4640/2019 (Βασικός Νόμος)</div>
+                <div class="lib-item" onclick="loadTheory('law_5197', this)">Ν. 5197/2025 (Τροποποιήσεις Δικαστών)</div>
+                <div class="lib-item" onclick="loadTheory('law_5221', this)">Ν. 5221/2025 (ΚΠολΔ & Ανακοπές)</div>
+                <div class="lib-item" onclick="loadTheory('law_5232', this)">Ν. 5232/2025 (Κυρώσεις Ε.Ε.)</div>
+                <div class="lib-item" onclick="loadTheory('law_5282', this)">Ν. 5282/2026 (Ψηφιακό Μητρώο)</div>
+                <div class="lib-item" onclick="loadTheory('manual_ktima', this)">Εγχειρίδιο Κτηματολογίου (2024)</div>
+            </div>
+            <div class="lib-content" id="theory_content">
+                <!-- The theory content will be loaded here by script.js -->
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- External JavaScript -->
+<script src="script.js"></script>
+</body>
+</html>
