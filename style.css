@@ -24,7 +24,6 @@ main { display: flex; flex: 1; overflow: hidden; }
 .form-panel { background: #fff; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); overflow-y: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
 .preview-panel { background: #fff; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
 
-/* Custom Scrollbar for sleek UI */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
@@ -99,6 +98,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
     .preview-panel, .doc-viewer { border: none; padding: 0; background: white; overflow: visible;}
     body * { visibility: hidden; }
     #preview, #preview * { visibility: visible; }
-    #preview { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; padding: 0; }
-    @page { size: A4; margin: 0; }
+    #preview { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; padding: 0; margin: 0; }
+    .printable { box-shadow: none; }
+    @page { size: A4; margin: 2.54cm; }
 }
