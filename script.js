@@ -37,7 +37,6 @@ function loadState() {
     if (saved) {
         try {
             const state = JSON.parse(saved);
-            // Safety Net: Συγχώνευση των αποθηκευμένων δεδομένων με τα προεπιλεγμένα κενά πεδία για αποφυγή "undefined"
             if (state.reqs) reqs = state.reqs.map(r => ({ ...emptyPerson(), ...r }));
             if (state.resps) resps = state.resps.map(r => ({ ...emptyPerson(), ...r }));
             if (state.currentPartyIdx !== undefined) currentPartyIdx = state.currentPartyIdx;
@@ -48,7 +47,7 @@ function loadState() {
                     document.getElementById(id).value = state[id];
                 }
             });
-        } catch (e) { console.error('Σφάλμα κατά τη φόρτωση δεδομένων', e); }
+        } catch (e) { console.error('Σφάλμα φόρτωσης state', e); }
     } else {
         const today = new Date();
         document.getElementById('doc_date').value = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
@@ -82,42 +81,48 @@ function rmReq(idx) { reqs.splice(idx, 1); renderLists(); draw(); }
 function addResp() { resps.push(emptyPerson()); renderLists(); draw(); }
 function rmResp(idx) { resps.splice(idx, 1); renderLists(); draw(); }
 
+function updatePersonField(type, idx, field, value) {
+    const target = type === 'req' ? reqs : resps;
+    target[idx][field] = value;
+    draw();
+}
+
 function renderLists() {
-    const buildForm = (arr, prefix, idx, isResp) => {
+    const buildForm = (arr, type, idx) => {
         const r = arr[idx];
+        const isResp = type === 'resp';
         const arrName = isResp ? 'resps' : 'reqs';
         const title = isResp ? `Έτερο Μέρος ${arr.length > 1 ? idx+1 : ''}` : `Επισπεύδων ${arr.length > 1 ? idx+1 : ''}`;
         
-        // Προσθήκη || '' σε όλα τα values για να μην τυπωθεί ποτέ "undefined" στα κουτάκια
         return `
         <div class="party-block">
             <div class="party-title">${title}</div>
             ${idx > 0 ? `<button class="btn-rm" onclick="${isResp?'rmResp':'rmReq'}(${idx})">Διαγραφή</button>` : ''}
             <div class="row-3">
-                <div class="form-group"><label>Όνομα</label><input value="${r.n || ''}" oninput="${arrName}[${idx}].n=this.value; draw()"></div>
-                <div class="form-group"><label>Επώνυμο</label><input value="${r.s || ''}" oninput="${arrName}[${idx}].s=this.value; draw()"></div>
-                <div class="form-group"><label>Πατρώνυμο</label><input value="${r.f || ''}" oninput="${arrName}[${idx}].f=this.value; draw()"></div>
+                <div class="form-group"><label>Όνομα</label><input value="${r.n || ''}" oninput="updatePersonField('${type}', ${idx}, 'n', this.value)"></div>
+                <div class="form-group"><label>Επώνυμο</label><input value="${r.s || ''}" oninput="updatePersonField('${type}', ${idx}, 's', this.value)"></div>
+                <div class="form-group"><label>Πατρώνυμο</label><input value="${r.f || ''}" oninput="updatePersonField('${type}', ${idx}, 'f', this.value)"></div>
             </div>
             <div class="row-2">
-                <div class="form-group"><label>Διεύθυνση</label><input value="${r.addr || ''}" oninput="${arrName}[${idx}].addr=this.value; draw()"></div>
-                <div class="form-group"><label>ΑΦΜ</label><input value="${r.afm || ''}" oninput="${arrName}[${idx}].afm=this.value; draw()"></div>
+                <div class="form-group"><label>Διεύθυνση</label><input value="${r.addr || ''}" oninput="updatePersonField('${type}', ${idx}, 'addr', this.value)"></div>
+                <div class="form-group"><label>ΑΦΜ</label><input value="${r.afm || ''}" oninput="updatePersonField('${type}', ${idx}, 'afm', this.value)"></div>
             </div>
             <div class="row-3">
-                <div class="form-group"><label>Κινητό</label><input value="${r.mob || ''}" oninput="${arrName}[${idx}].mob=this.value; draw()"></div>
-                <div class="form-group"><label>Email</label><input value="${r.email || ''}" oninput="${arrName}[${idx}].email=this.value; draw()"></div>
+                <div class="form-group"><label>Κινητό</label><input value="${r.mob || ''}" oninput="updatePersonField('${type}', ${idx}, 'mob', this.value)"></div>
+                <div class="form-group"><label>Email</label><input value="${r.email || ''}" oninput="updatePersonField('${type}', ${idx}, 'email', this.value)"></div>
             </div>
-            <label class="chk-label"><input type="checkbox" ${r.p_party !== false ? 'checked' : ''} onchange="${arrName}[${idx}].p_party=this.checked; draw()"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΥΑΣ</label>
+            <label class="chk-label"><input type="checkbox" ${r.p_party !== false ? 'checked' : ''} onchange="updatePersonField('${type}', ${idx}, 'p_party', this.checked)"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΥΑΣ</label>
             
             <div class="sub-title">Νομικός Παραστάτης</div>
             <div class="row-2">
-                <div class="form-group"><label>Ονοματεπώνυμο</label><input value="${r.l_s || ''}" placeholder="Επώνυμο Όνομα" oninput="${arrName}[${idx}].l_s=this.value; draw()"></div>
-                <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds || ''}" oninput="${arrName}[${idx}].l_amds=this.value; draw()"></div>
+                <div class="form-group"><label>Ονοματεπώνυμο</label><input value="${r.l_s || ''}" placeholder="Επώνυμο Όνομα" oninput="updatePersonField('${type}', ${idx}, 'l_s', this.value)"></div>
+                <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds || ''}" oninput="updatePersonField('${type}', ${idx}, 'l_amds', this.value)"></div>
             </div>
-            <label class="chk-label"><input type="checkbox" ${r.p_law !== false ? 'checked' : ''} onchange="${arrName}[${idx}].p_law=this.checked; draw()"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
+            <label class="chk-label"><input type="checkbox" ${r.p_law !== false ? 'checked' : ''} onchange="updatePersonField('${type}', ${idx}, 'p_law', this.checked)"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
         </div>`;
     };
-    document.getElementById('req_container').innerHTML = reqs.map((_, i) => buildForm(reqs, 'Req', i, false)).join('');
-    document.getElementById('resp_container').innerHTML = resps.map((_, i) => buildForm(resps, 'Resp', i, true)).join('');
+    document.getElementById('req_container').innerHTML = reqs.map((_, i) => buildForm(reqs, 'req', i)).join('');
+    document.getElementById('resp_container').innerHTML = resps.map((_, i) => buildForm(resps, 'resp', i)).join('');
 }
 
 const fmtD = (d) => d ? d.split('-').reverse().join('/') : "................";
@@ -154,7 +159,14 @@ function draw() {
     if(d.type === 'prosklisi') updatePartySelect();
 
     const zoomFrame = `<br>Ημερομηνία: ${fmtD(d.z_date)}<br>Ώρα: ${d.z_time}<br>Μέσο: Μέσω της πλατφόρμας τηλεδιάσκεψης Zoom (εντός της συνημμένης πρόσκλησης θα βρείτε την σύνδεσμο σύνδεσης).<br>`;
-    const zoomFrameEntypo = `<div style="border: 1.5pt solid #2563eb; padding: 15pt; margin: 20pt auto; background-color: #f0f7ff; width: 100%; box-sizing: border-box; text-align: center; border-radius: 8pt;"><div style="font-weight: bold; font-size: 13pt; margin-bottom: 10pt; text-decoration: underline;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</div><b>Ημερομηνία:</b> ${fmtD(d.z_date)} &nbsp;&nbsp;&nbsp; <b>Ώρα:</b> ${d.z_time}<br><br><b>Σύνδεσμος/Link:</b> <a href="${d.z_link}" style="color: #2563eb;">${d.z_link}</a><br><br><b>Meeting ID:</b> ${d.z_id}<br><b>Passcode:</b> ${d.z_pass}</div>`;
+    const zoomFrameEntypo = `
+<div style="border: 1.5pt solid #2563eb; padding: 15pt; margin: 20pt 0; background-color: #f0f7ff; width: 100%; box-sizing: border-box; text-align: center; border-radius: 8pt;">
+    <div style="font-weight: bold; font-size: 13pt; margin-bottom: 10pt; text-decoration: underline;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</div>
+    <b>Ημερομηνία:</b> ${fmtD(d.z_date)} &nbsp;&nbsp;&nbsp; <b>Ώρα:</b> ${d.z_time}<br><br>
+    <b>Σύνδεσμος/Link:</b> <a href="${d.z_link}" style="color: #2563eb;">${d.z_link}</a><br><br>
+    <b>Meeting ID:</b> ${d.z_id}<br>
+    <b>Passcode:</b> ${d.z_pass}
+</div>`;
 
     const reqsEnarktiria = reqs.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${r.l_s || "......."}`).join(' και ');
     const respsEnarktiria = resps.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${r.l_s || "......."}`).join(' και ');
@@ -322,7 +334,7 @@ ${praktikoRespHTML}
     }
 
     document.getElementById('preview').innerHTML = activeHtml;
-    saveState();
+    saveState(); 
 }
 
 // ==========================================
@@ -333,7 +345,6 @@ function exportToWord() {
     const html = document.getElementById("preview").innerHTML;
     const sel = document.getElementById('party_select');
     
-    // Safety check για το dropdown selection (αποτρέπει undefined error)
     let pName = "Meros";
     if (sel && sel.options && sel.selectedIndex >= 0) {
         pName = sel.options[sel.selectedIndex].text;
@@ -505,7 +516,7 @@ const theoryData = {
     conflict_moore: `<h3>Ο Κύκλος των Συγκρούσεων (Christopher Moore)</h3>
     <p>Ο Christopher Moore ταξινομεί τις αιτίες των συγκρούσεων σε 5 κατηγορίες, βοηθώντας τον διαμεσολαβητή να εντοπίσει τη "ρίζα" του προβλήματος.</p>
     <div style="text-align: center; margin: 25px 0;">
-        <img src="Παρουσίαση__2026-04-15T09_38_02.977Z.png" alt="Ο Κύκλος των Συγκρούσεων του Moore" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <img src="image_a357a6.png" alt="Ο Κύκλος των Συγκρούσεων του Moore" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
     </div>
     <div class="moore-circle">
         <div class="moore-node">
@@ -559,4 +570,45 @@ const theoryData = {
     </ul>`
 };
 
-// ... (Το υπόλοιπο αρχείο παραμένει ως έχει)
+function loadTheory(id, el) {
+    document.querySelectorAll('.lib-item').forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+    
+    const contentBox = document.getElementById('theory_content');
+    if (contentBox && theoryData[id]) {
+        contentBox.innerHTML = theoryData[id];
+    } else if (contentBox) {
+        contentBox.innerHTML = "<p>Σφάλμα φόρτωσης περιεχομένου.</p>";
+    }
+}
+
+function setTab(t, btn) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    
+    const targetTab = document.getElementById(t);
+    if (targetTab) targetTab.classList.add('active');
+    if (btn) btn.classList.add('active');
+    
+    const theoryContent = document.getElementById('theory_content');
+    if(t === 'library' && theoryContent && theoryContent.innerHTML.trim() === '') {
+        const firstItem = document.querySelector('.lib-item');
+        if(firstItem) {
+            loadTheory('law_procedure', firstItem);
+        }
+    }
+}
+
+// Αρχικοποίηση εφαρμογής (Φόρτωση δεδομένων & πρώτο render)
+window.onload = () => { 
+    loadState();
+    renderLists(); 
+    draw(); 
+    
+    // Προφόρτωση της βιβλιοθήκης (στο παρασκήνιο) για να είναι έτοιμη
+    const theoryContent = document.getElementById('theory_content');
+    if(theoryContent && theoryContent.innerHTML.trim() === '') {
+        const firstItem = document.querySelector('.lib-item');
+        if(firstItem) loadTheory('law_procedure', firstItem);
+    }
+};
