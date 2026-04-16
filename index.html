@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Διαμεσολάβησης - Παναγιώτης Ζαρογουλίδης</title>
-    <!-- External CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,7 +19,6 @@
 </nav>
 
 <main>
-    <!-- Tab: Document Drafting -->
     <div id="docs" class="tab-content active">
         <div class="grid">
             <div class="form-panel">
@@ -83,15 +81,15 @@
                     <div id="preview" class="printable"></div>
                 </div>
                 <div class="actions">
-                    <button class="btn btn-word" onclick="exportToWord()">📘 ΕΞΑΓΩΓΗ ΣΕ WORD (.doc)</button>
-                    <button class="btn btn-print" onclick="window.print()">🖨️ ΕΚΤΥΠΩΣΗ / PDF</button>
-                    <button class="btn btn-export" onclick="downloadMailTemplate()">📧 ΠΑΡΑΓΩΓΗ INDEX.HTML</button>
+                    <button class="btn btn-word" onclick="exportToWord()">📘 WORD (.doc)</button>
+                    <button class="btn btn-print" onclick="window.print()">🖨️ PDF</button>
+                    <button class="btn btn-export" onclick="downloadMailTemplate()">📧 INDEX.HTML</button>
+                    <button class="btn btn-danger" onclick="clearForm()">🗑️ ΚΑΘΑΡΙΣΜΟΣ</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tab: Library / Theory -->
     <div id="library" class="tab-content">
         <div class="lib-grid">
             <div class="lib-menu">
@@ -111,13 +109,11 @@
                 <div class="lib-item" onclick="loadTheory('manual_ktima', this)">Εγχειρίδιο Κτηματολογίου (2024)</div>
             </div>
             <div class="lib-content" id="theory_content">
-                <!-- The theory content will be loaded here by script.js -->
-            </div>
+                </div>
         </div>
     </div>
 </main>
 
-<!-- External JavaScript -->
 <script src="script.js"></script>
 </body>
 </html>
