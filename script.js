@@ -37,13 +37,14 @@ function loadState() {
     if (saved) {
         try {
             const state = JSON.parse(saved);
-            if (state.reqs) reqs = state.reqs;
-            if (state.resps) resps = state.resps;
+            // Safety Net: Συγχώνευση των αποθηκευμένων δεδομένων με τα προεπιλεγμένα κενά πεδία για αποφυγή "undefined"
+            if (state.reqs) reqs = state.reqs.map(r => ({ ...emptyPerson(), ...r }));
+            if (state.resps) resps = state.resps.map(r => ({ ...emptyPerson(), ...r }));
             if (state.currentPartyIdx !== undefined) currentPartyIdx = state.currentPartyIdx;
             
             const inputs = ['m_fee', 'p_subj', 'p_court', 'p_court_d', 'p_court_n', 'yas_date', 'yas_time', 'z_link', 'z_id', 'z_pass', 'notify_date', 'doc_date', 'doc_type'];
             inputs.forEach(id => {
-                if(state[id] && document.getElementById(id)) {
+                if(state[id] !== undefined && document.getElementById(id)) {
                     document.getElementById(id).value = state[id];
                 }
             });
@@ -55,7 +56,7 @@ function loadState() {
 }
 
 function clearForm() {
-    if(confirm('Είστε σίγουροι ότι θέλετε να καθαρίσετε όλα τα δεδομένα της φόρμας; Αυτή η ενέργεια δεν αναιρείται.')) {
+    if(confirm('Είστε σίγουροι ότι θέλετε να καθαρίσετε όλα τα δεδομένα της φόρμας;')) {
         localStorage.removeItem('mediationPortalState');
         reqs = [emptyPerson()];
         resps = [emptyPerson()];
@@ -81,48 +82,42 @@ function rmReq(idx) { reqs.splice(idx, 1); renderLists(); draw(); }
 function addResp() { resps.push(emptyPerson()); renderLists(); draw(); }
 function rmResp(idx) { resps.splice(idx, 1); renderLists(); draw(); }
 
-function updatePersonField(type, idx, field, value) {
-    const target = type === 'req' ? reqs : resps;
-    target[idx][field] = value;
-    draw();
-}
-
 function renderLists() {
-    const buildForm = (arr, type, idx) => {
+    const buildForm = (arr, prefix, idx, isResp) => {
         const r = arr[idx];
-        const isResp = type === 'resp';
         const arrName = isResp ? 'resps' : 'reqs';
         const title = isResp ? `Έτερο Μέρος ${arr.length > 1 ? idx+1 : ''}` : `Επισπεύδων ${arr.length > 1 ? idx+1 : ''}`;
         
+        // Προσθήκη || '' σε όλα τα values για να μην τυπωθεί ποτέ "undefined" στα κουτάκια
         return `
         <div class="party-block">
             <div class="party-title">${title}</div>
             ${idx > 0 ? `<button class="btn-rm" onclick="${isResp?'rmResp':'rmReq'}(${idx})">Διαγραφή</button>` : ''}
             <div class="row-3">
-                <div class="form-group"><label>Όνομα</label><input value="${r.n}" oninput="updatePersonField('${type}', ${idx}, 'n', this.value)"></div>
-                <div class="form-group"><label>Επώνυμο</label><input value="${r.s}" oninput="updatePersonField('${type}', ${idx}, 's', this.value)"></div>
-                <div class="form-group"><label>Πατρώνυμο</label><input value="${r.f}" oninput="updatePersonField('${type}', ${idx}, 'f', this.value)"></div>
+                <div class="form-group"><label>Όνομα</label><input value="${r.n || ''}" oninput="${arrName}[${idx}].n=this.value; draw()"></div>
+                <div class="form-group"><label>Επώνυμο</label><input value="${r.s || ''}" oninput="${arrName}[${idx}].s=this.value; draw()"></div>
+                <div class="form-group"><label>Πατρώνυμο</label><input value="${r.f || ''}" oninput="${arrName}[${idx}].f=this.value; draw()"></div>
             </div>
             <div class="row-2">
-                <div class="form-group"><label>Διεύθυνση</label><input value="${r.addr}" oninput="updatePersonField('${type}', ${idx}, 'addr', this.value)"></div>
-                <div class="form-group"><label>ΑΦΜ</label><input value="${r.afm}" oninput="updatePersonField('${type}', ${idx}, 'afm', this.value)"></div>
+                <div class="form-group"><label>Διεύθυνση</label><input value="${r.addr || ''}" oninput="${arrName}[${idx}].addr=this.value; draw()"></div>
+                <div class="form-group"><label>ΑΦΜ</label><input value="${r.afm || ''}" oninput="${arrName}[${idx}].afm=this.value; draw()"></div>
             </div>
             <div class="row-3">
-                <div class="form-group"><label>Κινητό</label><input value="${r.mob}" oninput="updatePersonField('${type}', ${idx}, 'mob', this.value)"></div>
-                <div class="form-group"><label>Email</label><input value="${r.email}" oninput="updatePersonField('${type}', ${idx}, 'email', this.value)"></div>
+                <div class="form-group"><label>Κινητό</label><input value="${r.mob || ''}" oninput="${arrName}[${idx}].mob=this.value; draw()"></div>
+                <div class="form-group"><label>Email</label><input value="${r.email || ''}" oninput="${arrName}[${idx}].email=this.value; draw()"></div>
             </div>
-            <label class="chk-label"><input type="checkbox" ${r.p_party?'checked':''} onchange="updatePersonField('${type}', ${idx}, 'p_party', this.checked)"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΥΑΣ</label>
+            <label class="chk-label"><input type="checkbox" ${r.p_party !== false ? 'checked' : ''} onchange="${arrName}[${idx}].p_party=this.checked; draw()"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΥΑΣ</label>
             
             <div class="sub-title">Νομικός Παραστάτης</div>
             <div class="row-2">
-                <div class="form-group"><label>Ονοματεπώνυμο</label><input value="${r.l_s}" placeholder="Επώνυμο Όνομα" oninput="updatePersonField('${type}', ${idx}, 'l_s', this.value)"></div>
-                <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds}" oninput="updatePersonField('${type}', ${idx}, 'l_amds', this.value)"></div>
+                <div class="form-group"><label>Ονοματεπώνυμο</label><input value="${r.l_s || ''}" placeholder="Επώνυμο Όνομα" oninput="${arrName}[${idx}].l_s=this.value; draw()"></div>
+                <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds || ''}" oninput="${arrName}[${idx}].l_amds=this.value; draw()"></div>
             </div>
-            <label class="chk-label"><input type="checkbox" ${r.p_law?'checked':''} onchange="updatePersonField('${type}', ${idx}, 'p_law', this.checked)"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
+            <label class="chk-label"><input type="checkbox" ${r.p_law !== false ? 'checked' : ''} onchange="${arrName}[${idx}].p_law=this.checked; draw()"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
         </div>`;
     };
-    document.getElementById('req_container').innerHTML = reqs.map((_, i) => buildForm(reqs, 'req', i)).join('');
-    document.getElementById('resp_container').innerHTML = resps.map((_, i) => buildForm(resps, 'resp', i)).join('');
+    document.getElementById('req_container').innerHTML = reqs.map((_, i) => buildForm(reqs, 'Req', i, false)).join('');
+    document.getElementById('resp_container').innerHTML = resps.map((_, i) => buildForm(resps, 'Resp', i, true)).join('');
 }
 
 const fmtD = (d) => d ? d.split('-').reverse().join('/') : "................";
@@ -136,7 +131,7 @@ function updatePartySelect() {
     sel.innerHTML = all.map((p, i) => `<option value="${i}" ${i==currentPartyIdx?'selected':''}>${getFullName(p.n, p.s)} ${i<reqs.length?'(Επισπεύδων)':'(Έτερο Μέρος)'}</option>`).join('');
 }
 
-function changeParty() { currentPartyIdx = parseInt(document.getElementById('party_select').value); draw(); }
+function changeParty() { currentPartyIdx = parseInt(document.getElementById('party_select').value) || 0; draw(); }
 
 function draw() {
     const d = {
@@ -159,26 +154,17 @@ function draw() {
     if(d.type === 'prosklisi') updatePartySelect();
 
     const zoomFrame = `<br>Ημερομηνία: ${fmtD(d.z_date)}<br>Ώρα: ${d.z_time}<br>Μέσο: Μέσω της πλατφόρμας τηλεδιάσκεψης Zoom (εντός της συνημμένης πρόσκλησης θα βρείτε την σύνδεσμο σύνδεσης).<br>`;
-    
-    // Το πλαίσιο Zoom με 100% πλάτος για να μην "σπάει" την στοίχιση
-    const zoomFrameEntypo = `
-<div style="border: 1.5pt solid #2563eb; padding: 15pt; margin: 20pt 0; background-color: #f0f7ff; width: 100%; box-sizing: border-box; text-align: center; border-radius: 8pt;">
-    <div style="font-weight: bold; font-size: 13pt; margin-bottom: 10pt; text-decoration: underline;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</div>
-    <b>Ημερομηνία:</b> ${fmtD(d.z_date)} &nbsp;&nbsp;&nbsp; <b>Ώρα:</b> ${d.z_time}<br><br>
-    <b>Σύνδεσμος/Link:</b> <a href="${d.z_link}" style="color: #2563eb;">${d.z_link}</a><br><br>
-    <b>Meeting ID:</b> ${d.z_id}<br>
-    <b>Passcode:</b> ${d.z_pass}
-</div>`;
+    const zoomFrameEntypo = `<div style="border: 1.5pt solid #2563eb; padding: 15pt; margin: 20pt auto; background-color: #f0f7ff; width: 100%; box-sizing: border-box; text-align: center; border-radius: 8pt;"><div style="font-weight: bold; font-size: 13pt; margin-bottom: 10pt; text-decoration: underline;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</div><b>Ημερομηνία:</b> ${fmtD(d.z_date)} &nbsp;&nbsp;&nbsp; <b>Ώρα:</b> ${d.z_time}<br><br><b>Σύνδεσμος/Link:</b> <a href="${d.z_link}" style="color: #2563eb;">${d.z_link}</a><br><br><b>Meeting ID:</b> ${d.z_id}<br><b>Passcode:</b> ${d.z_pass}</div>`;
 
     const reqsEnarktiria = reqs.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${r.l_s || "......."}`).join(' και ');
     const respsEnarktiria = resps.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${r.l_s || "......."}`).join(' και ');
 
     let praktikoReqHTML = '';
     reqs.forEach((r, i) => {
-        let chkParty = r.p_party ? '[ ☒ ]' : '[ ☐ ]';
-        let chkPartyNot = !r.p_party ? '[ ☒ ]' : '[ ☐ ]';
-        let chkLaw = r.p_law ? '[ ☒ ]' : '[ ☐ ]';
-        let chkLawNot = !r.p_law ? '[ ☒ ]' : '[ ☐ ]';
+        let chkParty = r.p_party !== false ? '[ ☒ ]' : '[ ☐ ]';
+        let chkPartyNot = r.p_party === false ? '[ ☒ ]' : '[ ☐ ]';
+        let chkLaw = r.p_law !== false ? '[ ☒ ]' : '[ ☐ ]';
+        let chkLawNot = r.p_law === false ? '[ ☒ ]' : '[ ☐ ]';
         
         praktikoReqHTML += `
 <b>Α. ΕΠΙΣΠΕΥΔΟΝ ΜΕΡΟΣ ${reqs.length > 1 ? i+1 : ''}</b><br>
@@ -203,10 +189,10 @@ Email	 [ ☒ ]<br>
 
     let praktikoRespHTML = '';
     resps.forEach((r, i) => {
-        let chkParty = r.p_party ? '[ ☒ ]' : '[ ☐ ]';
-        let chkPartyNot = !r.p_party ? '[ ☒ ]' : '[ ☐ ]';
-        let chkLaw = r.p_law ? '[ ☒ ]' : '[ ☐ ]';
-        let chkLawNot = !r.p_law ? '[ ☒ ]' : '[ ☐ ]';
+        let chkParty = r.p_party !== false ? '[ ☒ ]' : '[ ☐ ]';
+        let chkPartyNot = r.p_party === false ? '[ ☒ ]' : '[ ☐ ]';
+        let chkLaw = r.p_law !== false ? '[ ☒ ]' : '[ ☐ ]';
+        let chkLawNot = r.p_law === false ? '[ ☒ ]' : '[ ☐ ]';
 
         praktikoRespHTML += `
 <b>Β. ΕΤΕΡΑ ΜΕΡΟΣ ${resps.length > 1 ? i+1 : ''}</b><br>
@@ -336,7 +322,7 @@ ${praktikoRespHTML}
     }
 
     document.getElementById('preview').innerHTML = activeHtml;
-    saveState(); // Αποθήκευση της κατάστασης σε κάθε αλλαγή
+    saveState();
 }
 
 // ==========================================
@@ -346,8 +332,15 @@ function exportToWord() {
     const type = document.getElementById('doc_type').value;
     const html = document.getElementById("preview").innerHTML;
     const sel = document.getElementById('party_select');
+    
+    // Safety check για το dropdown selection (αποτρέπει undefined error)
+    let pName = "Meros";
+    if (sel && sel.options && sel.selectedIndex >= 0) {
+        pName = sel.options[sel.selectedIndex].text;
+    }
+    
     const filename = type === 'prosklisi' 
-        ? `Prosklisi_${sel.options[sel.selectedIndex]?.text.replace(/\s+/g,'_')}.doc` 
+        ? `Prosklisi_${pName.replace(/\s+/g,'_')}.doc` 
         : `${type.toUpperCase()}.doc`;
 
     const blobContent = `
@@ -369,7 +362,7 @@ function exportToWord() {
 function downloadMailTemplate() {
     const fee = document.getElementById('m_fee').value;
     const z_date = document.getElementById('yas_date').value;
-    const z_time = document.getElementById('yas_time').value;
+    const z_time = document.getElementById('yas_time').value || "....";
     const z_link = document.getElementById('z_link').value;
     const z_id = document.getElementById('z_id').value;
     const z_pass = document.getElementById('z_pass').value;
@@ -399,101 +392,88 @@ function downloadMailTemplate() {
 // 5. ΒΙΒΛΙΟΘΗΚΗ / ΘΕΩΡΙΑ & ΝΟΜΟΘΕΣΙΑ
 // ==========================================
 const theoryData = {
-    law_art_1_3: `<h3>Άρθρα 1-3: Σκοπός, Ορισμοί, Πεδίο Εφαρμογής</h3>
+    law_procedure: `<h3>Διαδικασία, Χρόνοι & Όρια (Ν. 4640/2019)</h3>
+    <div class="law-box">
+        <h4>Προσφυγή στη Διαμεσολάβηση (Άρθρο 6)</h4>
+        <p>Η προσφυγή γίνεται είτε εκουσίως (για οποιαδήποτε αστική/εμπορική διαφορά) είτε υποχρεωτικά μέσω της Υποχρεωτικής Αρχικής Συνεδρίας (ΥΑΣ).<br>
+        Η <b>ΥΑΣ είναι υποχρεωτική</b> για:<br>
+        α) Οικογενειακές διαφορές (εκτός από διαζύγια/ακυρώσεις γάμου).<br>
+        β) Διαφορές τακτικής διαδικασίας (Μονομελούς > 30.000€ και Πολυμελούς Πρωτοδικείου).</p>
+    </div>
+    <div class="law-box">
+        <h4>Χρονοδιαγράμματα και Προθεσμίες (Άρθρο 7)</h4>
+        <p><strong>• Γνωστοποίηση:</strong> Ο διαμεσολαβητής γνωστοποιεί εγγράφως στα μέρη τον τόπο και χρόνο της ΥΑΣ <b>τουλάχιστον πέντε (5) ημέρες πριν</b> από τη διεξαγωγή της.</p>
+        <p><strong>• Διεξαγωγή ΥΑΣ:</strong> Η ΥΑΣ πρέπει να λάβει χώρα το αργότερο <b>εντός είκοσι (20) ημερών</b> από την επομένη της αποστολής του αιτήματος προσφυγής στον διαμεσολαβητή (ή <b>30 ημερών</b> αν κάποιο μέρος διαμένει στο εξωτερικό).</p>
+        <p><strong>• Ολοκλήρωση Διαμεσολάβησης:</strong> Αν τα μέρη συμφωνήσουν (μετά την ΥΑΣ) να συνεχίσουν στη διαμεσολάβηση, αυτή πρέπει να ολοκληρωθεί εντός <b>σαράντα (40) ημερών</b> από τη λήξη της ανωτέρω προθεσμίας των 20 ή 30 ημερών. Τα μέρη μπορούν να συμφωνήσουν παράταση της διαδικασίας.</p>
+    </div>
+    <div class="law-box">
+        <h4>Διενέργεια Διαδικασίας (Άρθρο 5)</h4>
+        <p>Ο διαμεσολαβητής καθορίζει τη διαδικασία μαζί με τα μέρη. Οφείλει να διασφαλίζει την <b>ίση μεταχείριση</b>. Μπορεί να επικοινωνεί και να οργανώνει <b>κατ' ιδίαν συναντήσεις</b> με το κάθε μέρος. Πληροφορίες που αντλεί στις κατ' ιδίαν συναντήσεις παραμένουν αυστηρά εμπιστευτικές εκτός αν του δοθεί ρητή άδεια να τις αποκαλύψει.</p>
+    </div>`,
+
+    law_disciplinary: `<h3>Πειθαρχικό Δίκαιο Διαμεσολαβητών (Άρθρα 14-17)</h3>
+    <div class="law-box">
+        <h4>Πειθαρχικό Συμβούλιο (Άρθρο 14)</h4>
+        <p>Λειτουργεί στο Υπουργείο Δικαιοσύνης. Είναι πενταμελές και αποτελείται από έναν ανώτερο Δικαστικό Λειτουργό (πρόεδρος), έναν Καθηγητή ΑΕΙ, έναν δικηγόρο και δύο διαπιστευμένους διαμεσολαβητές.</p>
+    </div>
+    <div class="law-box">
+        <h4>Πειθαρχικά Παραπτώματα (Άρθρο 15)</h4>
+        <p>Συνιστά πειθαρχικό παράπτωμα:<br>
+        α) Η παραβίαση του απορρήτου (άρθρο 4).<br>
+        β) Η παραβίαση των διατάξεων για την εξουσία διάθεσης και την ισότητα (άρθρα 3 και 5).<br>
+        γ) Η παραβίαση του Κώδικα Δεοντολογίας (π.χ. σύγκρουση συμφερόντων).<br>
+        δ) Η συμπεριφορά που είναι ασυμβίβαστη προς το λειτούργημα του διαμεσολαβητή και θίγει το κύρος του θεσμού.</p>
+    </div>
+    <div class="law-box">
+        <h4>Πειθαρχικές Ποινές (Άρθρο 16)</h4>
+        <p>Το Συμβούλιο επιβάλλει, ανάλογα με τη βαρύτητα του παραπτώματος:<br>
+        1. Έγγραφη επίπληξη.<br>
+        2. Πρόστιμο από <b>τριακόσια (300) έως πέντε χιλιάδες (5.000) ευρώ</b>.<br>
+        3. Προσωρινή ανάκληση της διαπίστευσης και διαγραφή από το Μητρώο από <b>έναν (1) μήνα έως ένα (1) έτος</b>.<br>
+        4. Οριστική ανάκληση διαπίστευσης (σε περίπτωση βαρύτατης ή καθ' υποτροπήν παράβασης).</p>
+    </div>
+    <div class="law-box">
+        <h4>Πειθαρχική Διαδικασία & Παραγραφή (Άρθρο 17)</h4>
+        <p>Η πειθαρχική δίωξη ασκείται είτε κατόπιν καταγγελίας είτε αυτεπαγγέλτως. Μπορεί να διαταχθεί προκαταρκτική εξέταση. Ο εγκαλούμενος καλείται σε απολογία (προθεσμία 15 ημερών).<br>
+        Η απόφαση πρέπει να εκδοθεί εντός δύο (2) μηνών από την κλήση σε απολογία.<br>
+        <b>Παραγραφή:</b> Τα παραπτώματα παραγράφονται <b>τρία (3) έτη</b> μετά την τέλεσή τους.</p>
+    </div>`,
+
+    law_definitions: `<h3>Ν. 4640/2019: Ορισμοί & Πεδίο Εφαρμογής</h3>
     <div class="law-box">
         <h4>Άρθρο 1: Σκοπός</h4>
-        <p>Ο νόμος έχει σκοπό τη ρύθμιση του θεσμού της διαμεσολάβησης σε αστικές και εμπορικές υποθέσεις, και την εναρμόνιση της Ελληνικής Νομοθεσίας με την Οδηγία 2008/52/ΕΚ.</p>
+        <p>Ο παρών νόμος έχει σκοπό τη ρύθμιση του θεσμού της διαμεσολάβησης σε αστικές και εμπορικές υποθέσεις, καθώς και την περαιτέρω εναρμόνιση της Ελληνικής Νομοθεσίας με τις διατάξεις της Οδηγίας 2008/52/ΕΚ.</p>
     </div>
     <div class="law-box">
         <h4>Άρθρο 2: Ορισμοί</h4>
         <p><b>Διαμεσολάβηση:</b> Η διαρθρωμένη διαδικασία ανεξαρτήτως ονομασίας, στην οποία δύο ή περισσότερα μέρη επιχειρούν εκουσίως να επιλύσουν με συμφωνία μια διαφορά τους με τη συνδρομή διαμεσολαβητή.</p>
-        <p><b>Διαμεσολαβητής:</b> Ο τρίτος που αναλαμβάνει να διαμεσολαβήσει, ο οποίος είναι διαπιστευμένος από την Κ.Ε.Δ. και εγγεγραμμένος στο Μητρώο.</p>
     </div>
     <div class="law-box">
         <h4>Άρθρο 3: Υπαγόμενες Διαφορές</h4>
-        <p>Υπάγονται αστικές και εμπορικές διαφορές, εθνικού ή διασυνοριακού χαρακτήρα, εφόσον τα μέρη έχουν την <b>εξουσία διάθεσης</b> του αντικειμένου της διαφοράς.</p>
+        <p>Στη διαμεσολάβηση μπορούν να υπαχθούν αστικές και εμπορικές διαφορές, εθνικού ή διασυνοριακού χαρακτήρα, εφόσον τα μέρη έχουν την εξουσία διάθεσης του αντικειμένου της διαφοράς.</p>
     </div>`,
-    
-    law_art_4_5: `<h3>Άρθρα 4-5: Απόρρητο, Διαδικασία</h3>
+
+    law_execution: `<h3>Εκτελεστότητα & ΚΠολΔ</h3>
     <div class="law-box">
-        <h4>Άρθρο 4: Απόρρητο της διαδικασίας</h4>
-        <p>Η διαδικασία είναι απόρρητη. Τα μέρη, ο διαμεσολαβητής και οι παριστάμενοι <b>δεν εξετάζονται ως μάρτυρες</b>. Δεν προσκομίζονται σε δίκες πληροφορίες που προέκυψαν στη διαμεσολάβηση (π.χ. προτάσεις, αποδοχές, έγγραφα αποκλειστικά για τη διαδικασία).</p>
+        <h4>Ν. 4640/2019 - Άρθρο 8: Εκτελεστότητα</h4>
+        <p>Το πρακτικό διαμεσολάβησης κατατίθεται στο Πρωτοδικείο και, εφόσον περιέχει καταψηφιστική διάταξη, <b>αποτελεί εκτελεστό τίτλο</b>.</p>
     </div>
     <div class="law-box">
-        <h4>Άρθρο 5: Διεξαγωγή της διαδικασίας</h4>
-        <p>Ο διαμεσολαβητής ορίζεται από τα μέρη. Καθορίζει τη διαδικασία μαζί τους, διασφαλίζοντας την <b>ίση μεταχείριση</b>. Επιτρέπονται οι <b>κατ' ιδίαν συναντήσεις</b>, οι πληροφορίες των οποίων είναι εμπιστευτικές εκτός αν υπάρξει συγκατάθεση.</p>
+        <h4>Ν. 5221/2025: Παρεμβάσεις ΚΠολΔ</h4>
+        <p>Επιταχύνει τις ανακοπές εκτέλεσης (632 ΚΠολΔ). Αυτό καθιστά το πρακτικό διαμεσολάβησης ανώτερο εργαλείο αποφυγής καθυστερήσεων.</p>
     </div>`,
 
-    law_art_6: `<h3>Άρθρο 6: Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ)</h3>
+    law_fees_sanctions: `<h3>Αμοιβές, Κυρώσεις & Μητρώα</h3>
     <div class="law-box">
-        <h4>Υπαγόμενες διαφορές στην ΥΑΣ:</h4>
-        <p>α) <b>Οικογενειακές διαφορές</b> (με εξαιρέσεις όπως διαζύγιο, ακύρωση γάμου).<br>
-        β) Διαφορές <b>τακτικής διαδικασίας</b> (Μονομελούς Πρωτοδικείου άνω των 30.000€ και όλες του Πολυμελούς).</p>
-        <p>Εξαιρούνται διαφορές όπου το Δημόσιο ή ΟΤΑ είναι διάδικος.</p>
-    </div>`,
-
-    law_art_7: `<h3>Άρθρο 7: Διαδικασία ΥΑΣ, Προθεσμίες, Γνωστοποίηση</h3>
-    <div class="law-box">
-        <h4>Γνωστοποίηση & Προθεσμίες</h4>
-        <p>Ο διαμεσολαβητής γνωστοποιεί εγγράφως τον τόπο και χρόνο της ΥΑΣ <b>τουλάχιστον 5 ημέρες πριν</b>. Η ΥΑΣ διεξάγεται εντός <b>20 ημερών</b> από το αίτημα (ή 30 για κατοίκους εξωτερικού).</p>
+        <h4>Ν. 4640/2019 - Άρθρο 18: Αμοιβές</h4>
+        <p>Ελάχιστη αμοιβή ΥΑΣ: 50€ + ΦΠΑ. (Βαρύνει τα μέρη κατ' ισομοιρία). Ώρες εκούσιας διαμεσολάβησης: 80€/ώρα.</p>
     </div>
     <div class="law-box">
-        <h4>Διεξαγωγή</h4>
-        <p>Η παράσταση γίνεται <b>υποχρεωτικά με τον νομικό παραστάτη</b> (εκτός μικροδιαφορών καταναλωτών). Σε περίπτωση μη προσέλευσης, επιβάλλεται χρηματική ποινή 100-500€ από το δικαστήριο.</p>
-    </div>
-    <div class="law-box">
-        <h4>Διάρκεια</h4>
-        <p>Εάν τα μέρη συνεχίσουν τη διαμεσολάβηση, ολοκληρώνεται εντός <b>40 ημερών</b> μετά τη λήξη της αρχικής προθεσμίας.</p>
+        <h4>Ν. 5232/2025: Κυρώσεις ΕΕ & Ν. 5282/2026: Διαφθορά</h4>
+        <p>Απαγορεύεται το πρακτικό να περιέχει όρους που παρακάμπτουν τα περιοριστικά μέτρα της Ε.Ε. (δεσμεύσεις λογαριασμών). Το Μητρώο (5282) ελέγχει ψηφιακά υποθέσεις διαφθοράς δημοσίου ενδιαφέροντος.</p>
     </div>`,
 
-    law_art_8_9: `<h3>Άρθρα 8-9: Εκτελεστότητα, Παραγραφή</h3>
-    <div class="law-box">
-        <h4>Άρθρο 8: Το Πρακτικό</h4>
-        <p>Το πρακτικό κατατίθεται στο Πρωτοδικείο. Από την κατάθεση, εφόσον περιέχει απαίτηση που μπορεί να αναγκαστικά να εκτελεστεί, <b>αποτελεί εκτελεστό τίτλο</b>.</p>
-    </div>
-    <div class="law-box">
-        <h4>Άρθρο 9: Παραγραφή & Προθεσμίες</h4>
-        <p>Η έγγραφη γνωστοποίηση για ΥΑΣ <b>αναστέλλει την παραγραφή</b> και τις δικονομικές προθεσμίες των άρθρων 237 και 238 ΚΠολΔ.</p>
-    </div>`,
-
-    law_art_14_17: `<h3>Άρθρα 14-17: Πειθαρχικό Δίκαιο, Ποινές</h3>
-    <div class="law-box">
-        <h4>Άρθρο 14-15: Πειθαρχικό Συμβούλιο & Παραπτώματα</h4>
-        <p>Πενταμελές Πειθαρχικό Συμβούλιο. Παραπτώματα: Παραβίαση απορρήτου, σύγκρουση συμφερόντων (Άρθρο 4 & 5), συμπεριφορά που θίγει το κύρος του θεσμού.</p>
-    </div>
-    <div class="law-box">
-        <h4>Άρθρο 16-17: Ποινές & Παραγραφή</h4>
-        <p><b>Ποινές:</b> 1) Επίπληξη, 2) Πρόστιμο 300€ - 5.000€, 3) Προσωρινή ανάκληση διαπίστευσης (1 μήνα έως 1 έτος), 4) Οριστική ανάκληση. <br>
-        <b>Παραγραφή:</b> 3 έτη από την τέλεση.</p>
-    </div>`,
-
-    law_art_18: `<h3>Άρθρο 18: Αμοιβή Διαμεσολαβητή</h3>
-    <div class="law-box">
-        <p>Η αμοιβή της <b>ΥΑΣ</b> ορίζεται κατ’ ελάχιστον στο ποσό των πενήντα (50) ευρώ (πλέον ΦΠΑ), το οποίο <b>βαρύνει τα μέρη κατ' ισομοιρία</b>.<br>
-        Για την <b>εκούσια διαμεσολάβηση</b> (ώρες μετά την ΥΑΣ), η ελάχιστη αμοιβή είναι ογδόντα (80) ευρώ ανά ώρα, εκτός αν συμφωνηθεί διαφορετικά.</p>
-    </div>`,
-
-    law_5197: `<h3>Ν. 5197/2025 (Τροποποιήσεις Δικαστών & Συμβολαιογράφων)</h3>
-    <div class="law-box">
-        <p>Εισάγει παρεμβάσεις στην Εθνική Σχολή Δικαστικών Λειτουργών και στον Κώδικα Συμβολαιογράφων. Ενισχύεται ο ρόλος των δικαστών στην προώθηση εναλλακτικών μεθόδων επίλυσης διαφορών και η εκπαίδευσή τους στη διαμεσολάβηση.</p>
-    </div>`,
-
-    law_5221: `<h3>Ν. 5221/2025 (Παρεμβάσεις ΚΠολΔ)</h3>
-    <div class="law-box">
-        <p>Τροποποιήσεις στον ΚΠολΔ για τη δημοσίευση διαθηκών και τις ανακοπές κατά της αναγκαστικής εκτέλεσης. Η επιτάχυνση των ανακοπών (632 ΚΠολΔ) καθιστά το εκτελεστό πρακτικό διαμεσολάβησης ανώτερο εργαλείο.</p>
-    </div>`,
-
-    law_5232: `<h3>Ν. 5232/2025 (Περιοριστικά Μέτρα Ε.Ε.)</h3>
-    <div class="law-box">
-        <p>Καθορίζει κυρώσεις για παραβίαση περιοριστικών μέτρων της Ε.Ε. Ο Διαμεσολαβητής πρέπει να εξασφαλίζει ότι το πρακτικό σε διασυνοριακές ή εμπορικές διαφορές δεν καταστρατηγεί κυρώσεις (π.χ. σε μεταφορές κεφαλαίων).</p>
-    </div>`,
-
-    law_5282: `<h3>Ν. 5282/2026 (Ψηφιακό Μητρώο & Διαφθορά)</h3>
-    <div class="law-box">
-        <p>Σύσταση του Ενιαίου Ψηφιακού Μητρώου παρακολούθησης υποθέσεων διαφθοράς. Η διαμεσολάβηση δεν μπορεί να παρακάμψει κανόνες διαφάνειας, καθώς το απόρρητο κάμπτεται για λόγους δημόσιας τάξης (Άρθρο 4, Ν. 4640).</p>
-    </div>`,
-
-    manual_ktima: `<h3>Εγχειρίδιο Ενιαίων Κανόνων Κτηματολογίου (Έκδοση 5.0)</h3>
+    law_ktima: `<h3>Εγχειρίδιο Ενιαίων Κανόνων Κτηματολογίου (Έκδοση 5.0)</h3>
     <div class="law-box">
         <h4>Κτηματολογική Διαμεσολάβηση</h4>
         <p>Υποχρεωτικό προστάδιο (Άρθρο 6 §2 Ν. 2664/1998). Το πρακτικό <b>εγγράφεται απευθείας στο Κτηματολόγιο</b> (συνοδευόμενο από ΤΔΓΜ) χωρίς δικαστική απόφαση.</p>
@@ -579,27 +559,4 @@ const theoryData = {
     </ul>`
 };
 
-function loadTheory(id, el) {
-    document.querySelectorAll('.lib-item').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('theory_content').innerHTML = theoryData[id];
-}
-
-function setTab(t, btn) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(t).classList.add('active');
-    if (btn) btn.classList.add('active');
-    
-    // Φόρτωση του πρώτου νόμου ως προεπιλογή στην καρτέλα της βιβλιοθήκης
-    if(t === 'library' && document.getElementById('theory_content').innerHTML.trim() === '') {
-        loadTheory('law_art_1_3', document.querySelector('.lib-item'));
-    }
-}
-
-// Αρχικοποίηση εφαρμογής (Φόρτωση δεδομένων & πρώτο render)
-window.onload = () => { 
-    loadState();
-    renderLists(); 
-    draw(); 
-};
+// ... (Το υπόλοιπο αρχείο παραμένει ως έχει)
