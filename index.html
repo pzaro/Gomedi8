@@ -117,6 +117,10 @@
                     <div class="form-group"><label>Επώνυμο</label><input type="text" id="reg_m_s" placeholder="π.χ. Ζαρογουλίδης"></div>
                 </div>
                 <div class="row-2">
+                    <div class="form-group"><label>Διεύθυνση</label><input type="text" id="reg_m_addr" placeholder="π.χ. Ερμού 15, Αθήνα"></div>
+                    <div class="form-group"><label>Email</label><input type="text" id="reg_m_email" placeholder="π.χ. info@mediator.gr"></div>
+                </div>
+                <div class="row-2">
                     <div class="form-group"><label>IBAN</label><input type="text" id="reg_m_iban" placeholder="GR..."></div>
                     <div class="form-group"><label>Τράπεζα</label><input type="text" id="reg_m_bank" placeholder="π.χ. ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ"></div>
                 </div>
@@ -129,14 +133,19 @@
                     <div class="form-group"><label>ΑΦΜ</label><input type="text" id="reg_l_afm"></div>
                     <div class="form-group"><label>Κινητό</label><input type="text" id="reg_l_mob"></div>
                 </div>
-                <div class="row-2">
-                    <div class="form-group"><label>Σταθερό Τηλέφωνο</label><input type="text" id="reg_l_tel"></div>
-                    <div class="form-group"><label>ΑΜ / ΔΣ</label><input type="text" id="reg_l_amds" placeholder="π.χ. ΔΣΑ 1234"></div>
+                <div class="row-3">
+                    <div class="form-group"><label>Σταθερό</label><input type="text" id="reg_l_tel"></div>
+                    <div class="form-group"><label>Α.Μ.</label><input type="text" id="reg_l_am" placeholder="π.χ. 1234"></div>
+                    <div class="form-group"><label>Δ.Σ.</label><input type="text" id="reg_l_ds" placeholder="π.χ. ΔΣΑ"></div>
                 </div>
                 <div class="row-3">
                     <div class="form-group"><label>Όνομα</label><input type="text" id="reg_l_n"></div>
                     <div class="form-group"><label>Επώνυμο</label><input type="text" id="reg_l_s"></div>
                     <div class="form-group"><label>Πατρώνυμο</label><input type="text" id="reg_l_f"></div>
+                </div>
+                <div class="row-2">
+                    <div class="form-group"><label>Διεύθυνση</label><input type="text" id="reg_l_addr" placeholder="π.χ. Τσιμισκή 20"></div>
+                    <div class="form-group"><label>Email</label><input type="text" id="reg_l_email" placeholder="π.χ. lawyer@law.gr"></div>
                 </div>
                 <button class="btn-add" onclick="registerLawyer()" style="width: 100%; margin-top: 10px; padding: 12px; font-size: 1rem; background: var(--accent);">💾 Αποθήκευση στο Google Sheet</button>
             </div>
