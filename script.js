@@ -2,16 +2,15 @@
 // 1. GOOGLE SHEETS & DATA SETUP
 // ==========================================
 
-// Το νέο σου URL του Google Apps Script για σύνδεση με το Cloud
 const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAZ0Inog6pOzlNLx5qh8viyfn0ifPvmKpHkNbGg5MT6fTEqfAcxKEO1IE7CGVFZsP8/exec"; 
 
 let m_data = {
-    n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ"
+    n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ", addr: "", email: ""
 };
 
 const emptyPerson = () => ({
     n: '', s: '', f: '', addr: '', afm: '', tel: '', mob: '', email: '',
-    l_n: '', l_s: '', l_f: '', l_addr: '', l_amds: '', l_afm: '', l_tel: '', l_mob: '', l_email: '',
+    l_n: '', l_s: '', l_f: '', l_addr: '', l_email: '', l_am: '', l_ds: '', l_afm: '', l_tel: '', l_mob: '',
     p_party: true, p_law: true
 });
 
@@ -31,10 +30,12 @@ async function registerMediator() {
     const s = document.getElementById('reg_m_s').value.trim();
     const iban = document.getElementById('reg_m_iban').value.trim();
     const bank = document.getElementById('reg_m_bank').value.trim();
+    const addr = document.getElementById('reg_m_addr').value.trim();
+    const email = document.getElementById('reg_m_email').value.trim();
 
     if(!am || !n || !s) { alert("Παρακαλώ συμπληρώστε τουλάχιστον ΑΜΔ, Όνομα και Επώνυμο."); return; }
 
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeMediator&am=${encodeURIComponent(am)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&iban=${encodeURIComponent(iban)}&bank=${encodeURIComponent(bank)}`;
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeMediator&am=${encodeURIComponent(am)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&iban=${encodeURIComponent(iban)}&bank=${encodeURIComponent(bank)}&addr=${encodeURIComponent(addr)}&email=${encodeURIComponent(email)}`;
     document.getElementById('reg_m_amd').value = "Αποθήκευση..."; 
     
     try {
@@ -46,6 +47,7 @@ async function registerMediator() {
             document.getElementById('reg_m_amd').value = ''; document.getElementById('reg_m_f').value = '';
             document.getElementById('reg_m_n').value = ''; document.getElementById('reg_m_s').value = '';
             document.getElementById('reg_m_iban').value = ''; document.getElementById('reg_m_bank').value = '';
+            document.getElementById('reg_m_addr').value = ''; document.getElementById('reg_m_email').value = '';
         } else if (data.message === "Exists") {
             alert("⚠️ Προσοχή: Υπάρχει ήδη Διαμεσολαβητής με αυτό το ΑΜΔ στο Google Sheet!");
             document.getElementById('reg_m_amd').value = am;
@@ -90,12 +92,15 @@ async function registerLawyer() {
     const n = document.getElementById('reg_l_n').value.trim();
     const s = document.getElementById('reg_l_s').value.trim();
     const f = document.getElementById('reg_l_f').value.trim();
-    const amds = document.getElementById('reg_l_amds').value.trim();
+    const am = document.getElementById('reg_l_am').value.trim();
+    const ds = document.getElementById('reg_l_ds').value.trim();
+    const addr = document.getElementById('reg_l_addr').value.trim();
+    const email = document.getElementById('reg_l_email').value.trim();
 
     if(!afm && !mob) { alert("Συμπληρώστε ΑΦΜ ή Κινητό για να είναι δυνατή η αναζήτηση."); return; }
     if(!n || !s) { alert("Συμπληρώστε Όνομα και Επώνυμο."); return; }
 
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeLawyer&afm=${encodeURIComponent(afm)}&mob=${encodeURIComponent(mob)}&tel=${encodeURIComponent(tel)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&amds=${encodeURIComponent(amds)}`;
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeLawyer&afm=${encodeURIComponent(afm)}&mob=${encodeURIComponent(mob)}&tel=${encodeURIComponent(tel)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&am=${encodeURIComponent(am)}&ds=${encodeURIComponent(ds)}&addr=${encodeURIComponent(addr)}&email=${encodeURIComponent(email)}`;
     document.getElementById('reg_l_n').value = "Αποθήκευση...";
 
     try {
@@ -107,7 +112,8 @@ async function registerLawyer() {
             document.getElementById('reg_l_afm').value = ''; document.getElementById('reg_l_mob').value = '';
             document.getElementById('reg_l_tel').value = ''; document.getElementById('reg_l_n').value = '';
             document.getElementById('reg_l_s').value = ''; document.getElementById('reg_l_f').value = '';
-            document.getElementById('reg_l_amds').value = '';
+            document.getElementById('reg_l_am').value = ''; document.getElementById('reg_l_ds').value = '';
+            document.getElementById('reg_l_addr').value = ''; document.getElementById('reg_l_email').value = '';
         } else if (data.message === "Exists") {
             alert("⚠️ Προσοχή: Υπάρχει ήδη Δικηγόρος με αυτό το ΑΦΜ ή Κινητό στο Google Sheet!");
             document.getElementById('reg_l_n').value = n;
@@ -122,7 +128,6 @@ async function autoFillLawyer(val, type, idx, isResp) {
     if(!val.trim()) return;
     
     let arr = isResp ? resps : reqs;
-    let oldVal = type === 'afm' ? arr[idx].l_afm : arr[idx].l_mob;
     
     if(type === 'afm') arr[idx].l_afm = "Φόρτωση...";
     if(type === 'mob') arr[idx].l_mob = "Φόρτωση...";
@@ -135,13 +140,16 @@ async function autoFillLawyer(val, type, idx, isResp) {
         let data = await response.json();
         
         if (data.status === "success") {
-            arr[idx].l_afm = data.data.afm;
-            arr[idx].l_mob = data.data.mob;
-            arr[idx].l_tel = data.data.tel;
-            arr[idx].l_n = data.data.n;
-            arr[idx].l_s = data.data.s;
-            arr[idx].l_f = data.data.f;
-            arr[idx].l_amds = data.data.amds;
+            arr[idx].l_afm = data.data.afm || '';
+            arr[idx].l_mob = data.data.mob || '';
+            arr[idx].l_tel = data.data.tel || '';
+            arr[idx].l_n = data.data.n || '';
+            arr[idx].l_s = data.data.s || '';
+            arr[idx].l_f = data.data.f || '';
+            arr[idx].l_am = data.data.am || '';
+            arr[idx].l_ds = data.data.ds || '';
+            arr[idx].l_addr = data.data.addr || '';
+            arr[idx].l_email = data.data.email || '';
             renderLists();
             draw();
         } else {
@@ -199,14 +207,19 @@ function renderLists() {
                 <div class="form-group" style="margin:0;"><label>ΑΦΜ 🔍</label><input value="${r.l_afm}" placeholder="Βάλε ΑΦΜ & Enter..." onchange="autoFillLawyer(this.value, 'afm', ${idx}, ${isResp})"></div>
                 <div class="form-group" style="margin:0;"><label>Κινητό 🔍</label><input value="${r.l_mob}" placeholder="Βάλε Κινητό & Enter..." onchange="autoFillLawyer(this.value, 'mob', ${idx}, ${isResp})"></div>
             </div>
-            <div class="row-2">
+            <div class="row-3">
                 <div class="form-group"><label>Όνομα Δικηγόρου</label><input value="${r.l_n}" placeholder="Όνομα..." oninput="${arrName}[${idx}].l_n=this.value; draw()"></div>
                 <div class="form-group"><label>Επώνυμο Δικηγόρου</label><input value="${r.l_s}" placeholder="Επώνυμο..." oninput="${arrName}[${idx}].l_s=this.value; draw()"></div>
+                <div class="form-group"><label>Πατρώνυμο</label><input value="${r.l_f}" placeholder="Πατρώνυμο..." oninput="${arrName}[${idx}].l_f=this.value; draw()"></div>
             </div>
             <div class="row-3">
-                <div class="form-group"><label>Πατρώνυμο</label><input value="${r.l_f}" placeholder="Πατρώνυμο..." oninput="${arrName}[${idx}].l_f=this.value; draw()"></div>
                 <div class="form-group"><label>Σταθερό Τηλ.</label><input value="${r.l_tel}" placeholder="Σταθερό..." oninput="${arrName}[${idx}].l_tel=this.value; draw()"></div>
-                <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds}" placeholder="π.χ. ΔΣΑ 1234" oninput="${arrName}[${idx}].l_amds=this.value; draw()"></div>
+                <div class="form-group"><label>Α.Μ.</label><input value="${r.l_am}" placeholder="π.χ. 1234" oninput="${arrName}[${idx}].l_am=this.value; draw()"></div>
+                <div class="form-group"><label>Δ.Σ.</label><input value="${r.l_ds}" placeholder="π.χ. ΔΣΑ" oninput="${arrName}[${idx}].l_ds=this.value; draw()"></div>
+            </div>
+            <div class="row-2">
+                <div class="form-group"><label>Διεύθυνση Δικηγόρου</label><input value="${r.l_addr}" placeholder="Διεύθυνση..." oninput="${arrName}[${idx}].l_addr=this.value; draw()"></div>
+                <div class="form-group"><label>Email Δικηγόρου</label><input value="${r.l_email}" placeholder="Email..." oninput="${arrName}[${idx}].l_email=this.value; draw()"></div>
             </div>
             <label class="chk-label"><input type="checkbox" ${r.p_law?'checked':''} onchange="${arrName}[${idx}].p_law=this.checked; draw()"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
         </div>`;
