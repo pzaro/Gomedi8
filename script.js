@@ -2,8 +2,8 @@
 // 1. GOOGLE SHEETS & DATA SETUP
 // ==========================================
 
-// Το URL του Google Apps Script για σύνδεση με το Cloud
-const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjcV67nojj8a4S5zd0qSeaRgMEW2ZgmPfPg1I1cu57YS5NoLi9MVIFZOWsSlW1kk1n/exec"; 
+// Το νέο σου URL του Google Apps Script για σύνδεση με το Cloud
+const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAZ0Inog6pOzlNLx5qh8viyfn0ifPvmKpHkNbGg5MT6fTEqfAcxKEO1IE7CGVFZsP8/exec"; 
 
 let m_data = {
     n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ"
@@ -144,7 +144,6 @@ async function autoFillLawyer(val, type, idx, isResp) {
             arr[idx].l_amds = data.data.amds;
             renderLists();
             draw();
-            // Μικρό pop-up επιβεβαίωσης στο πλάι, ή απλά οπτική ενημέρωση
         } else {
             alert("❌ Δεν βρέθηκε Δικηγόρος στο Cloud με αυτά τα στοιχεία.");
             if(type === 'afm') arr[idx].l_afm = val.trim();
