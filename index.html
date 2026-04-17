@@ -9,12 +9,17 @@
 <body>
 
 <header>
-    <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΠΑΝΑΓΙΩΤΗΣ ΖΑΡΟΓΟΥΛΙΔΗΣ | Σύστημα Δικογράφων & Εργαλεία</div>
-    <div style="font-size: 0.9rem; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3);">ΑΜΔ 2341</div>
+    <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΣΥΣΤΗΜΑ ΔΙΚΟΓΡΑΦΩΝ & ΕΡΓΑΛΕΙΑ ΥΑΣ</div>
+    <div class="mediator-login" style="display: flex; gap: 10px; align-items: center;">
+        <span style="font-size: 0.85rem; color: #cbd5e1;">ΑΜΔ Διαμεσολαβητή:</span>
+        <input type="text" id="mediator_amd_input" placeholder="π.χ. 2341" style="width: 100px; padding: 5px; border-radius: 4px; border: none; text-align: center; font-weight: bold;">
+        <button onclick="loadMediator()" style="padding: 5px 12px; border: none; border-radius: 4px; background: #059669; color: white; cursor: pointer; font-weight: bold;">ΑΝΑΖΗΤΗΣΗ</button>
+    </div>
 </header>
 
 <nav>
     <button class="nav-btn active" onclick="setTab('docs', this)">📝 ΣΥΝΤΑΞΗ ΕΓΓΡΑΦΩΝ</button>
+    <button class="nav-btn" onclick="setTab('register', this)">👤 ΕΓΓΡΑΦΗ ΧΡΗΣΤΩΝ</button>
     <button class="nav-btn" onclick="setTab('smart_tool', this)">⚖️ ΑΞΙΟΛΟΓΗΣΗ ΠΡΟΤΑΣΗΣ (SMART)</button>
     <button class="nav-btn" onclick="setTab('library', this)">📚 ΝΟΜΟΘΕΣΙΑ & ΘΕΩΡΙΑ</button>
 </nav>
@@ -24,7 +29,16 @@
         <div class="grid">
             <div class="form-panel">
                 <div class="group-header" style="margin-top:0;">💰 ΟΙΚΟΝΟΜΙΚΑ ΣΤΟΙΧΕΙΑ</div>
-                <div class="form-group"><label>Ποσό Αμοιβής</label><input type="text" id="m_fee" value="75 ευρώ πλέον ΦΠΑ 24% (σύνολο €93) ανά μέρος" oninput="draw()"></div>
+                <div class="form-group">
+                    <label>Ποσό Αμοιβής</label>
+                    <select id="m_fee" onchange="draw()" style="background: #fff; font-weight: bold;">
+                        <option value="50 ευρώ πλέον ΦΠΑ 24% (σύνολο €62,00) ανά μέρος">50 ευρώ + ΦΠΑ (Σύνολο: 62,00€)</option>
+                        <option value="60 ευρώ πλέον ΦΠΑ 24% (σύνολο €74,40) ανά μέρος">60 ευρώ + ΦΠΑ (Σύνολο: 74,40€)</option>
+                        <option value="65 ευρώ πλέον ΦΠΑ 24% (σύνολο €80,60) ανά μέρος">65 ευρώ + ΦΠΑ (Σύνολο: 80,60€)</option>
+                        <option value="70 ευρώ πλέον ΦΠΑ 24% (σύνολο €86,80) ανά μέρος">70 ευρώ + ΦΠΑ (Σύνολο: 86,80€)</option>
+                        <option value="75 ευρώ πλέον ΦΠΑ 24% (σύνολο €93,00) ανά μέρος" selected>75 ευρώ + ΦΠΑ (Σύνολο: 93,00€)</option>
+                    </select>
+                </div>
 
                 <div class="group-header">
                     <span>Α. ΕΠΙΣΠΕΥΔΟΝ ΜΕΡΟΣ</span>
@@ -86,6 +100,45 @@
                     <button class="btn btn-print" onclick="window.print()">🖨️ ΕΚΤΥΠΩΣΗ / PDF</button>
                     <button class="btn btn-export" onclick="downloadMailTemplate()">📧 ΠΑΡΑΓΩΓΗ INDEX.HTML</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="register" class="tab-content">
+        <div class="grid">
+            <div class="form-panel">
+                <h2 style="color: var(--sidebar); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">👤 Εγγραφή Διαμεσολαβητή</h2>
+                <div class="row-2">
+                    <div class="form-group"><label>ΑΜΔ</label><input type="text" id="reg_m_amd" placeholder="π.χ. 2341"></div>
+                    <div class="form-group"><label>Πατρώνυμο</label><input type="text" id="reg_m_f" placeholder="π.χ. Αριστοτέλης"></div>
+                </div>
+                <div class="row-2">
+                    <div class="form-group"><label>Όνομα</label><input type="text" id="reg_m_n" placeholder="π.χ. Παναγιώτης"></div>
+                    <div class="form-group"><label>Επώνυμο</label><input type="text" id="reg_m_s" placeholder="π.χ. Ζαρογουλίδης"></div>
+                </div>
+                <div class="row-2">
+                    <div class="form-group"><label>IBAN</label><input type="text" id="reg_m_iban" placeholder="GR..."></div>
+                    <div class="form-group"><label>Τράπεζα</label><input type="text" id="reg_m_bank" placeholder="π.χ. ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ"></div>
+                </div>
+                <button class="btn-add" onclick="registerMediator()" style="width: 100%; margin-top: 10px; padding: 12px; font-size: 1rem;">💾 Αποθήκευση στο Google Sheet</button>
+            </div>
+            
+            <div class="form-panel">
+                <h2 style="color: var(--sidebar); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">⚖️ Εγγραφή Δικηγόρου</h2>
+                <div class="row-2">
+                    <div class="form-group"><label>ΑΦΜ</label><input type="text" id="reg_l_afm"></div>
+                    <div class="form-group"><label>Κινητό</label><input type="text" id="reg_l_mob"></div>
+                </div>
+                <div class="row-2">
+                    <div class="form-group"><label>Σταθερό Τηλέφωνο</label><input type="text" id="reg_l_tel"></div>
+                    <div class="form-group"><label>ΑΜ / ΔΣ</label><input type="text" id="reg_l_amds" placeholder="π.χ. ΔΣΑ 1234"></div>
+                </div>
+                <div class="row-3">
+                    <div class="form-group"><label>Όνομα</label><input type="text" id="reg_l_n"></div>
+                    <div class="form-group"><label>Επώνυμο</label><input type="text" id="reg_l_s"></div>
+                    <div class="form-group"><label>Πατρώνυμο</label><input type="text" id="reg_l_f"></div>
+                </div>
+                <button class="btn-add" onclick="registerLawyer()" style="width: 100%; margin-top: 10px; padding: 12px; font-size: 1rem; background: var(--accent);">💾 Αποθήκευση στο Google Sheet</button>
             </div>
         </div>
     </div>
@@ -156,8 +209,7 @@
             <div class="lib-menu">
                 <div class="lib-section-title">Θεωρία των Συγκρούσεων</div>
                 <div class="lib-item active" onclick="loadTheory('conflict_methodology', this)">Μεθοδολογία (Ψυχολογία & Πράξη)</div>
-                <div class="lib-item" onclick="loadTheory('harvard_model', this)">Το Μοντέλο του Harvard & Νευροβιολογία</div>
-                <div class="lib-item" onclick="loadTheory('batna_zopa', this)">BATNA, WATNA & ZOPA (Ανάλυση)</div>
+                <div class="lib-item" onclick="loadTheory('harvard_model', this)">Το Μοντέλο του Harvard & BATNA</div>
                 <div class="lib-item" onclick="loadTheory('smart_theory', this)">Η Μεθοδολογία SMART (Αξιολόγηση)</div>
                 <div class="lib-item" onclick="loadTheory('conflict_moore', this)">Ο Κύκλος των Συγκρούσεων (C. Moore)</div>
                 <div class="lib-item" onclick="loadTheory('conflict_intro', this)">Φύση & Ορισμός της Σύγκρουσης</div>
