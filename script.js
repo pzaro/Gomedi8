@@ -1,23 +1,13 @@
 // ==========================================
-// 1. GOOGLE SHEETS & LOCAL DATA SETUP
+// 1. GOOGLE SHEETS & DATA SETUP
 // ==========================================
 
 // Το URL του Google Apps Script για σύνδεση με το Cloud
 const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjcV67nojj8a4S5zd0qSeaRgMEW2ZgmPfPg1I1cu57YS5NoLi9MVIFZOWsSlW1kk1n/exec"; 
 
-// Τοπική βάση για Δικηγόρους (Μπορείς μελλοντικά να κάνεις το ίδιο script και για αυτούς)
-let lawyersDB = [
-    { afm: "123456789", mob: "6971234567", n: "Κωνσταντίνος", s: "Νικολάου", amds: "ΔΣΑ 4567" }
-];
-
 let m_data = {
     n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ"
 };
-
-function loadLocalDB() {
-    const localL = localStorage.getItem('my_lawyers');
-    if(localL) { lawyersDB = JSON.parse(localL); }
-}
 
 const emptyPerson = () => ({
     n: '', s: '', f: '', addr: '', afm: '', tel: '', mob: '', email: '',
@@ -42,41 +32,27 @@ async function registerMediator() {
     const iban = document.getElementById('reg_m_iban').value.trim();
     const bank = document.getElementById('reg_m_bank').value.trim();
 
-    if(!am || !n || !s) {
-        alert("Παρακαλώ συμπληρώστε τουλάχιστον ΑΜΔ, Όνομα και Επώνυμο.");
-        return;
-    }
+    if(!am || !n || !s) { alert("Παρακαλώ συμπληρώστε τουλάχιστον ΑΜΔ, Όνομα και Επώνυμο."); return; }
 
-    if (!GOOGLE_APP_SCRIPT_URL) {
-        alert("Δεν έχετε συνδέσει το Google App Script URL στον κώδικα.");
-        return;
-    }
-
-    // Ετοιμασία του URL για εγγραφή
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=write&am=${encodeURIComponent(am)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&iban=${encodeURIComponent(iban)}&bank=${encodeURIComponent(bank)}`;
-    
-    document.getElementById('reg_m_amd').value = "Αποθήκευση..."; // Προσωρινό μήνυμα
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeMediator&am=${encodeURIComponent(am)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&iban=${encodeURIComponent(iban)}&bank=${encodeURIComponent(bank)}`;
+    document.getElementById('reg_m_amd').value = "Αποθήκευση..."; 
     
     try {
         let response = await fetch(url);
         let data = await response.json();
         
         if (data.status === "success") {
-            alert("✅ Ο Διαμεσολαβητής αποθηκεύτηκε επιτυχώς στο Cloud (Google Sheets)!");
-            // Καθαρισμός πεδίων
-            document.getElementById('reg_m_amd').value = '';
-            document.getElementById('reg_m_f').value = '';
-            document.getElementById('reg_m_n').value = '';
-            document.getElementById('reg_m_s').value = '';
-            document.getElementById('reg_m_iban').value = '';
-            document.getElementById('reg_m_bank').value = '';
+            alert("✅ Ο Διαμεσολαβητής αποθηκεύτηκε επιτυχώς στο Google Sheet!");
+            document.getElementById('reg_m_amd').value = ''; document.getElementById('reg_m_f').value = '';
+            document.getElementById('reg_m_n').value = ''; document.getElementById('reg_m_s').value = '';
+            document.getElementById('reg_m_iban').value = ''; document.getElementById('reg_m_bank').value = '';
         } else if (data.message === "Exists") {
             alert("⚠️ Προσοχή: Υπάρχει ήδη Διαμεσολαβητής με αυτό το ΑΜΔ στο Google Sheet!");
-            document.getElementById('reg_m_amd').value = am; // Επαναφορά
+            document.getElementById('reg_m_amd').value = am;
         }
     } catch(e) {
-        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet ή το URL του Google Script.");
-        document.getElementById('reg_m_amd').value = am; // Επαναφορά
+        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet.");
+        document.getElementById('reg_m_amd').value = am;
     }
 }
 
@@ -84,14 +60,9 @@ async function loadMediator() {
     const inputAMD = document.getElementById('mediator_amd_input').value.trim();
     if(!inputAMD) return;
     
-    if (!GOOGLE_APP_SCRIPT_URL) {
-        alert("Δεν έχετε συνδέσει το Google App Script URL.");
-        return;
-    }
-
     document.getElementById('mediator_amd_input').value = "Φόρτωση...";
 
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=read&am=${encodeURIComponent(inputAMD)}`;
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readMediator&am=${encodeURIComponent(inputAMD)}`;
     
     try {
         let response = await fetch(url);
@@ -101,7 +72,7 @@ async function loadMediator() {
             m_data = { ...data.data };
             draw();
             alert(`✅ Δεδομένα ελήφθησαν από Google Sheets!\nΔιαμεσολαβητής: ${m_data.n} ${m_data.s}\nΑΜΔ: ${m_data.am}`);
-            document.getElementById('mediator_amd_input').value = ""; // Καθαρισμός
+            document.getElementById('mediator_amd_input').value = ""; 
         } else {
             alert("❌ Δεν βρέθηκε Διαμεσολαβητής με αυτό το ΑΜΔ στο Cloud. Πηγαίνετε στην 'ΕΓΓΡΑΦΗ ΧΡΗΣΤΩΝ' για να τον προσθέσετε.");
             document.getElementById('mediator_amd_input').value = inputAMD;
@@ -112,37 +83,78 @@ async function loadMediator() {
     }
 }
 
-function registerLawyer() {
+async function registerLawyer() {
     const afm = document.getElementById('reg_l_afm').value.trim();
     const mob = document.getElementById('reg_l_mob').value.trim();
+    const tel = document.getElementById('reg_l_tel').value.trim();
     const n = document.getElementById('reg_l_n').value.trim();
     const s = document.getElementById('reg_l_s').value.trim();
+    const f = document.getElementById('reg_l_f').value.trim();
     const amds = document.getElementById('reg_l_amds').value.trim();
 
-    if(!afm && !mob) { alert("Συμπληρώστε ΑΦΜ ή Κινητό."); return; }
+    if(!afm && !mob) { alert("Συμπληρώστε ΑΦΜ ή Κινητό για να είναι δυνατή η αναζήτηση."); return; }
     if(!n || !s) { alert("Συμπληρώστε Όνομα και Επώνυμο."); return; }
-    if(lawyersDB.find(l => (afm && l.afm === afm) || (mob && l.mob === mob))) {
-        alert("⚠️ Υπάρχει ήδη Δικηγόρος με αυτό το ΑΦΜ/Κινητό στην τοπική μνήμη!"); return;
-    }
 
-    lawyersDB.push({ afm, mob, n, s, amds });
-    localStorage.setItem('my_lawyers', JSON.stringify(lawyersDB));
-    alert("✅ Ο Δικηγόρος αποθηκεύτηκε επιτυχώς (Τοπικά)!");
-    
-    document.getElementById('reg_l_afm').value = ''; document.getElementById('reg_l_mob').value = '';
-    document.getElementById('reg_l_n').value = ''; document.getElementById('reg_l_s').value = '';
-    document.getElementById('reg_l_amds').value = '';
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeLawyer&afm=${encodeURIComponent(afm)}&mob=${encodeURIComponent(mob)}&tel=${encodeURIComponent(tel)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&amds=${encodeURIComponent(amds)}`;
+    document.getElementById('reg_l_n').value = "Αποθήκευση...";
+
+    try {
+        let response = await fetch(url);
+        let data = await response.json();
+        
+        if (data.status === "success") {
+            alert("✅ Ο Δικηγόρος αποθηκεύτηκε επιτυχώς στο Google Sheet!");
+            document.getElementById('reg_l_afm').value = ''; document.getElementById('reg_l_mob').value = '';
+            document.getElementById('reg_l_tel').value = ''; document.getElementById('reg_l_n').value = '';
+            document.getElementById('reg_l_s').value = ''; document.getElementById('reg_l_f').value = '';
+            document.getElementById('reg_l_amds').value = '';
+        } else if (data.message === "Exists") {
+            alert("⚠️ Προσοχή: Υπάρχει ήδη Δικηγόρος με αυτό το ΑΦΜ ή Κινητό στο Google Sheet!");
+            document.getElementById('reg_l_n').value = n;
+        }
+    } catch(e) {
+        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet.");
+        document.getElementById('reg_l_n').value = n;
+    }
 }
 
-function autoFillLawyer(val, type, idx, isResp) {
+async function autoFillLawyer(val, type, idx, isResp) {
     if(!val.trim()) return;
-    const found = lawyersDB.find(l => type === 'afm' ? l.afm === val.trim() : l.mob === val.trim());
-    if(found) {
-        let arr = isResp ? resps : reqs;
-        arr[idx].l_n = found.n; arr[idx].l_s = found.s; arr[idx].l_amds = found.amds;
-        if(type === 'afm') arr[idx].l_mob = found.mob;
-        if(type === 'mob') arr[idx].l_afm = found.afm;
-        renderLists(); draw();
+    
+    let arr = isResp ? resps : reqs;
+    let oldVal = type === 'afm' ? arr[idx].l_afm : arr[idx].l_mob;
+    
+    if(type === 'afm') arr[idx].l_afm = "Φόρτωση...";
+    if(type === 'mob') arr[idx].l_mob = "Φόρτωση...";
+    renderLists();
+
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readLawyer&query=${encodeURIComponent(val.trim())}`;
+    
+    try {
+        let response = await fetch(url);
+        let data = await response.json();
+        
+        if (data.status === "success") {
+            arr[idx].l_afm = data.data.afm;
+            arr[idx].l_mob = data.data.mob;
+            arr[idx].l_tel = data.data.tel;
+            arr[idx].l_n = data.data.n;
+            arr[idx].l_s = data.data.s;
+            arr[idx].l_f = data.data.f;
+            arr[idx].l_amds = data.data.amds;
+            renderLists();
+            draw();
+            // Μικρό pop-up επιβεβαίωσης στο πλάι, ή απλά οπτική ενημέρωση
+        } else {
+            alert("❌ Δεν βρέθηκε Δικηγόρος στο Cloud με αυτά τα στοιχεία.");
+            if(type === 'afm') arr[idx].l_afm = val.trim();
+            if(type === 'mob') arr[idx].l_mob = val.trim();
+            renderLists();
+        }
+    } catch(e) {
+        if(type === 'afm') arr[idx].l_afm = val.trim();
+        if(type === 'mob') arr[idx].l_mob = val.trim();
+        renderLists();
     }
 }
 
@@ -182,17 +194,21 @@ function renderLists() {
             
             <div class="sub-title" style="display:flex; justify-content: space-between; align-items: center;">
                 <span>Νομικός Παραστάτης</span>
-                <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Αναζήτηση (Enter)</span>
+                <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Cloud Αναζήτηση (Enter)</span>
             </div>
             <div class="row-2" style="background: #f0f9ff; padding: 10px; border-radius: 6px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
-                <div class="form-group" style="margin:0;"><label>ΑΦΜ 🔍</label><input value="${r.l_afm}" placeholder="Βάλε ΑΦΜ & Enter..." onchange="autoFillLawyer(this.value, 'afm', ${idx}, ${isResp}); ${arrName}[${idx}].l_afm=this.value; draw()"></div>
-                <div class="form-group" style="margin:0;"><label>Κινητό 🔍</label><input value="${r.l_mob}" placeholder="Βάλε Κινητό & Enter..." onchange="autoFillLawyer(this.value, 'mob', ${idx}, ${isResp}); ${arrName}[${idx}].l_mob=this.value; draw()"></div>
+                <div class="form-group" style="margin:0;"><label>ΑΦΜ 🔍</label><input value="${r.l_afm}" placeholder="Βάλε ΑΦΜ & Enter..." onchange="autoFillLawyer(this.value, 'afm', ${idx}, ${isResp})"></div>
+                <div class="form-group" style="margin:0;"><label>Κινητό 🔍</label><input value="${r.l_mob}" placeholder="Βάλε Κινητό & Enter..." onchange="autoFillLawyer(this.value, 'mob', ${idx}, ${isResp})"></div>
             </div>
             <div class="row-2">
                 <div class="form-group"><label>Όνομα Δικηγόρου</label><input value="${r.l_n}" placeholder="Όνομα..." oninput="${arrName}[${idx}].l_n=this.value; draw()"></div>
                 <div class="form-group"><label>Επώνυμο Δικηγόρου</label><input value="${r.l_s}" placeholder="Επώνυμο..." oninput="${arrName}[${idx}].l_s=this.value; draw()"></div>
             </div>
-            <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds}" placeholder="π.χ. ΔΣΑ 1234" oninput="${arrName}[${idx}].l_amds=this.value; draw()"></div>
+            <div class="row-3">
+                <div class="form-group"><label>Πατρώνυμο</label><input value="${r.l_f}" placeholder="Πατρώνυμο..." oninput="${arrName}[${idx}].l_f=this.value; draw()"></div>
+                <div class="form-group"><label>Σταθερό Τηλ.</label><input value="${r.l_tel}" placeholder="Σταθερό..." oninput="${arrName}[${idx}].l_tel=this.value; draw()"></div>
+                <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds}" placeholder="π.χ. ΔΣΑ 1234" oninput="${arrName}[${idx}].l_amds=this.value; draw()"></div>
+            </div>
             <label class="chk-label"><input type="checkbox" ${r.p_law?'checked':''} onchange="${arrName}[${idx}].p_law=this.checked; draw()"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
         </div>`;
     };
@@ -549,62 +565,51 @@ const theoryData = {
     </div>`,
 
     harvard_model: `<h3>Η Μεθοδολογία του Harvard (Με Νευροβιολογία & BATNA/ZOPA)</h3>
-    <p>Το μοντέλο διαπραγμάτευσης του Harvard (Harvard Negotiation Project - "Getting to Yes"), αποκτά άλλη διάσταση όταν κατανοήσουμε πώς οι ερωτήσεις του Διαμεσολαβητή "καλωδιώνουν" τον εγκέφαλο. Ακολουθεί το πλήρες μοντέλο των 5 σταδίων, ενσωματώνοντας τη θεωρία των BATNA/ZOPA ως τον τελικό μηχανισμό λήψης απόφασης.</p>
+    <p>Το μοντέλο διαπραγμάτευσης του Harvard αποκτά άλλη διάσταση όταν κατανοήσουμε πώς οι ερωτήσεις του Διαμεσολαβητή "καλωδιώνουν" τον εγκέφαλο. Ακολουθεί το πλήρες μοντέλο των 5 σταδίων, ενσωματώνοντας τη θεωρία των BATNA/ZOPA ως τον τελικό μηχανισμό λήψης απόφασης.</p>
 
     <div class="highlight-box" style="border-left-color: #be185d; background: #fff1f2;">
         <h4 style="margin-top:0; color: #be185d;">Βήμα 1: Διαχωρισμός Ανθρώπων από το Πρόβλημα</h4>
         <p><b>Ο Εγκέφαλος:</b> Ο στόχος είναι να βοηθήσουμε τον Κοιλιοέσω Προμετωπιαίο Φλοιό (vmPFC) να "κατευνάσει" την Αμυγδαλή (το κέντρο συναγερμού/θυμού). Η αμυντικότητα (fight-or-flight) πρέπει να πέσει.<br>
-        <b>Εργαλειοθήκη Ερωτήσεων (Συναισθηματική Αποφόρτιση & Ενσυναίσθηση):</b></p>
+        <b>Εργαλειοθήκη Ερωτήσεων:</b></p>
         <ul>
             <li>Πώς σας έκανε να νιώσετε αυτή η κατάσταση όταν ξεκίνησε;</li>
             <li>Τι σας πλήγωσε ή σας εκνεύρισε περισσότερο σε όλη αυτή τη διαδικασία;</li>
-            <li>Ποια πιστεύετε ότι ήταν η πραγματική πρόθεση της άλλης πλευράς όταν συνέβη αυτό;</li>
-            <li>Πώς έχει επηρεάσει αυτή η σύγκρουση την καθημερινότητά σας ή την εργασία σας;</li>
-            <li>Αν βρισκόσασταν στη δική τους θέση, πώς πιστεύετε ότι θα βλέπατε τα πράγματα;</li>
-            <li>Τι θα χρειαζόταν να ακούσετε σήμερα από την άλλη πλευρά για να νιώσετε ότι σας καταλαβαίνουν;</li>
-            <li>Πώς μπορούμε να αφήσουμε πίσω τις προσωπικές επιθέσεις και να εστιάσουμε καθαρά στο πρακτικό κομμάτι;</li>
+            <li>Ποια πιστεύετε ότι ήταν η πραγματική πρόθεση της άλλης πλευράς;</li>
+            <li>Πώς έχει επηρεάσει αυτή η σύγκρουση την καθημερινότητά σας;</li>
         </ul>
     </div>
 
     <div class="highlight-box" style="border-left-color: #be185d; background: #fff1f2;">
         <h4 style="margin-top:0; color: #be185d;">Βήμα 2: Εστίαση στα Συμφέροντα (Interests), όχι στις Θέσεις</h4>
-        <p><b>Ο Εγκέφαλος:</b> Μεταφέρουμε την ενέργεια από το συναισθηματικό σύστημα στον Ραχιοπλάγιο Προμετωπιαίο Φλοιό (dlPFC), τη "CPU" της λογικής ανάλυσης και του σχεδιασμού.<br>
-        <b>Εργαλειοθήκη Ερωτήσεων (Ενδοσκόπηση & Αποκάλυψη Αναγκών):</b></p>
+        <p><b>Ο Εγκέφαλος:</b> Μεταφέρουμε την ενέργεια από το συναισθηματικό σύστημα στον Ραχιοπλάγιο Προμετωπιαίο Φλοιό (dlPFC), τη "CPU" της λογικής ανάλυσης.<br>
+        <b>Εργαλειοθήκη Ερωτήσεων:</b></p>
         <ul>
-            <li>Πέρα από το ποσό που ζητάτε (Θέση), τι είναι αυτό που πραγματικά έχετε ανάγκη να πετύχετε αύριο το πρωί (Συμφέρον);</li>
+            <li>Πέρα από το ποσό που ζητάτε (Θέση), τι είναι αυτό που πραγματικά έχετε ανάγκη να πετύχετε (Συμφέρον);</li>
             <li>Για ποιο λόγο είναι τόσο σημαντικός αυτός ο συγκεκριμένος όρος για εσάς;</li>
             <li>Τι φοβάστε ότι θα συμβεί αν δεν ικανοποιηθεί αυτό το συγκεκριμένο αίτημα;</li>
-            <li>Ποιες είναι οι βασικές σας προτεραιότητες για το μέλλον της επιχείρησής/οικογένειάς σας;</li>
-            <li>Αν η άλλη πλευρά αποδεχόταν τώρα την πρότασή σας, τι ακριβώς θα άλλαζε προς το καλύτερο στην καθημερινότητά σας;</li>
-            <li>Υπάρχει κάτι άλλο, πέρα από το οικονομικό κομμάτι, που θα σας έδινε ικανοποίηση ή ηρεμία;</li>
+            <li>Ποιες είναι οι βασικές σας προτεραιότητες για το μέλλον;</li>
         </ul>
     </div>
 
     <div class="highlight-box" style="border-left-color: #be185d; background: #fff1f2;">
         <h4 style="margin-top:0; color: #be185d;">Βήμα 3: Παραγωγή Επιλογών (Brainstorming)</h4>
-        <p><b>Ο Εγκέφαλος:</b> Ενεργοποιείται το Δίκτυο Προεπιλεγμένης Λειτουργίας (DMN), το οποίο επιτρέπει τη φαντασία και τη δημιουργική σκέψη (out-of-the-box), εκκρίνοντας ντοπαμίνη.<br>
-        <b>Εργαλειοθήκη Ερωτήσεων (Δημιουργικότητα Win-Win χωρίς δέσμευση):</b></p>
+        <p><b>Ο Εγκέφαλος:</b> Ενεργοποιείται το Δίκτυο Προεπιλεγμένης Λειτουργίας (DMN), το οποίο επιτρέπει τη δημιουργική σκέψη (out-of-the-box).<br>
+        <b>Εργαλειοθήκη Ερωτήσεων:</b></p>
         <ul>
-            <li>Αν είχαμε ένα μαγικό ραβδί, ποιες άλλες εναλλακτικές λύσεις θα μπορούσαμε να σκεφτούμε για να καλυφθούν και οι δύο πλευρές;</li>
-            <li>Πώς θα μπορούσαμε να συνδυάσουμε τους δικούς σας διαθέσιμους πόρους με τις δικές τους ανάγκες;</li>
+            <li>Αν είχαμε ένα μαγικό ραβδί, ποιες άλλες εναλλακτικές λύσεις θα μπορούσαμε να σκεφτούμε;</li>
             <li>Τι θα προτείνατε εσείς αν ξέρατε ότι η άλλη πλευρά είναι διατεθειμένη να κάνει μια σημαντική υποχώρηση;</li>
-            <li>Υπάρχει κάποιος δημιουργικός τρόπος να μοιραστεί το ρίσκο ή το κόστος ώστε να μην επιβαρυνθεί μόνο ο ένας;</li>
-            <li>Αν δεν υπήρχαν αυστηροί νομικοί περιορισμοί, ποια θα ήταν η ιδανική εμπορική λύση μεταξύ σας;</li>
-            <li>Ποιες μικρές, φαινομενικά ανέξοδες παραχωρήσεις θα μπορούσατε να κάνετε, που όμως θα είχαν τεράστια αξία για τον άλλον;</li>
+            <li>Υπάρχει κάποιος δημιουργικός τρόπος να μοιραστεί το ρίσκο ή το κόστος;</li>
         </ul>
     </div>
 
     <div class="highlight-box" style="border-left-color: #be185d; background: #fff1f2;">
         <h4 style="margin-top:0; color: #be185d;">Βήμα 4: Αντικειμενικά Κριτήρια</h4>
-        <p><b>Ο Εγκέφαλος:</b> Ο Προμετωπιαίος Φλοιός κάνει αυστηρή λογική αξιολόγηση. Ο Πρόσθιος Φλοιός του Προσαγωγίου (ACC) αξιολογεί το αίσθημα της "Δικαιοσύνης".<br>
-        <b>Εργαλειοθήκη Ερωτήσεων (Εκλογίκευση & Δίκαιη Διαδικασία):</b></p>
+        <p><b>Ο Εγκέφαλος:</b> Ο Προμετωπιαίος Φλοιός κάνει αυστηρή λογική αξιολόγηση. Ο Πρόσθιος Φλοιός του Προσαγωγίου (ACC) αξιολογεί τη "Δικαιοσύνη".<br>
+        <b>Εργαλειοθήκη Ερωτήσεων:</b></p>
         <ul>
-            <li>Με βάση ποια αντικειμενικά δεδομένα της αγοράς (π.χ. πραγματογνωμοσύνη, νόμος, τιμές ζώνης) προκύπτει αυτός ο αριθμός;</li>
-            <li>Ποια είναι η συνήθης εμπορική πρακτική στον κλάδο σας για αντίστοιχες υποθέσεις;</li>
-            <li>Αν αναθέταμε σήμερα σε έναν ανεξάρτητο πραγματογνώμονα να εκτιμήσει την κατάσταση, τι πιστεύετε ότι θα αποφαινόταν;</li>
-            <li>Υπάρχει κάποια πρόσφατη δικαστική απόφαση ή δεδικασμένο σε παρόμοιες υποθέσεις που να μας καθοδηγεί;</li>
-            <li>Με ποιο σκεπτικό θα μπορούσατε να δικαιολογήσετε αυτό το ποσό σε έναν τρίτο, εντελώς ουδέτερο παρατηρητή;</li>
-            <li>Αντί να διαφωνούμε για την τελική αξία, μπορούμε έστω να συμφωνήσουμε στη *μέθοδο* με την οποία θα την υπολογίσουμε;</li>
+            <li>Με βάση ποια αντικειμενικά δεδομένα προκύπτει αυτός ο αριθμός;</li>
+            <li>Ποια είναι η συνήθης εμπορική πρακτική στον κλάδο σας;</li>
+            <li>Με ποιο σκεπτικό θα μπορούσατε να δικαιολογήσετε αυτό το ποσό σε έναν ουδέτερο παρατηρητή;</li>
         </ul>
     </div>
 
@@ -612,22 +617,18 @@ const theoryData = {
         <div class="moore-node" style="border-left-color: #10b981; flex: 1 1 100%;">
             <h4 style="color: #047857; margin-top:0;">Βήμα 5α: BATNA (Best Alternative To a Negotiated Agreement)</h4>
             <p><b>Ορισμός:</b> Η Καλύτερη Εναλλακτική Λύση εκτός Συμφωνίας. Είναι το "δίχτυ ασφαλείας". Δεν δεχόμαστε ποτέ μια συμφωνία στη Διαμεσολάβηση που είναι χειρότερη από το BATNA μας.</p>
-            <p><b>Μεθοδολογία Υπολογισμού:</b> 1. Καταγραφή όλων των εναλλακτικών (δικαστήριο, άλλη συνεργασία κλπ). 2. Αξιολόγηση ρίσκου/κόστους. 3. Επιλογή της καλύτερης.</p>
         </div>
         <div class="moore-node" style="border-left-color: #ef4444; flex: 1 1 100%;">
             <h4 style="color: #b91c1c; margin-top:0;">Βήμα 5β: WATNA (Worst Alternative To a Negotiated Agreement)</h4>
-            <p><b>Ορισμός:</b> Το απόλυτο "Εφιαλτικό Σενάριο" αν οι διαπραγματεύσεις καταρρεύσουν. Χρησιμοποιείται στρατηγικά στις κατ' ιδίαν συνεδρίες (caucuses) για Reality Testing, ενεργοποιώντας τον φόβο της απώλειας (Loss Aversion).</p>
-            <p><b>Ερωτήσεις Reality Testing:</b></p>
+            <p><b>Ορισμός:</b> Το απόλυτο "Εφιαλτικό Σενάριο". Χρησιμοποιείται για Reality Testing.</p>
             <ul>
                 <li>Ποιο είναι το χειρότερο σενάριο αν δεν βρούμε λύση σήμερα και καταλήξετε στο δικαστήριο;</li>
-                <li>Πόσο χρόνο και χρήμα είστε διατεθειμένοι να ξοδέψετε σε δικαστικά έξοδα τα επόμενα χρόνια;</li>
                 <li>Αν το δικαστήριο απορρίψει την αγωγή σας (το WATNA σας), πώς θα επιβιώσει επιχειρηματικά η εταιρεία σας;</li>
             </ul>
         </div>
         <div class="moore-node" style="border-left-color: #3b82f6; flex: 1 1 100%;">
             <h4 style="color: #1d4ed8; margin-top:0;">Βήμα 5γ: ZOPA (Zone of Possible Agreement)</h4>
-            <p><b>Ορισμός:</b> Η Ζώνη Πιθανής Συμφωνίας. Είναι το "παράθυρο" στο οποίο οι ανοχές (Reservation Points) των δύο πλευρών επικαλύπτονται.</p>
-            <p><b>Αρνητικό ZOPA:</b> Όταν οι απαιτήσεις δεν τέμνονται. Η τέχνη του Διαμεσολαβητή είναι να "μεγαλώσει την πίτα" εισάγοντας <b>νέες μεταβλητές</b> (π.χ. χρόνο αποπληρωμής, ανάληψη εξόδων μεταφοράς) για να δημιουργήσει ZOPA εκεί που δεν υπήρχε.</p>
+            <p><b>Ορισμός:</b> Η Ζώνη Πιθανής Συμφωνίας. Το "παράθυρο" στο οποίο οι ανοχές των δύο πλευρών επικαλύπτονται.</p>
         </div>
     </div>`,
 
@@ -775,7 +776,7 @@ function setTab(t, btn) {
 }
 
 window.onload = () => { 
-    // Φορτώνει όλα τα αποθηκευμένα (τοπικά) από την προηγούμενη φορά!
+    // Φορτώνει όλα τα αποθηκευμένα (τοπικά) από την προηγούμενη φορά
     loadLocalDB();
 
     const today = new Date();
