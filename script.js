@@ -1,13 +1,23 @@
 // ==========================================
-// 1. DATA & HELPER FUNCTIONS
+// 1. GOOGLE SHEETS & LOCAL DATA SETUP
 // ==========================================
-const m_data = {
-    name: "Παναγιώτης Ζαρογουλίδης",
-    father: "Αριστοτέλης",
-    am: "2341",
-    iban: "GR89 0172 252 000 5252 01616 0277",
-    bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ"
+
+// Το URL του Google Apps Script για σύνδεση με το Cloud
+const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjcV67nojj8a4S5zd0qSeaRgMEW2ZgmPfPg1I1cu57YS5NoLi9MVIFZOWsSlW1kk1n/exec"; 
+
+// Τοπική βάση για Δικηγόρους (Μπορείς μελλοντικά να κάνεις το ίδιο script και για αυτούς)
+let lawyersDB = [
+    { afm: "123456789", mob: "6971234567", n: "Κωνσταντίνος", s: "Νικολάου", amds: "ΔΣΑ 4567" }
+];
+
+let m_data = {
+    n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ"
 };
+
+function loadLocalDB() {
+    const localL = localStorage.getItem('my_lawyers');
+    if(localL) { lawyersDB = JSON.parse(localL); }
+}
 
 const emptyPerson = () => ({
     n: '', s: '', f: '', addr: '', afm: '', tel: '', mob: '', email: '',
@@ -18,6 +28,124 @@ const emptyPerson = () => ({
 let reqs = [emptyPerson()];
 let resps = [emptyPerson()];
 let currentPartyIdx = 0;
+
+
+// ==========================================
+// 1.5. CLOUD REGISTRATION & FETCH LOGIC (GOOGLE SHEETS)
+// ==========================================
+
+async function registerMediator() {
+    const am = document.getElementById('reg_m_amd').value.trim();
+    const f = document.getElementById('reg_m_f').value.trim();
+    const n = document.getElementById('reg_m_n').value.trim();
+    const s = document.getElementById('reg_m_s').value.trim();
+    const iban = document.getElementById('reg_m_iban').value.trim();
+    const bank = document.getElementById('reg_m_bank').value.trim();
+
+    if(!am || !n || !s) {
+        alert("Παρακαλώ συμπληρώστε τουλάχιστον ΑΜΔ, Όνομα και Επώνυμο.");
+        return;
+    }
+
+    if (!GOOGLE_APP_SCRIPT_URL) {
+        alert("Δεν έχετε συνδέσει το Google App Script URL στον κώδικα.");
+        return;
+    }
+
+    // Ετοιμασία του URL για εγγραφή
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=write&am=${encodeURIComponent(am)}&n=${encodeURIComponent(n)}&s=${encodeURIComponent(s)}&f=${encodeURIComponent(f)}&iban=${encodeURIComponent(iban)}&bank=${encodeURIComponent(bank)}`;
+    
+    document.getElementById('reg_m_amd').value = "Αποθήκευση..."; // Προσωρινό μήνυμα
+    
+    try {
+        let response = await fetch(url);
+        let data = await response.json();
+        
+        if (data.status === "success") {
+            alert("✅ Ο Διαμεσολαβητής αποθηκεύτηκε επιτυχώς στο Cloud (Google Sheets)!");
+            // Καθαρισμός πεδίων
+            document.getElementById('reg_m_amd').value = '';
+            document.getElementById('reg_m_f').value = '';
+            document.getElementById('reg_m_n').value = '';
+            document.getElementById('reg_m_s').value = '';
+            document.getElementById('reg_m_iban').value = '';
+            document.getElementById('reg_m_bank').value = '';
+        } else if (data.message === "Exists") {
+            alert("⚠️ Προσοχή: Υπάρχει ήδη Διαμεσολαβητής με αυτό το ΑΜΔ στο Google Sheet!");
+            document.getElementById('reg_m_amd').value = am; // Επαναφορά
+        }
+    } catch(e) {
+        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet ή το URL του Google Script.");
+        document.getElementById('reg_m_amd').value = am; // Επαναφορά
+    }
+}
+
+async function loadMediator() {
+    const inputAMD = document.getElementById('mediator_amd_input').value.trim();
+    if(!inputAMD) return;
+    
+    if (!GOOGLE_APP_SCRIPT_URL) {
+        alert("Δεν έχετε συνδέσει το Google App Script URL.");
+        return;
+    }
+
+    document.getElementById('mediator_amd_input').value = "Φόρτωση...";
+
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=read&am=${encodeURIComponent(inputAMD)}`;
+    
+    try {
+        let response = await fetch(url);
+        let data = await response.json();
+        
+        if (data.status === "success") {
+            m_data = { ...data.data };
+            draw();
+            alert(`✅ Δεδομένα ελήφθησαν από Google Sheets!\nΔιαμεσολαβητής: ${m_data.n} ${m_data.s}\nΑΜΔ: ${m_data.am}`);
+            document.getElementById('mediator_amd_input').value = ""; // Καθαρισμός
+        } else {
+            alert("❌ Δεν βρέθηκε Διαμεσολαβητής με αυτό το ΑΜΔ στο Cloud. Πηγαίνετε στην 'ΕΓΓΡΑΦΗ ΧΡΗΣΤΩΝ' για να τον προσθέσετε.");
+            document.getElementById('mediator_amd_input').value = inputAMD;
+        }
+    } catch(e) {
+        alert("❌ Σφάλμα σύνδεσης με το Google Sheet.");
+        document.getElementById('mediator_amd_input').value = inputAMD;
+    }
+}
+
+function registerLawyer() {
+    const afm = document.getElementById('reg_l_afm').value.trim();
+    const mob = document.getElementById('reg_l_mob').value.trim();
+    const n = document.getElementById('reg_l_n').value.trim();
+    const s = document.getElementById('reg_l_s').value.trim();
+    const amds = document.getElementById('reg_l_amds').value.trim();
+
+    if(!afm && !mob) { alert("Συμπληρώστε ΑΦΜ ή Κινητό."); return; }
+    if(!n || !s) { alert("Συμπληρώστε Όνομα και Επώνυμο."); return; }
+    if(lawyersDB.find(l => (afm && l.afm === afm) || (mob && l.mob === mob))) {
+        alert("⚠️ Υπάρχει ήδη Δικηγόρος με αυτό το ΑΦΜ/Κινητό στην τοπική μνήμη!"); return;
+    }
+
+    lawyersDB.push({ afm, mob, n, s, amds });
+    localStorage.setItem('my_lawyers', JSON.stringify(lawyersDB));
+    alert("✅ Ο Δικηγόρος αποθηκεύτηκε επιτυχώς (Τοπικά)!");
+    
+    document.getElementById('reg_l_afm').value = ''; document.getElementById('reg_l_mob').value = '';
+    document.getElementById('reg_l_n').value = ''; document.getElementById('reg_l_s').value = '';
+    document.getElementById('reg_l_amds').value = '';
+}
+
+function autoFillLawyer(val, type, idx, isResp) {
+    if(!val.trim()) return;
+    const found = lawyersDB.find(l => type === 'afm' ? l.afm === val.trim() : l.mob === val.trim());
+    if(found) {
+        let arr = isResp ? resps : reqs;
+        arr[idx].l_n = found.n; arr[idx].l_s = found.s; arr[idx].l_amds = found.amds;
+        if(type === 'afm') arr[idx].l_mob = found.mob;
+        if(type === 'mob') arr[idx].l_afm = found.afm;
+        renderLists(); draw();
+    }
+}
+
 
 // ==========================================
 // 2. UI RENDERING FUNCTIONS
@@ -52,11 +180,19 @@ function renderLists() {
             </div>
             <label class="chk-label"><input type="checkbox" ${r.p_party?'checked':''} onchange="${arrName}[${idx}].p_party=this.checked; draw()"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΥΑΣ</label>
             
-            <div class="sub-title">Νομικός Παραστάτης</div>
-            <div class="row-2">
-                <div class="form-group"><label>Ονοματεπώνυμο</label><input value="${r.l_s}" placeholder="Επώνυμο Όνομα" oninput="${arrName}[${idx}].l_s=this.value; draw()"></div>
-                <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds}" oninput="${arrName}[${idx}].l_amds=this.value; draw()"></div>
+            <div class="sub-title" style="display:flex; justify-content: space-between; align-items: center;">
+                <span>Νομικός Παραστάτης</span>
+                <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Αναζήτηση (Enter)</span>
             </div>
+            <div class="row-2" style="background: #f0f9ff; padding: 10px; border-radius: 6px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
+                <div class="form-group" style="margin:0;"><label>ΑΦΜ 🔍</label><input value="${r.l_afm}" placeholder="Βάλε ΑΦΜ & Enter..." onchange="autoFillLawyer(this.value, 'afm', ${idx}, ${isResp}); ${arrName}[${idx}].l_afm=this.value; draw()"></div>
+                <div class="form-group" style="margin:0;"><label>Κινητό 🔍</label><input value="${r.l_mob}" placeholder="Βάλε Κινητό & Enter..." onchange="autoFillLawyer(this.value, 'mob', ${idx}, ${isResp}); ${arrName}[${idx}].l_mob=this.value; draw()"></div>
+            </div>
+            <div class="row-2">
+                <div class="form-group"><label>Όνομα Δικηγόρου</label><input value="${r.l_n}" placeholder="Όνομα..." oninput="${arrName}[${idx}].l_n=this.value; draw()"></div>
+                <div class="form-group"><label>Επώνυμο Δικηγόρου</label><input value="${r.l_s}" placeholder="Επώνυμο..." oninput="${arrName}[${idx}].l_s=this.value; draw()"></div>
+            </div>
+            <div class="form-group"><label>ΑΜ / ΔΣ</label><input value="${r.l_amds}" placeholder="π.χ. ΔΣΑ 1234" oninput="${arrName}[${idx}].l_amds=this.value; draw()"></div>
             <label class="chk-label"><input type="checkbox" ${r.p_law?'checked':''} onchange="${arrName}[${idx}].p_law=this.checked; draw()"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
         </div>`;
     };
@@ -108,8 +244,8 @@ function draw() {
     <b>Passcode:</b> ${d.z_pass}
 </div>`;
 
-    const reqsEnarktiria = reqs.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${r.l_s || "......."}`).join(' και ');
-    const respsEnarktiria = resps.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${r.l_s || "......."}`).join(' και ');
+    const reqsEnarktiria = reqs.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${getFullName(r.l_n, r.l_s) || "......."}`).join(' και ');
+    const respsEnarktiria = resps.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${getFullName(r.l_n, r.l_s) || "......."}`).join(' και ');
 
     let praktikoReqHTML = '';
     reqs.forEach((r, i) => {
@@ -129,7 +265,7 @@ function draw() {
 Email	 [ ☐ ]<br>
 Άλλο (προσδιορίστε) [ ☐ ] ........................<br><br>
 Νομικός παραστάτης επισπεύδοντας<br>
-Ονοματεπώνυμο: ${r.l_s || "......."}<br>
+Ονοματεπώνυμο: ${getFullName(r.l_n, r.l_s) || "......."}<br>
 παραστάθηκε: ${chkLaw}    δεν παραστάθηκε: ${chkLawNot}<br>
 Ημερομηνία: ${d.doc_date}<br>
 <div style="text-align: right; padding-right: 50px;">Υπογραφή νομικού παραστάτη<br>……………..</div>
@@ -156,17 +292,18 @@ Email	 [ ☒ ]<br>
 Συστημένη Επιστολή [ ☐ ]<br>
 Email [ ☒ ]<br><br>
 Νομικός παραστάτης ετέρου μέρους<br>
-Ονοματεπώνυμο: ${r.l_s || "......."}<br>
+Ονοματεπώνυμο: ${getFullName(r.l_n, r.l_s) || "......."}<br>
 παραστάθηκε: ${chkLaw}    δεν παραστάθηκε: ${chkLawNot}<br>
 Ημερομηνία: ${d.doc_date}<br>
 <div style="text-align: right; padding-right: 50px;">Υπογραφή νομικού παραστάτη<br>………………………….</div><br>`;
     });
 
     let activeHtml = '';
+    const mediatorFullName = `${m_data.n} ${m_data.s}`;
 
     if (d.type === 'email') {
         activeHtml = `Αξιότιμες κυρίες, Αξιότιμοι κύριοι,<br><br>
-Ονομάζομαι ${m_data.name} και είμαι Διαπιστευμένος Διαμεσολαβητής. Σε συνέχεια του διορισμού μου από την Κεντρική Επιτροπή Διαμεσολάβησης (ΚΕΔ), επικοινωνώ μαζί σας σχετικά με την ιδιωτική διαφορά που έχει ανακύψει μεταξύ σας, η οποία αποτελεί αντικείμενο της από ${d.court_d} αγωγής που κατατέθηκε στο ${d.court} με αριθμό κατάθεσης ${d.court_n}.<br><br>
+Ονομάζομαι ${mediatorFullName} και είμαι Διαπιστευμένος Διαμεσολαβητής. Σε συνέχεια του διορισμού μου από την Κεντρική Επιτροπή Διαμεσολάβησης (ΚΕΔ), επικοινωνώ μαζί σας σχετικά με την ιδιωτική διαφορά που έχει ανακύψει μεταξύ σας, η οποία αποτελεί αντικείμενο της από ${d.court_d} αγωγής που κατατέθηκε στο ${d.court} με αριθμό κατάθεσης ${d.court_n}.<br><br>
 Με την παρούσα επιστολή, σας προσκαλώ στην Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) Διαμεσολάβησης, η οποία θα διεξαχθεί:<br>
 ${zoomFrame}<br>
 Η αμοιβή για τη διεξαγωγή της ΥΑΣ ανέρχεται στο ποσό των ${d.fee}. Το ποσό θα πρέπει να έχει κατατεθεί πριν την έναρξη της συνεδρίας στον λογαριασμό IBAN: ${m_data.iban}, Τράπεζα ${m_data.bank}.<br><br>
@@ -187,11 +324,11 @@ ${zoomFrame}<br>
 Θα ακολουθήσει τηλεφωνική επικοινωνία τόσο με καθένα από εσάς αλλά και με τους δικηγόρους σας.<br>
 Παραμένω στη διάθεσή σας για οποιαδήποτε διευκρίνιση.<br><br>
 Με εκτίμηση,<br>
-${m_data.name}`;
+${mediatorFullName}`;
 
     } else if (d.type === 'enarktiri') {
         activeHtml = `<b>Εναρκτήρια δήλωση ΥΑΣ</b><br><br>
-Καλησπέρα σας και καλώς ορίσατε στη σημερινή Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης. Ονομάζομαι ${m_data.name} και είμαι διαπιστευμένος διαμεσολαβητής. Ο ρόλος μου σήμερα είναι να σας παρουσιάσω τη δυνατότητα εξωδικαστικής επίλυσης της διαφοράς σας, με έναν τρόπο εποικοδομητικό και αμοιβαία αποδεκτό.<br><br>
+Καλησπέρα σας και καλώς ορίσατε στη σημερινή Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης. Ονομάζομαι ${mediatorFullName} και είμαι διαπιστευμένος διαμεσολαβητής. Ο ρόλος μου σήμερα είναι να σας παρουσιάσω τη δυνατότητα εξωδικαστικής επίλυσης της διαφοράς σας, με έναν τρόπο εποικοδομητικό και αμοιβαία αποδεκτό.<br><br>
 Θα ήθελα να επιβεβαιώσουμε την παρουσία όλων των μερών. Από τη μία πλευρά, έχουμε την ενάγουσα πλευρά, ${reqsEnarktiria}. Από την άλλη πλευρά, έχουμε την εναγομένη πλευρά, ${respsEnarktiria}.<br><br>
 Σκοπός αυτής της πρώτης, υποχρεωτικής συνεδρίας, όπως ορίζει ο νόμος 4640/2019, είναι να ενημερωθείτε για τον θεσμό της διαμεσολάβησης και να εξετάσετε από κοινού αν μπορεί να αποτελέσει ένα χρήσιμο εργαλείο για την επίλυση της δικής σας υπόθεσης.<br><br>
 Ως διαμεσολαβητής, είμαι ένα ουδέτερο και αμερόληπτο τρίτο μέρος. Δεν είμαι δικαστής, δεν εκδίδω αποφάσεις και δεν πρόκειται να επιβάλω λύσεις. Ο ρόλος μου είναι να διευκολύνω την επικοινωνία μεταξύ σας, να διασφαλίσω ότι η συζήτηση θα είναι ισορροπημένη και παραγωγική και να σας βοηθήσω να αναζητήσετε πιθανές λύσεις που θα μπορούσαν να ικανοποιήσουν τα συμφέροντα και των δύο πλευρών.<br><br>
@@ -232,7 +369,7 @@ ${zoomFrameEntypo}<br>
 <div style="text-align:right; padding-right: 50px;">
 Ο διαμεσολαβητής<br>
 (Υπογραφή)<br>
-${m_data.name}
+${mediatorFullName}
 </div><br>
 
 *ΠΑΡΕΛΗΦΘΗ την…………………….......<br>
@@ -250,7 +387,7 @@ ${m_data.name}
     } else if (d.type === 'praktiko') {
         activeHtml = `<div style="text-align:center;"><b>ΠΡΑΚΤΙΚΟ ΠΕΡΑΤΩΣΗΣ ΑΡΧΙΚΗΣ ΥΠΟΧΡΕΩΤΙΚΗΣ ΣΥΝΕΔΡΙΑΣ</b><br>
 (άρθρο 7 παρ. 4 του ν.4640/2019)</div><br><br>
-Ο διαμεσολαβητής ${m_data.name} του ${m_data.father} (ΑΜΔ ${m_data.am}) βεβαιώνω ότι περατώθηκε η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων, κατά την οποία παραστάθηκαν τα μέρη, όπως παρακάτω αναφέρεται.<br><br>
+Ο διαμεσολαβητής ${mediatorFullName} του ${m_data.f} (ΑΜΔ ${m_data.am}) βεβαιώνω ότι περατώθηκε η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων, κατά την οποία παραστάθηκαν τα μέρη, όπως παρακάτω αναφέρεται.<br><br>
 Ημερομηνία ΥΑΣ : ${fmtD(d.z_date)}<br>
 Τόπος (διεύθυνση) ΥΑΣ: ΣΚΥΔΡΑ, ΜΑΝΔΑΛΟ ΤΚ 58500 ΜΕΣΩ ΤΗΛΕΔΙΑΣΚΕΨΗΣ<br><br>
 <b>ΣΥΜΜΕΤΕΧΟΝΤΕΣ ΣΤΗΝ ΥΑΣ:</b><br><br>
@@ -258,7 +395,7 @@ ${praktikoReqHTML}
 ${praktikoRespHTML}
 
 <b>Ο ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</b><br>
-Ονοματεπώνυμο: ${m_data.name} Πατρώνυμο: ${m_data.father}<br>
+Ονοματεπώνυμο: ${mediatorFullName} Πατρώνυμο: ${m_data.f}<br>
 Μάνδαλο, την ${d.doc_date}<br>
 <div style="text-align:right; padding-right:50px;">Υπογραφή Διαμεσολαβητή<br>……………………</div><br>
 
@@ -299,7 +436,8 @@ function exportToWord() {
 }
 
 function downloadMailTemplate() {
-    const fee = document.getElementById('m_fee').value;
+    const feeElem = document.getElementById('m_fee');
+    const fee = feeElem.options[feeElem.selectedIndex].text;
     const z_date = document.getElementById('yas_date').value;
     const z_time = document.getElementById('yas_time').value;
     const z_link = document.getElementById('z_link').value;
@@ -410,8 +548,8 @@ const theoryData = {
         <p>Χρήση αποκλίνουσας σκέψης (divergent thinking) για τη δημιουργία επιλογών αμοιβαίου οφέλους (Win-Win). Στόχος είναι η "μεγέθυνση της πίτας" πριν τον τελικό διαμοιρασμό της.</p>
     </div>`,
 
-    harvard_model: `<h3>Η Μεθοδολογία του Harvard & Νευροβιολογία (Neuro-Mediation)</h3>
-    <p>Το μοντέλο διαπραγμάτευσης του Harvard αποκτά άλλη διάσταση όταν κατανοήσουμε πώς οι ερωτήσεις του Διαμεσολαβητή "καλωδιώνουν" τον εγκέφαλο των μερών. Ακολουθεί η αντιστοίχιση βημάτων, νευρολογικών αντιδράσεων και μια εκτεταμένη εργαλειοθήκη ερωτήσεων:</p>
+    harvard_model: `<h3>Η Μεθοδολογία του Harvard (Με Νευροβιολογία & BATNA/ZOPA)</h3>
+    <p>Το μοντέλο διαπραγμάτευσης του Harvard (Harvard Negotiation Project - "Getting to Yes"), αποκτά άλλη διάσταση όταν κατανοήσουμε πώς οι ερωτήσεις του Διαμεσολαβητή "καλωδιώνουν" τον εγκέφαλο. Ακολουθεί το πλήρες μοντέλο των 5 σταδίων, ενσωματώνοντας τη θεωρία των BATNA/ZOPA ως τον τελικό μηχανισμό λήψης απόφασης.</p>
 
     <div class="highlight-box" style="border-left-color: #be185d; background: #fff1f2;">
         <h4 style="margin-top:0; color: #be185d;">Βήμα 1: Διαχωρισμός Ανθρώπων από το Πρόβλημα</h4>
@@ -468,52 +606,28 @@ const theoryData = {
             <li>Με ποιο σκεπτικό θα μπορούσατε να δικαιολογήσετε αυτό το ποσό σε έναν τρίτο, εντελώς ουδέτερο παρατηρητή;</li>
             <li>Αντί να διαφωνούμε για την τελική αξία, μπορούμε έστω να συμφωνήσουμε στη *μέθοδο* με την οποία θα την υπολογίσουμε;</li>
         </ul>
-    </div>`,
-
-    batna_zopa: `<h3>BATNA, WATNA & ZOPA: Ενδελεχής Ανάλυση & Μεθοδολογία</h3>
-    <p>Τα τρία αυτά ακρωνύμια αποτελούν τη ραχοκοκαλιά της αξιολόγησης του ρίσκου και της λήψης αποφάσεων (Decision Analysis) στη Διαμεσολάβηση. Χωρίς αυτά, ένα μέρος διαπραγματεύεται "στα τυφλά", βασιζόμενο μόνο στο συναίσθημα ή το πείσμα.</p>
-
-    <div class="highlight-box" style="border-left-color: #10b981;">
-        <h4 style="color: #047857; margin-top:0;">BATNA (Best Alternative To a Negotiated Agreement)</h4>
-        <p><b>Ορισμός:</b> Η Καλύτερη Εναλλακτική Λύση εκτός Συμφωνίας. Είναι αυτό που θα κάνεις αν σηκωθείς τώρα από το τραπέζι και φύγεις. Το BATNA <b>δεν</b> είναι ο στόχος σου στη διαπραγμάτευση. Είναι το "δίχτυ ασφαλείας" σου.</p>
-        <p><b>Ψυχολογική/Νευροβιολογική Διάσταση:</b> Ένα ισχυρό BATNA μειώνει το άγχος (κατευνάζει την αμυγδαλή) και δίνει αυτοπεποίθηση. Όταν ξέρεις ότι έχεις μια καλή εναλλακτική, δεν διαπραγματεύεσαι από θέση απελπισίας, γεγονός που αποτρέπει την "παραχώρηση υπό καθεστώς πανικού".</p>
-        <p><b>Μεθοδολογία Υπολογισμού (3 Βήματα):</b>
-        <ol>
-            <li><b>Καταγραφή (Brainstorming):</b> Ποιες είναι όλες οι επιλογές αν δεν τα βρούμε; (π.χ. Δικαστήριο, να βρω άλλο προμηθευτή, να μην κάνω τίποτα, να απεργήσω).</li>
-            <li><b>Αξιολόγηση:</b> Μετατρέψτε κάθε επιλογή σε "νούμερα" και πιθανότητες. Τι κόστος, χρόνο και ρίσκο έχει καθεμία;</li>
-            <li><b>Επιλογή:</b> Επιλέξτε την καλύτερη. Αυτό είναι το BATNA σας.</li>
-        </ol>
-        <i>* Κανόνας: Δεν δεχόμαστε ΠΟΤΕ μια συμφωνία στη Διαμεσολάβηση που είναι χειρότερη από το BATNA μας.</i></p>
-    </div>
-
-    <div class="highlight-box" style="border-left-color: #ef4444;">
-        <h4 style="color: #b91c1c; margin-top:0;">WATNA (Worst Alternative To a Negotiated Agreement)</h4>
-        <p><b>Ορισμός:</b> Η Χειρότερη Εναλλακτική Λύση. Το απόλυτο "Εφιαλτικό Σενάριο" αν οι διαπραγματεύσεις καταρρεύσουν.</p>
-        <p><b>Ο Ρόλος του Διαμεσολαβητή (Έλεγχος Πραγματικότητας / Reality Testing):</b> Το WATNA χρησιμοποιείται στρατηγικά στις κατ' ιδίαν συνεδρίες (caucuses) για να "ξυπνήσει" ένα μέρος που έχει παράλογες απαιτήσεις (Overconfidence Bias). Ο διαμεσολαβητής, μέσω στοχευμένων ερωτήσεων, ενεργοποιεί τον φόβο της απώλειας (Loss Aversion).</p>
-        <p><b>Μεθοδολογία Υπολογισμού:</b> Αθροίστε το χειρότερο αποτέλεσμα. Π.χ. Στο δικαστήριο: (Απόρριψη της αγωγής σας) + (Καταβολή δικαστικών εξόδων αντιδίκου) + (Δέσμευση κεφαλαίων για 5 χρόνια) + (Ανυπολόγιστη ψυχική φθορά) + (Δημόσια δυσφήμιση).
-        <br><br><i>"Αν συμβεί το χειρότερο σενάριο και χάσετε το Εφετείο, πώς θα καλύψετε τα έξοδα επιβίωσης της εταιρείας σας για την επόμενη τριετία;"</i></p>
-    </div>
-
-    <div class="highlight-box" style="border-left-color: #3b82f6;">
-        <h4 style="color: #1d4ed8; margin-top:0;">ZOPA (Zone of Possible Agreement)</h4>
-        <p><b>Ορισμός:</b> Η Ζώνη Πιθανής Συμφωνίας. Είναι το "παράθυρο" στο οποίο οι ανοχές των δύο πλευρών επικαλύπτονται. Εκεί μέσα κρύβεται η τελική συμφωνία.</p>
-        <p><b>Πώς λειτουργεί:</b> Κάθε πλευρά έχει ένα <b>Σημείο Αντίστασης (Reservation Point / Bottom Line)</b> — το απόλυτο όριο της, το οποίο καθορίζεται από το BATNA της.</p>
-        <ul>
-            <li>Αν το Μέγιστο Ποσό που δίνει ο Αγοραστής είναι <b>μεγαλύτερο</b> από το Ελάχιστο Ποσό που δέχεται ο Πωλητής, υπάρχει ZOPA.</li>
-            <li><b>Αρνητικό ZOPA:</b> Όταν οι απαιτήσεις δεν τέμνονται πουθενά (π.χ. Ο Αγοραστής δίνει μαξ 100€, ο Πωλητής θέλει μίνιμουμ 120€). Εδώ η διαπραγμάτευση κολλάει.</li>
-        </ul>
-        <p><b>Η Τέχνη του Διαμεσολαβητή:</b> Αν υπάρχει Αρνητικό ZOPA (χάσμα), ο διαμεσολαβητής πρέπει να "μεγαλώσει την πίτα" (Δημιουργία Επιλογών - Harvard Βήμα 3). Εισάγει <b>νέες μεταβλητές</b> στο τραπέζι για να δημιουργήσει ZOPA. (π.χ. "Ο αγοραστής μένει στα 100€, αλλά αναλαμβάνει ο ίδιος τα έξοδα μεταφοράς που κοστίζουν 25€. Άρα το συνολικό όφελος για τον πωλητή πάει στα 125€ — το ZOPA μόλις άνοιξε!").</p>
     </div>
 
     <div class="moore-circle">
-        <div class="moore-node" style="border-left-color: #64748b; background: #f8fafc; flex: 1 1 100%;">
-            <h4 style="color: #334155;">Ένα Πρακτικό Παράδειγμα (Μισθωτική Διαφορά)</h4>
-            <p>Ένας ιδιοκτήτης (Α) θέλει να κάνει έξωση στον ενοικιαστή (Β) που χρωστάει ενοίκια αξίας 10.000€.</p>
-            <ul style="margin-bottom: 0;">
-                <li><b>BATNA του (Α):</b> Να πάει δικαστικά, να πληρώσει 1.500€ σε δικηγόρους/δικαστικά, να περιμένει 8 μήνες να βγει η απόφαση, και ίσως πάρει πίσω το σπίτι και κάποια χρήματα. (Καθαρό κέρδος: Το σπίτι + ίσως 8.500€ σε 8 μήνες).</li>
-                <li><b>WATNA του (Α):</b> Να πάει δικαστικά, ο ενοικιαστής να κάνει ανακοπές, να μείνει μέσα άλλα 2 χρόνια χωρίς να πληρώνει, να καταστρέψει το σπίτι φεύγοντας, και ο Α να μην πάρει ούτε ευρώ γιατί ο Β είναι αφερέγγυος.</li>
-                <li><b>ZOPA:</b> Ο Διαμεσολαβητής βάζει τα μέρη να δουν τα WATNA τους. Ο Ιδιοκτήτης καταλαβαίνει το τεράστιο ρίσκο. Ο Ενοικιαστής καταλαβαίνει ότι το WATNA του είναι να του κατασχεθεί ο μισθός και να βρεθεί στο δρόμο. Το ZOPA δημιουργείται όταν ο Α δέχεται να διαγράψει 3.000€ χρέους, αρκεί ο Β να του δώσει 7.000€ μετρητά σήμερα και να αδειάσει το σπίτι σε 15 μέρες σε άριστη κατάσταση. Και οι δύο γλίτωσαν το WATNA τους!</li>
+        <div class="moore-node" style="border-left-color: #10b981; flex: 1 1 100%;">
+            <h4 style="color: #047857; margin-top:0;">Βήμα 5α: BATNA (Best Alternative To a Negotiated Agreement)</h4>
+            <p><b>Ορισμός:</b> Η Καλύτερη Εναλλακτική Λύση εκτός Συμφωνίας. Είναι το "δίχτυ ασφαλείας". Δεν δεχόμαστε ποτέ μια συμφωνία στη Διαμεσολάβηση που είναι χειρότερη από το BATNA μας.</p>
+            <p><b>Μεθοδολογία Υπολογισμού:</b> 1. Καταγραφή όλων των εναλλακτικών (δικαστήριο, άλλη συνεργασία κλπ). 2. Αξιολόγηση ρίσκου/κόστους. 3. Επιλογή της καλύτερης.</p>
+        </div>
+        <div class="moore-node" style="border-left-color: #ef4444; flex: 1 1 100%;">
+            <h4 style="color: #b91c1c; margin-top:0;">Βήμα 5β: WATNA (Worst Alternative To a Negotiated Agreement)</h4>
+            <p><b>Ορισμός:</b> Το απόλυτο "Εφιαλτικό Σενάριο" αν οι διαπραγματεύσεις καταρρεύσουν. Χρησιμοποιείται στρατηγικά στις κατ' ιδίαν συνεδρίες (caucuses) για Reality Testing, ενεργοποιώντας τον φόβο της απώλειας (Loss Aversion).</p>
+            <p><b>Ερωτήσεις Reality Testing:</b></p>
+            <ul>
+                <li>Ποιο είναι το χειρότερο σενάριο αν δεν βρούμε λύση σήμερα και καταλήξετε στο δικαστήριο;</li>
+                <li>Πόσο χρόνο και χρήμα είστε διατεθειμένοι να ξοδέψετε σε δικαστικά έξοδα τα επόμενα χρόνια;</li>
+                <li>Αν το δικαστήριο απορρίψει την αγωγή σας (το WATNA σας), πώς θα επιβιώσει επιχειρηματικά η εταιρεία σας;</li>
             </ul>
+        </div>
+        <div class="moore-node" style="border-left-color: #3b82f6; flex: 1 1 100%;">
+            <h4 style="color: #1d4ed8; margin-top:0;">Βήμα 5γ: ZOPA (Zone of Possible Agreement)</h4>
+            <p><b>Ορισμός:</b> Η Ζώνη Πιθανής Συμφωνίας. Είναι το "παράθυρο" στο οποίο οι ανοχές (Reservation Points) των δύο πλευρών επικαλύπτονται.</p>
+            <p><b>Αρνητικό ZOPA:</b> Όταν οι απαιτήσεις δεν τέμνονται. Η τέχνη του Διαμεσολαβητή είναι να "μεγαλώσει την πίτα" εισάγοντας <b>νέες μεταβλητές</b> (π.χ. χρόνο αποπληρωμής, ανάληψη εξόδων μεταφοράς) για να δημιουργήσει ZOPA εκεί που δεν υπήρχε.</p>
         </div>
     </div>`,
 
@@ -661,6 +775,9 @@ function setTab(t, btn) {
 }
 
 window.onload = () => { 
+    // Φορτώνει όλα τα αποθηκευμένα (τοπικά) από την προηγούμενη φορά!
+    loadLocalDB();
+
     const today = new Date();
     document.getElementById('doc_date').value = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
     renderLists(); 
