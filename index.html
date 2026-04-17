@@ -9,12 +9,13 @@
 <body>
 
 <header>
-    <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΠΑΝΑΓΙΩΤΗΣ ΖΑΡΟΓΟΥΛΙΔΗΣ | Σύστημα Δικογράφων</div>
+    <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΠΑΝΑΓΙΩΤΗΣ ΖΑΡΟΓΟΥΛΙΔΗΣ | Σύστημα Δικογράφων & Εργαλεία</div>
     <div style="font-size: 0.9rem; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3);">ΑΜΔ 2341</div>
 </header>
 
 <nav>
     <button class="nav-btn active" onclick="setTab('docs', this)">📝 ΣΥΝΤΑΞΗ ΕΓΓΡΑΦΩΝ</button>
+    <button class="nav-btn" onclick="setTab('smart_tool', this)">⚖️ ΑΞΙΟΛΟΓΗΣΗ ΠΡΟΤΑΣΗΣ (SMART)</button>
     <button class="nav-btn" onclick="setTab('library', this)">📚 ΝΟΜΟΘΕΣΙΑ & ΘΕΩΡΙΑ</button>
 </nav>
 
@@ -89,12 +90,74 @@
         </div>
     </div>
 
+    <div id="smart_tool" class="tab-content">
+        <div class="smart-container">
+            <h2 style="color: var(--sidebar); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">Αυτόματη Αξιολόγηση Πρότασης (SMART)</h2>
+            <div class="form-group">
+                <label>Κείμενο Πρότασης προς αξιολόγηση (Προαιρετικό)</label>
+                <textarea rows="3" placeholder="Εισάγετε την πρόταση που έκανε το μέρος..."></textarea>
+            </div>
+            
+            <div class="smart-grid">
+                <div class="smart-card">
+                    <h3>S - Specific (Συγκεκριμένη)</h3>
+                    <p>Είναι σαφής, εστιασμένη και καλά ορισμένη; Απαντά στο "τι ακριβώς προτείνεται";</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_s" oninput="calcSmart()">
+                        <span class="slider-val" id="val_s">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>M - Measurable (Μετρήσιμη)</h3>
+                    <p>Μπορούμε να πούμε με αντικειμενικό τρόπο (KPIs) πότε ο στόχος επιτεύχθηκε;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_m" oninput="calcSmart()">
+                        <span class="slider-val" id="val_m">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>A - Achievable (Εφικτή)</h3>
+                    <p>Είναι ρεαλιστική με βάση τους πόρους, τον προϋπολογισμό και τις ικανότητες;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_a" oninput="calcSmart()">
+                        <span class="slider-val" id="val_a">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>R - Relevant (Σχετική)</h3>
+                    <p>Απαντά στο πραγματικό πρόβλημα (συμφέροντα) και συνάδει με το όραμα;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_r" oninput="calcSmart()">
+                        <span class="slider-val" id="val_r">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>T - Time-bound (Χρονική)</h3>
+                    <p>Υπάρχει σαφές, ρεαλιστικό χρονοδιάγραμμα και ορόσημα υλοποίησης;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_t" oninput="calcSmart()">
+                        <span class="slider-val" id="val_t">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="smart-result" id="smart_result_box">
+                <div class="score-circle" id="smart_score">15/25</div>
+                <div class="score-text">
+                    <h3 id="smart_title">Μέτρια Πρόταση</h3>
+                    <p id="smart_desc">Απαιτούνται διευκρινίσεις. Η πρόταση έχει βάση, αλλά πρέπει να εξειδικευτεί περαιτέρω πριν γίνει αποδεκτή.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="library" class="tab-content">
         <div class="lib-grid">
             <div class="lib-menu">
                 <div class="lib-section-title">Θεωρία των Συγκρούσεων</div>
                 <div class="lib-item active" onclick="loadTheory('conflict_methodology', this)">Μεθοδολογία (Ψυχολογία & Πράξη)</div>
-                <div class="lib-item" onclick="loadTheory('harvard_model', this)">Το Μοντέλο του Harvard (Βήματα)</div>
+                <div class="lib-item" onclick="loadTheory('harvard_model', this)">Το Μοντέλο του Harvard & Νευροβιολογία</div>
+                <div class="lib-item" onclick="loadTheory('smart_theory', this)">Η Μεθοδολογία SMART (Αξιολόγηση)</div>
                 <div class="lib-item" onclick="loadTheory('conflict_moore', this)">Ο Κύκλος των Συγκρούσεων (C. Moore)</div>
                 <div class="lib-item" onclick="loadTheory('conflict_intro', this)">Φύση & Ορισμός της Σύγκρουσης</div>
                 <div class="lib-item" onclick="loadTheory('conflict_escalation', this)">Κλιμάκωση (Μοντέλο Glasl)</div>
