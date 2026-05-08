@@ -504,47 +504,155 @@ function downloadMailTemplate() {
 // ==========================================
 // 3. SMART EVALUATOR LOGIC
 // ==========================================
+// ==========================================
+// SMART QUESTIONNAIRE SYSTEM
+// ==========================================
+
+const smartCriteria = [
+    {
+        id: 'S', label: 'S – Specific', sublabel: 'Σαφήνεια & Εξειδίκευση', color: '#2563eb',
+        questions: [
+            { text: 'Ορίζει ξεκάθαρα το αντικείμενο της υποχρέωσης (τι ακριβώς θα γίνει, θα παραδοθεί ή θα καταβληθεί);', weight: 4 },
+            { text: 'Αναφέρει τα υπόχρεα μέρη και κατανέμει σαφώς τις αντίστοιχες ευθύνες τους;', weight: 3 },
+            { text: 'Αποκλείει ασάφειες ή δυνατότητα διαφορετικής ερμηνείας από τα μέρη;', weight: 3 }
+        ]
+    },
+    {
+        id: 'M', label: 'M – Measurable', sublabel: 'Μετρησιμότητα & Επαληθευσιμότητα', color: '#7c3aed',
+        questions: [
+            { text: 'Υπάρχει αντικειμενικός, αδιαμφισβήτητος τρόπος να αποδειχθεί η εκπλήρωση της υποχρέωσης;', weight: 4 },
+            { text: 'Περιλαμβάνει συγκεκριμένα, μετρήσιμα κριτήρια επιτυχίας (π.χ. ποσό, ημερομηνία, ποσότητα);', weight: 3 },
+            { text: 'Είναι σαφές το σημείο "εκπλήρωσης" — δηλ. πότε και πώς λήγει η υποχρέωση;', weight: 3 }
+        ]
+    },
+    {
+        id: 'A', label: 'A – Achievable', sublabel: 'Εφικτότητα & Βιωσιμότητα', color: '#059669',
+        questions: [
+            { text: 'Τα υπόχρεα μέρη διαθέτουν αποδεδειγμένα τους αναγκαίους οικονομικούς ή πρακτικούς πόρους;', weight: 4 },
+            { text: 'Η εκτέλεση δεν εξαρτάται από παράγοντες εκτός ελέγχου των μερών (τρίτους, δικαστήρια, αγορά);', weight: 3 },
+            { text: 'Είναι νομικά συμβατή και δεν αντίκειται σε ήδη υφιστάμενες υποχρεώσεις ή δεσμεύσεις;', weight: 3 }
+        ]
+    },
+    {
+        id: 'R', label: 'R – Relevant', sublabel: 'Σχετικότητα & Αμοιβαία Αποδοχή', color: '#d97706',
+        questions: [
+            { text: 'Απαντά στα πραγματικά υποκείμενα συμφέροντα (interests) — όχι απλώς στις δηλωμένες θέσεις (positions) — και των δύο μερών;', weight: 4 },
+            { text: 'Είναι αμοιβαία αποδεκτή ή τουλάχιστον ανεκτή ("αρκούντως ικανοποιητική") από όλα τα εμπλεκόμενα μέρη;', weight: 4 },
+            { text: 'Συμβάλλει στη διατήρηση ή βελτίωση της μελλοντικής σχέσης μεταξύ των μερών;', weight: 2 }
+        ]
+    },
+    {
+        id: 'T', label: 'T – Time-bound', sublabel: 'Χρονική Δέσμευση & Συνέπειες', color: '#dc2626',
+        questions: [
+            { text: 'Ορίζεται σαφής, συγκεκριμένη ημερομηνία ή προθεσμία εκτέλεσης;', weight: 4 },
+            { text: 'Υπάρχει μηχανισμός παρακολούθησης ή προβλέπονται συνέπειες σε περίπτωση μη τήρησης (ρήτρα, πρόστιμο, κλπ.);', weight: 3 },
+            { text: 'Το χρονοδιάγραμμα είναι ρεαλιστικό σε σχέση με τις αντικειμενικές δυνατότητες των μερών;', weight: 3 }
+        ]
+    }
+];
+
+const SMART_MAX = smartCriteria.reduce((t, c) => t + c.questions.reduce((s, q) => s + q.weight, 0), 0); // 50
+
+function renderSmartForm() {
+    const container = document.getElementById('smart_questions_container');
+    if (!container) return;
+
+    let html = '<div class="smart-q-grid">';
+    smartCriteria.forEach(crit => {
+        const maxScore = crit.questions.reduce((s, q) => s + q.weight, 0);
+        html += `<div class="smart-q-group">
+            <div class="smart-q-header" style="border-left-color:${crit.color};">
+                <span><b>${crit.label}</b> <span class="smart-q-sublabel">${crit.sublabel}</span></span>
+                <span class="smart-q-badge" id="score_${crit.id}" style="background:${crit.color}20; color:${crit.color};">–/${maxScore}</span>
+            </div>`;
+        crit.questions.forEach((q, qi) => {
+            const name = `sq_${crit.id}_${qi}`;
+            html += `<div class="smart-question">
+                <div class="smart-question-text">${q.text} <span class="smart-q-weight">(βαρύτητα: ${q.weight})</span></div>
+                <div class="smart-radio-group">
+                    <div class="smart-radio-btn">
+                        <input type="radio" name="${name}" id="${name}_y" value="full" onchange="calcSmart()">
+                        <label for="${name}_y" class="sq-yes">✓ Ναι</label>
+                    </div>
+                    <div class="smart-radio-btn">
+                        <input type="radio" name="${name}" id="${name}_p" value="partial" onchange="calcSmart()">
+                        <label for="${name}_p" class="sq-partial">≈ Εν μέρει</label>
+                    </div>
+                    <div class="smart-radio-btn">
+                        <input type="radio" name="${name}" id="${name}_n" value="none" onchange="calcSmart()">
+                        <label for="${name}_n" class="sq-no">✗ Όχι</label>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
 function calcSmart() {
-    const s = parseInt(document.getElementById('smart_s').value);
-    const m = parseInt(document.getElementById('smart_m').value);
-    const a = parseInt(document.getElementById('smart_a').value);
-    const r = parseInt(document.getElementById('smart_r').value);
-    const t = parseInt(document.getElementById('smart_t').value);
+    let totalScore = 0;
+    let answeredCount = 0;
 
-    document.getElementById('val_s').innerText = s;
-    document.getElementById('val_m').innerText = m;
-    document.getElementById('val_a').innerText = a;
-    document.getElementById('val_r').innerText = r;
-    document.getElementById('val_t').innerText = t;
+    smartCriteria.forEach(crit => {
+        let critScore = 0;
+        const maxCritScore = crit.questions.reduce((s, q) => s + q.weight, 0);
+        crit.questions.forEach((q, qi) => {
+            const checked = document.querySelector(`input[name="sq_${crit.id}_${qi}"]:checked`);
+            if (checked) {
+                answeredCount++;
+                if (checked.value === 'full') critScore += q.weight;
+                else if (checked.value === 'partial') critScore += q.weight * 0.5;
+            }
+        });
+        totalScore += critScore;
+        const el = document.getElementById(`score_${crit.id}`);
+        if (el) el.textContent = `${critScore % 1 === 0 ? critScore : critScore.toFixed(1)}/${maxCritScore}`;
+    });
 
-    const total = s + m + a + r + t;
-    document.getElementById('smart_score').innerText = `${total}/25`;
-
-    let title, desc, color;
-    if (total <= 10) {
-        title = "Αδύναμη Πρόταση";
-        desc = "Η πρόταση πάσχει σε βασικά δομικά στοιχεία. Δεν είναι έτοιμη για διαπραγμάτευση. Πρέπει να ζητηθούν άμεσα διευκρινίσεις.";
-        color = "var(--danger)";
-    } else if (total <= 17) {
-        title = "Μέτρια Πρόταση";
-        desc = "Απαιτούνται διευκρινίσεις. Έχει βάση, αλλά πρέπει να εξειδικευτεί περαιτέρω (ειδικά στα κριτήρια που βαθμολογήθηκαν χαμηλά) πριν γίνει αποδεκτή.";
-        color = "#f59e0b"; // Orange
-    } else if (total <= 22) {
-        title = "Καλή Πρόταση";
-        desc = "Η πρόταση είναι ρεαλιστική και αξιολογήσιμη. Μικρές λεπτομέρειες πρέπει να ρυθμιστούν για την τελική συμφωνία.";
-        color = "var(--accent)"; // Green
-    } else {
-        title = "Εξαιρετική / Ισχυρή Πρόταση";
-        desc = "Η πρόταση είναι απόλυτα ξεκάθαρη, μετρήσιμη και ρεαλιστική. Αποτελεί ιδανική βάση για την υπογραφή του Ιδιωτικού Συμφωνητικού.";
-        color = "#15803d"; // Dark Green
+    if (answeredCount === 0) {
+        document.getElementById('smart_score').textContent = '–';
+        document.getElementById('smart_score').style.background = '#94a3b8';
+        document.getElementById('smart_title').textContent = 'Συμπληρώστε το ερωτηματολόγιο';
+        document.getElementById('smart_desc').textContent = 'Απαντήστε στις παραπάνω ερωτήσεις για να αξιολογηθεί η βιωσιμότητα και εφαρμοστικότητα της πρότασης.';
+        document.getElementById('smart_result_box').style.borderColor = '#e2e8f0';
+        return;
     }
 
-    const resultBox = document.getElementById('smart_result_box');
-    document.getElementById('smart_title').innerText = title;
-    document.getElementById('smart_desc').innerText = desc;
+    const pct = (totalScore / SMART_MAX) * 100;
+    let title, desc, color;
+
+    if (pct < 35) {
+        title = '⛔ Μη Βιώσιμη Πρόταση';
+        desc = 'Η πρόταση παρουσιάζει κρίσιμες ελλείψεις σε πολλαπλά επίπεδα. Δεν αποτελεί έτοιμη βάση για συμφωνία. Απαιτείται ουσιαστική αναδιατύπωση πριν συζητηθεί περαιτέρω.';
+        color = '#dc2626';
+    } else if (pct < 55) {
+        title = '⚠️ Πρόταση με Σοβαρές Ελλείψεις';
+        desc = 'Υπάρχει διάθεση και βάση, αλλά κρίσιμα στοιχεία εφαρμοστικότητας ή αποδοχής απουσιάζουν. Χρειάζεται εξειδίκευση στα αδύναμα κριτήρια πριν προχωρήσει η διαπραγμάτευση.';
+        color = '#f97316';
+    } else if (pct < 72) {
+        title = '🔶 Μέτρια Βιώσιμη Πρόταση';
+        desc = 'Η πρόταση έχει ουσία αλλά παρουσιάζει αδυναμίες. Εντοπίστε τα κριτήρια με χαμηλή βαθμολογία και ζητήστε διευκρινίσεις ή τροποποιήσεις για να ενισχυθεί.';
+        color = '#eab308';
+    } else if (pct < 88) {
+        title = '✅ Καλή Πρόταση';
+        desc = 'Η πρόταση είναι σε μεγάλο βαθμό βιώσιμη και εφαρμόσιμη. Μικρές βελτιώσεις στα αδύναμα σημεία μπορούν να την καταστήσουν ισχυρότερη βάση για συμφωνία.';
+        color = '#22c55e';
+    } else {
+        title = '🏆 Ισχυρή Πρόταση';
+        desc = 'Η πρόταση πληροί υψηλά κριτήρια βιωσιμότητας και εφαρμοστικότητας. Αποτελεί ισχυρή βάση για την υπογραφή του Ιδιωτικού Συμφωνητικού.';
+        color = '#059669';
+    }
+
+    const scoreEl = document.getElementById('smart_score');
+    const displayScore = `${totalScore % 1 === 0 ? totalScore : totalScore.toFixed(1)}/${SMART_MAX}`;
+    scoreEl.textContent = displayScore;
+    scoreEl.style.background = color;
+    document.getElementById('smart_title').textContent = title;
+    document.getElementById('smart_desc').textContent = `${desc}  (Βαθμολογία: ${Math.round(pct)}%)`;
     document.getElementById('smart_title').style.color = color;
-    document.getElementById('smart_score').style.backgroundColor = color;
-    resultBox.style.borderColor = color;
+    document.getElementById('smart_result_box').style.borderColor = color;
 }
 
 // ==========================================
@@ -847,8 +955,8 @@ function setTab(t, btn) {
     document.getElementById(t).classList.add('active');
     if (btn) btn.classList.add('active');
     
-    // Initialize SMART if tab opened
-    if (t === 'smart_tool') calcSmart();
+    // Initialize SMART questionnaire if tab opened
+    if (t === 'smart_tool') renderSmartForm();
 }
 
 window.onload = () => { 
@@ -859,5 +967,6 @@ window.onload = () => {
     document.getElementById('doc_date').value = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
     renderLists(); 
     draw(); 
-    loadTheory('conflict_methodology', document.querySelector('.lib-item'));
+    renderSmartForm();
+    loadTheory('mediation_concept_methods', document.querySelector('.lib-item'));
 };
