@@ -563,33 +563,144 @@ function exportToWord() {
     link.click();
 }
 
+// Φτιάχνει γραφικό «ημερολογιακό» πλακίδιο ημερομηνίας (table-based για email).
+function buildCalendarBadge(dateStr, timeStr) {
+    const monthsGR = ["ΙΑΝΟΥΑΡΙΟΣ","ΦΕΒΡΟΥΑΡΙΟΣ","ΜΑΡΤΙΟΣ","ΑΠΡΙΛΙΟΣ","ΜΑΪΟΣ","ΙΟΥΝΙΟΣ","ΙΟΥΛΙΟΣ","ΑΥΓΟΥΣΤΟΣ","ΣΕΠΤΕΜΒΡΙΟΣ","ΟΚΤΩΒΡΙΟΣ","ΝΟΕΜΒΡΙΟΣ","ΔΕΚΕΜΒΡΙΟΣ"];
+    let dayNum = "—", monthLabel = "ΥΑΣ", weekday = "Ημερομηνία προς ορισμό";
+    if (dateStr) {
+        const parts = dateStr.split('-'); // yyyy-mm-dd
+        const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10);
+        if (!isNaN(d)) {
+            dayNum = d;
+            monthLabel = (monthsGR[m - 1] || "") + " " + y;
+            weekday = getDay(dateStr);
+        }
+    }
+    const timeRow = timeStr ? `
+                <tr><td align="center" style="padding:8px 6px 0 6px; font-family:Arial,sans-serif; font-size:13px; font-weight:bold; color:#c0392b;">🕒 ${timeStr}</td></tr>` : "";
+
+    return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="180" style="width:180px; border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; background:#ffffff;">
+        <tr>
+            <td align="center" bgcolor="#c0392b" style="background:#c0392b; padding:8px 6px; font-family:Arial,sans-serif; font-size:13px; font-weight:bold; color:#ffffff; letter-spacing:0.5px;">${monthLabel}</td>
+        </tr>
+        <tr>
+            <td align="center" bgcolor="#ffffff" style="padding:10px 6px 6px 6px; font-family:Arial,sans-serif; font-size:52px; line-height:52px; font-weight:bold; color:#2c3e50;">${dayNum}</td>
+        </tr>
+        <tr>
+            <td align="center" bgcolor="#ffffff" style="padding:0 6px 10px 6px; font-family:Arial,sans-serif; font-size:13px; color:#7f8c8d; text-transform:uppercase; letter-spacing:1px;">${weekday}</td>
+        </tr>${timeRow}
+        <tr><td style="height:8px; line-height:8px;">&nbsp;</td></tr>
+    </table>`;
+}
+
 function downloadMailTemplate() {
     const feeElem = document.getElementById('m_fee');
-    const fee = feeElem.options[feeElem.selectedIndex].text;
+    // Πλήρης διατύπωση που περιλαμβάνει το «ανά μέρος».
+    const fee = feeElem.value;
     const z_date = document.getElementById('yas_date').value;
     const z_time = document.getElementById('yas_time').value;
     const z_link = document.getElementById('z_link').value;
     const z_id = document.getElementById('z_id').value;
     const z_pass = document.getElementById('z_pass').value;
 
-    const html = `<!DOCTYPE html><html lang="el"><body style="background:#2c3e50; padding:40px; font-family:Arial;"><div style="max-width:600px; margin:auto; background:#34495e; padding:30px; border-radius:10px; color:white; line-height:1.6;">
-    <p>Αξιότιμες Κυρίες & Κύριοι,</p><p>Σε συνέχεια της επικοινωνίας μας αποστέλλω: την πρόσκληση για την υποχρεωτική αρχική συνεδρία διαμεσολάβησης καθώς και τον ΤΡΟΠΟ, ΤΟΠΟ, και ΧΡΟΝΟ διεξαγωγής της Υποχρεωτικής Αρχικής Συνεδρίας, τα βασικά στοιχεία των μερών και τα δικά μου και σύντομη περιγραφή της διαφοράς σας, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα</p>
-    <p>Υπενθυμίζω ότι για την διεξαγωγή της Υ.Α.Σ η αμοιβή μου ανέρχεται στο ποσό των ${fee} το οποίο θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στην συνημμένη πρόσκληση.</p>
-    <p>Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.) ως αναπόσπαστο μέρος της διαμεσολάβησης, αποτελεί έναν νεοσύστατο θεσμό στην χώρα μας που λειτουργεί ως υποχρεωτικό προστάδιο λίγο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
-    <p>Η Διαμεσολάβηση αποτελεί μια προσπάθεια εξωδικαστικής επίλυσης της διαφοράς με επίκεντρο εσάς και θεματοφύλακες του νόμου τους νομικούς παραστάτες σας. Πρόκειται για μια διαρθρωμένη διαδικασία με βασικά χαρακτηριστικά την εμπιστευτικότητα και την ιδιωτική αυτονομία.</p>
-    <p>Ο διαμεσολαβητής, νοείται ένα τρίτο πρόσωπο σε σχέση με τα συμμετέχοντα μέρη και τη διαφορά, το οποίο αναλαμβάνει να διαμεσολαβήσει με κατάλληλο, αποτελεσματικό και αμερόληπτο τρόπο, διευκολύνοντας τα να βρουν μια κοινά αποδεκτή λύση για τη διαφορά τους.</p>
-    <p>Η διαμεσολάβηση είναι μια διαδικασία:<br>
-    - <strong><span style="color:rgb(255, 171, 1);">εκούσια</span></strong>, διότι προσέρχεστε και παραμένετε σε αυτήν εθελοντικά<br>
-    - <strong><span style="color:rgb(255, 171, 1);">μη δεσμευτική</span></strong>, μέχρι τη στιγμή που θα υπογράψετε τη συμφωνία σας<br>
-    - <strong><span style="color:rgb(255, 171, 1);">απόλυτα εμπιστευτική</span></strong> διότι οτιδήποτε ακουστεί, οποιεσδήποτε προσφορές, παραχωρήσεις και παραδοχές που τυχόν προκύψουν, σε περίπτωση που δεν καταλήξετε σε συμφωνία δεν μπορούν να χρησιμοποιηθούν στο Δικαστήριο. Οτιδήποτε ειπωθεί και προκύψει κατά τη διάρκεια της διαδικασίας δεν μπορεί να κοινοποιηθεί σε τρίτους ούτε και να αποτελέσει αποδεικτικό στοιχείο σε άλλες διαδικασίες, όπως διαιτησία ή Δικαστήριο.</p>
-    <p><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
-    <p><strong>Στόχος μας:</strong> μέσα από την καλόπιστη συμπεριφορά και την συναλλακτική ευθύτητα όλων είναι η κατάληξη σε μια κοινά αποδεκτή συμφωνία !!!</p>
-    <div style="border:2px solid orange; padding:15px; text-align:center; background:rgba(0,0,0,0.2);">
-    <h3 style="color:orange; margin-top: 0;">ΣΤΟΙΧΕΙΑ ΣΥΝΔΕΣΗΣ (ΔΙΑΔΙΚΤΥΑΚΑ)</h3><p>Ημερομηνία / Ώρα: ${fmtD(z_date)} στις ${z_time}</p><p>Link: <a href="${z_link}" style="color:orange;">${z_link}</a></p><p>Meeting ID: ${z_id} <br><br> Passcode: ${z_pass}</p></div></div></body></html>`;
+    const calendar = buildCalendarBadge(z_date, z_time);
+    const linkHtml = z_link ? `<a href="${z_link}" style="color:#c0392b; word-break:break-all;">${z_link}</a>` : "—";
+
+    // Email τύπου Mailchimp: πίνακες + inline στυλ, ώστε να ανοίγει σωστά σε όλους τους clients.
+    const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="el">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Πρόσκληση σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης</title>
+</head>
+<body style="margin:0; padding:0; background-color:#eef1f4;">
+<!-- preheader (κρυφό) -->
+<div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">Πρόσκληση σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (Υ.Α.Σ.)</div>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#eef1f4;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+
+      <!-- Container 600px -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px; background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+        <!-- Header bar -->
+        <tr>
+          <td bgcolor="#2c3e50" style="background:#2c3e50; padding:22px 30px; font-family:Arial,sans-serif; color:#ffffff;">
+            <div style="font-size:18px; font-weight:bold; letter-spacing:0.5px;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ</div>
+            <div style="font-size:13px; color:#bdc3c7; margin-top:4px;">Διαμεσολάβηση — Πρόσκληση Συμμετοχής</div>
+          </td>
+        </tr>
+
+        <!-- Calendar badge -->
+        <tr>
+          <td align="center" style="padding:26px 30px 6px 30px;">
+            ${calendar}
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:10px 30px 0 30px; font-family:Arial,sans-serif; font-size:15px; line-height:1.6; color:#2c3e50;">
+            <p style="margin:0 0 14px 0;">Αξιότιμες Κυρίες &amp; Κύριοι,</p>
+            <p style="margin:0 0 14px 0;">Σε συνέχεια της επικοινωνίας μας αποστέλλω: την πρόσκληση για την υποχρεωτική αρχική συνεδρία διαμεσολάβησης καθώς και τον ΤΡΟΠΟ, ΤΟΠΟ και ΧΡΟΝΟ διεξαγωγής της Υποχρεωτικής Αρχικής Συνεδρίας, τα βασικά στοιχεία των μερών και τα δικά μου, και σύντομη περιγραφή της διαφοράς σας, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα.</p>
+            <p style="margin:0 0 14px 0;">Υπενθυμίζω ότι για τη διεξαγωγή της Υ.Α.Σ. η αμοιβή μου ανέρχεται στο ποσό των <strong>${fee}</strong>, το οποίο θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στη συνημμένη πρόσκληση.</p>
+            <p style="margin:0 0 14px 0;">Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.), ως αναπόσπαστο μέρος της διαμεσολάβησης, αποτελεί έναν νεοσύστατο θεσμό στη χώρα μας που λειτουργεί ως υποχρεωτικό προστάδιο λίγο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
+            <p style="margin:0 0 14px 0;">Η Διαμεσολάβηση αποτελεί μια προσπάθεια εξωδικαστικής επίλυσης της διαφοράς με επίκεντρο εσάς και θεματοφύλακες του νόμου τους νομικούς παραστάτες σας. Πρόκειται για μια διαρθρωμένη διαδικασία με βασικά χαρακτηριστικά την εμπιστευτικότητα και την ιδιωτική αυτονομία.</p>
+            <p style="margin:0 0 14px 0;">Ο διαμεσολαβητής νοείται ένα τρίτο πρόσωπο σε σχέση με τα συμμετέχοντα μέρη και τη διαφορά, το οποίο αναλαμβάνει να διαμεσολαβήσει με κατάλληλο, αποτελεσματικό και αμερόληπτο τρόπο, διευκολύνοντάς τα να βρουν μια κοινά αποδεκτή λύση για τη διαφορά τους.</p>
+          </td>
+        </tr>
+
+        <!-- Χαρακτηριστικά -->
+        <tr>
+          <td style="padding:6px 30px 0 30px; font-family:Arial,sans-serif; font-size:15px; line-height:1.6; color:#2c3e50;">
+            <p style="margin:0 0 6px 0;">Η διαμεσολάβηση είναι μια διαδικασία:</p>
+            <p style="margin:0 0 8px 0;">&bull; <strong style="color:#e67e22;">εκούσια</strong>, διότι προσέρχεστε και παραμένετε σε αυτήν εθελοντικά</p>
+            <p style="margin:0 0 8px 0;">&bull; <strong style="color:#e67e22;">μη δεσμευτική</strong>, μέχρι τη στιγμή που θα υπογράψετε τη συμφωνία σας</p>
+            <p style="margin:0 0 14px 0;">&bull; <strong style="color:#e67e22;">απόλυτα εμπιστευτική</strong>, διότι οτιδήποτε ακουστεί, οποιεσδήποτε προσφορές, παραχωρήσεις και παραδοχές που τυχόν προκύψουν, σε περίπτωση που δεν καταλήξετε σε συμφωνία δεν μπορούν να χρησιμοποιηθούν στο Δικαστήριο. Οτιδήποτε ειπωθεί κατά τη διάρκεια της διαδικασίας δεν μπορεί να κοινοποιηθεί σε τρίτους ούτε να αποτελέσει αποδεικτικό στοιχείο σε άλλες διαδικασίες, όπως διαιτησία ή Δικαστήριο.</p>
+            <p style="margin:0 0 14px 0;"><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
+            <p style="margin:0 0 18px 0;"><strong>Στόχος μας:</strong> μέσα από την καλόπιστη συμπεριφορά και τη συναλλακτική ευθύτητα όλων, η κατάληξη σε μια κοινά αποδεκτή συμφωνία!</p>
+          </td>
+        </tr>
+
+        <!-- Στοιχεία σύνδεσης -->
+        <tr>
+          <td style="padding:0 30px 26px 30px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:2px solid #e67e22; border-radius:8px;">
+              <tr>
+                <td bgcolor="#fff8f1" style="background:#fff8f1; padding:16px 18px; font-family:Arial,sans-serif; color:#2c3e50; font-size:14px; line-height:1.6;">
+                  <div style="font-size:15px; font-weight:bold; color:#e67e22; margin-bottom:8px;">ΣΤΟΙΧΕΙΑ ΣΥΝΔΕΣΗΣ (ΔΙΑΔΙΚΤΥΑΚΑ)</div>
+                  <div><strong>Ημερομηνία / Ώρα:</strong> ${fmtD(z_date)}${z_time ? " στις " + z_time : ""}</div>
+                  <div style="margin-top:4px;"><strong>Σύνδεσμος:</strong> ${linkHtml}</div>
+                  <div style="margin-top:4px;"><strong>Meeting ID:</strong> ${z_id || "—"}</div>
+                  <div style="margin-top:4px;"><strong>Passcode:</strong> ${z_pass || "—"}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td bgcolor="#2c3e50" style="background:#2c3e50; padding:16px 30px; font-family:Arial,sans-serif; font-size:12px; color:#bdc3c7; text-align:center;">
+            Διαπιστευμένος Διαμεσολαβητής — Υπουργείο Δικαιοσύνης
+          </td>
+        </tr>
+
+      </table>
+      <!-- /Container -->
+
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
 
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([html], {type:"text/html"}));
-    link.download = "Mail_Template.html";
+    link.href = URL.createObjectURL(new Blob([html], {type:"text/html;charset=utf-8"}));
+    link.download = "Prosklisi_Mail.html";
     link.click();
 }
 
