@@ -83,12 +83,50 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 
 @media (max-width: 1100px) { .grid, .lib-grid { grid-template-columns: 1fr; } .form-panel { max-height: none; } }
 @media print {
-    header, nav, .form-panel, .actions, .nav-btn { display: none !important; }
-    .preview-panel, .doc-viewer { border: none; padding: 0; background: white; overflow: visible;}
-    body * { visibility: hidden; }
-    #preview, #preview * { visibility: visible; }
-    #preview { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; padding: 0; }
-    @page { size: A4; margin: 0; }
+    /* Τα περιθώρια τα ορίζει αποκλειστικά η @page (όχι padding/margin στο έγγραφο) */
+    @page { size: A4; margin: 2cm; }
+
+    /* Απόκρυψη όλων των στοιχείων του UI που δεν ανήκουν στο έγγραφο */
+    header, nav, .nav-btn, .form-panel, .actions,
+    #register, #smart_tool, #library { display: none !important; }
+
+    html, body { height: auto; background: #fff !important; }
+
+    /* Ξετυλίγουμε το layout ώστε το #preview να ρέει φυσιολογικά (όχι absolute) */
+    main, #docs, .grid, .preview-panel, .doc-viewer {
+        display: block !important;
+        flex: none !important;
+        height: auto !important;
+        max-height: none !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: #fff !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+    }
+    .grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+
+    /* Το ίδιο το έγγραφο: φυσικό πλάτος, χωρίς δικά του περιθώρια/σκιά */
+    #preview, .printable {
+        position: static !important;
+        width: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+    }
+
+    /* Να τυπώνονται τα χρωματιστά πλαίσια (Zoom/Έντυπο 3) όπως στην οθόνη */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Αποφυγή «σπασμένων» μπλοκ/υπογραφών ανάμεσα σε σελίδες */
+    #preview div, #preview p { break-inside: avoid; }
 }
 
 /* --- Styles for SMART Evaluator Tool --- */
