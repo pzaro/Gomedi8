@@ -82,7 +82,18 @@
                     <option value="enarktiri">2. Εναρκτήρια Δήλωση ΥΑΣ</option>
                     <option value="prosklisi">3. Έντυπο 3: Γνωστοποίηση (Ατομική)</option>
                     <option value="praktiko">4. Πρακτικό Περάτωσης ΥΑΣ</option>
+                    <option value="entypo1">5. Φύλλο Βασικών Στοιχείων (Έντυπο 1)</option>
                 </select>
+
+                <div class="form-group" style="margin-top:10px;">
+                    <label>Νομική Βάση ΥΑΣ (για Έντυπο 1)</label>
+                    <select id="entypo1_basis" onchange="draw()">
+                        <option value="1a">άρθρο 6 §1α ν.4640/2019 (οικογενειακή διαφορά)</option>
+                        <option value="1b1">άρθρο 6 §1β ν.4640/2019 (τακτική Μονομελούς άνω 30.000€)</option>
+                        <option value="1b2">άρθρο 6 §1β ν.4640/2019 (τακτική Πολυμελούς)</option>
+                        <option value="1g">άρθρο 6 §1γ ν.4640/2019 (ρήτρα διαμεσολάβησης)</option>
+                    </select>
+                </div>
 
                 <div id="party_select_container">
                     <div class="form-group" style="margin:0;">
