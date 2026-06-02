@@ -2,7 +2,7 @@
 // 1. GOOGLE SHEETS & DATA SETUP
 // ==========================================
 
-const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAZ0Inog6pOzlNLx5qh8viyfn0ifPvmKpHkNbGg5MT6fTEqfAcxKEO1IE7CGVFZsP8/exec"; 
+const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxg6nha2zhC7PXxiLZUbelDEDos7KCamsXmuEj5KkNAIUulWybvaDNSPeD_LFNhw6zuVA/exec"; 
 
 // Βοηθητική συνάρτηση: καλεί το Apps Script και ξεχωρίζει την πραγματική αιτία σφάλματος.
 async function gasFetch(url) {
