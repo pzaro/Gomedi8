@@ -63,6 +63,18 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 .btn-print { background: var(--sidebar); color: white; }
 .btn-export { background: #d97706; color: white; }
 .btn-word { background: #1e40af; color: white; box-shadow: 0 4px 6px rgba(30, 64, 175, 0.2); }
+.btn-edit { background: var(--accent); color: white; }
+.btn-edit.btn-editing { background: #b45309; }
+.btn-regen { background: #475569; color: white; }
+
+/* Κατάσταση χειροκίνητης επεξεργασίας του εγγράφου */
+.printable.editing {
+    outline: 2px dashed var(--accent);
+    outline-offset: 6px;
+    cursor: text;
+    background: #fffef9;
+}
+.printable.editing:focus { outline-color: var(--primary); }
 
 #party_select_container { display: none; background: #fef3c7; padding: 15px; border-radius: 8px; border: 1px solid #fcd34d; margin-top: 10px; }
 
