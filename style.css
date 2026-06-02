@@ -68,6 +68,10 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 .btn-regen { background: #475569; color: white; }
 .btn-web { background: #0ea5e9; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
 .btn-web:hover { background: #0284c7; }
+.btn-party-save { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.btn-party-recall { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.btn-party-save:hover { background: #047857; }
+.btn-party-recall:hover { background: #1d4ed8; }
 
 /* Κατάσταση χειροκίνητης επεξεργασίας του εγγράφου */
 .printable.editing {
