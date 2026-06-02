@@ -66,6 +66,8 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 .btn-edit { background: var(--accent); color: white; }
 .btn-edit.btn-editing { background: #b45309; }
 .btn-regen { background: #475569; color: white; }
+.btn-web { background: #0ea5e9; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+.btn-web:hover { background: #0284c7; }
 
 /* Κατάσταση χειροκίνητης επεξεργασίας του εγγράφου */
 .printable.editing {
