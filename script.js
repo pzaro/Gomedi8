@@ -2,7 +2,7 @@
 // 1. GOOGLE SHEETS & DATA SETUP
 // ==========================================
 
-const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxg6nha2zhC7PXxiLZUbelDEDos7KCamsXmuEj5KkNAIUulWybvaDNSPeD_LFNhw6zuVA/exec"; 
+const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylH-1N_pCIrRgf-HkC3g3G3Kk17Nijtef0VPlqm3nzwn972YalEMVsdag3QsxgypU3/exec"; 
 
 // Βοηθητική συνάρτηση: καλεί το Apps Script και ξεχωρίζει την πραγματική αιτία σφάλματος.
 async function gasFetch(url) {
@@ -218,6 +218,126 @@ function searchLawyerWeb(idx, isResp) {
     window.open("https://www.google.com/search?q=" + encodeURIComponent(query), "_blank");
 }
 
+// ==========================================
+// ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ (ΕΝΤΥΠΟ 1)
+// ==========================================
+function buildEntypo1(d) {
+    const dot = (v) => (v && v.toString().trim()) ? v : "...............";
+
+    const bases = [
+        { id: '1a',  t: 'άρθρου 6 § 1α του ν.4640/2019 (οικογενειακή διαφορά)' },
+        { id: '1b1', t: 'άρθρου 6 § 1β του ν.4640/2019 (τακτική Μονομελούς άνω 30.000 ευρώ)' },
+        { id: '1b2', t: 'άρθρου 6 § 1β του ν.4640/2019 (τακτική Πολυμελούς)' },
+        { id: '1g',  t: 'άρθρου 6 § 1γ του ν.4640/2019 (ρήτρα διαμεσολάβησης)' }
+    ];
+    const basisHtml = bases.map(b => `${d.basis === b.id ? '[ ☒ ]' : '[ ☐ ]'} ${b.t}`).join('<br>');
+
+    const partyBlock = (r) => `Όνομα: ${dot(r.n)} &nbsp; Επώνυμο: ${dot(r.s)} &nbsp; Πατρώνυμο: ${dot(r.f)}<br>
+Διεύθυνση: ${dot(r.addr)}<br>
+ΑΦΜ: ${dot(r.afm)}<br>
+Αριθμός τηλεφώνου: ${dot(r.mob || r.tel)}<br>
+Email: ${dot(r.email)}<br>`;
+
+    const repBlock = (r) => {
+        const dsLabel = (r.l_ds && r.l_ds.toString().trim()) ? `ΑΜ ΔΣ ${r.l_ds}` : 'ΑΜ';
+        return `<i>Νομικός Παραστάτης:</i><br>
+Όνομα: ${dot(r.l_n)} &nbsp; Επώνυμο: ${dot(r.l_s)} &nbsp; Πατρώνυμο: ${dot(r.l_f)}<br>
+Διεύθυνση: ${dot(r.l_addr)}<br>
+${dsLabel}: ${dot(r.l_am)}<br>
+ΑΦΜ: ${dot(r.l_afm)}<br>
+Αριθμός τηλεφώνου: ${dot(r.l_mob || r.l_tel)}<br>
+Email: ${dot(r.l_email)}<br>`;
+    };
+
+    const reqHtml = reqs.map((r, i) =>
+        `<b>Α. Επισπεύδον μέρος ${reqs.length > 1 ? (i + 1) : ''}:</b><br>${partyBlock(r)}${repBlock(r)}<br>`
+    ).join('');
+
+    const respHtml = resps.map((r, i) =>
+        `<b>Β. Έτερο μέρος ${resps.length > 1 ? (i + 1) : ''}:</b><br>${partyBlock(r)}${repBlock(r)}<br>`
+    ).join('');
+
+    const medBlock = `Όνομα: ${dot(m_data.n)} &nbsp; Επώνυμο: ${dot(m_data.s)} &nbsp; Πατρώνυμο: ${dot(m_data.f)}<br>
+Διεύθυνση: ${dot(m_data.addr)}<br>
+ΑΦΜ: ${dot(m_data.afm)}<br>
+Αριθμός τηλεφώνου: ${dot(m_data.phone || m_data.tel)}<br>
+Email: ${dot(m_data.email)}<br>`;
+
+    const subjFull = `${d.subj}<br><br>
+Δικαστήριο: ${d.court}<br>
+Αριθμός Κατάθεσης Αγωγής: ${d.court_n} &nbsp; — &nbsp; Ημερομηνία: ${d.court_d}`;
+
+    return `<div style="text-align:center;"><b>ΕΝΤΥΠΟ 1</b><br><b style="font-size:13pt;">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</b></div><br>
+Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) διαμεσολάβησης βάσει εφαρμογής του:<br><br>
+${basisHtml}<br><br>
+<b style="font-size:12pt;">ΣΥΜΜΕΤΕΧΟΝΤΑ ΜΕΡΗ</b><br><br>
+${reqHtml}
+${respHtml}
+<b style="font-size:12pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</b><br>
+${medBlock}<br>
+<b style="font-size:12pt;">Σύντομη περιγραφή του αντικειμένου της διαφοράς</b><br>
+${subjFull}<br>
+
+<div style="font-size: 10pt; color: #777777; margin-top: 25pt; border-top: 1pt dashed #ccc; padding-top: 15pt;">
+<b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΗΝ ΧΡΗΣΗ ΤΟΥ ΕΝΤΥΠΟΥ 1</b><br>
+Το Φύλλο Βασικών Στοιχείων (Έντυπο 1) περιλαμβάνει τα στοιχεία όλων όσων αφορά η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) και την περιγραφή του αντικειμένου της διαφοράς.<br>
+Για τη διευκόλυνση της διαδικασίας συμπλήρωσης των υπολοίπων εντύπων (Έντυπο 2, Έντυπο 3 και Έντυπο 4) το Φύλλο Βασικών Στοιχείων επισυνάπτεται σε καθένα από τα έντυπα αυτά, αποτελώντας αναπόσπαστο μέρος τους.
+</div>`;
+}
+
+// ==========================================
+// ΑΠΟΘΗΚΕΥΣΗ / ΑΝΑΚΛΗΣΗ ΔΙΑΔΙΚΩΝ (CLOUD)
+// ==========================================
+async function saveParty(idx, isResp) {
+    const arr = isResp ? resps : reqs;
+    const r = arr[idx];
+    if (!r.afm && !r.mob) { alert("Συμπληρώστε ΑΦΜ ή Κινητό του διαδίκου, ώστε να μπορεί να ανακληθεί αργότερα."); return; }
+    if (!r.n || !r.s) { alert("Συμπληρώστε Όνομα και Επώνυμο του διαδίκου."); return; }
+
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeParty`
+        + `&afm=${encodeURIComponent(r.afm || '')}&mob=${encodeURIComponent(r.mob || '')}&tel=${encodeURIComponent(r.tel || '')}`
+        + `&n=${encodeURIComponent(r.n || '')}&s=${encodeURIComponent(r.s || '')}&f=${encodeURIComponent(r.f || '')}`
+        + `&addr=${encodeURIComponent(r.addr || '')}&email=${encodeURIComponent(r.email || '')}`;
+
+    try {
+        const data = await gasFetch(url);
+        if (data.status === "success") {
+            alert("✅ Ο διάδικος αποθηκεύτηκε στο Cloud!");
+        } else if (data.message === "Exists") {
+            alert("⚠️ Υπάρχει ήδη διάδικος με αυτό το ΑΦΜ ή Κινητό στο Cloud.");
+        } else {
+            alert("❌ " + (data.message || "Σφάλμα αποθήκευσης."));
+        }
+    } catch (e) {
+        reportGasError(e);
+    }
+}
+
+async function recallParty(idx, isResp) {
+    const arr = isResp ? resps : reqs;
+    const r = arr[idx];
+    const query = (r.afm || r.mob || '').toString().trim();
+    if (!query) { alert("Συμπληρώστε ΑΦΜ ή Κινητό του διαδίκου για να γίνει η αναζήτηση."); return; }
+
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readParty&query=${encodeURIComponent(query)}`;
+    try {
+        const data = await gasFetch(url);
+        if (data.status === "success") {
+            const dd = data.data;
+            r.n = dd.n || ''; r.s = dd.s || ''; r.f = dd.f || '';
+            r.addr = dd.addr || ''; r.afm = dd.afm || '';
+            r.tel = dd.tel || ''; r.mob = dd.mob || ''; r.email = dd.email || '';
+            renderLists();
+            draw();
+            alert(`✅ Ανακλήθηκαν τα στοιχεία: ${getFullName(r.n, r.s)}`);
+        } else {
+            alert("❌ Δεν βρέθηκε διάδικος στο Cloud με αυτό το ΑΦΜ/Κινητό.");
+        }
+    } catch (e) {
+        reportGasError(e);
+    }
+}
+
 
 // ==========================================
 // 2. UI RENDERING FUNCTIONS
@@ -237,6 +357,10 @@ function renderLists() {
         <div class="party-block">
             <div class="party-title">${title}</div>
             ${idx > 0 ? `<button class="btn-rm" onclick="${isResp?'rmResp':'rmReq'}(${idx})">Διαγραφή</button>` : ''}
+            <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                <button type="button" class="btn-party-save" onclick="saveParty(${idx}, ${isResp})">💾 Αποθήκευση διαδίκου</button>
+                <button type="button" class="btn-party-recall" onclick="recallParty(${idx}, ${isResp})">🔍 Ανάκληση (ΑΦΜ/Κινητό)</button>
+            </div>
             <div class="row-3">
                 <div class="form-group"><label>Όνομα</label><input value="${r.n}" oninput="${arrName}[${idx}].n=this.value; draw()"></div>
                 <div class="form-group"><label>Επώνυμο</label><input value="${r.s}" oninput="${arrName}[${idx}].s=this.value; draw()"></div>
@@ -313,7 +437,8 @@ function draw() {
         z_pass: document.getElementById('z_pass').value || "................",
         notify_date: document.getElementById('notify_date').value,
         doc_date: document.getElementById('doc_date').value || "................",
-        type: document.getElementById('doc_type').value
+        type: document.getElementById('doc_type').value,
+        basis: (document.getElementById('entypo1_basis') || {}).value || '1a'
     };
 
     document.getElementById('party_select_container').style.display = (d.type === 'prosklisi') ? 'block' : 'none';
@@ -500,6 +625,8 @@ ${praktikoRespHTML}
 - Το παρόν Πρακτικό Περάτωσης Υποχρεωτικής Αρχικής Συνεδρίας διαμεσολάβησης, αφορά στη διαφορά των μερών που αναλυτικά περιγράφεται στην αγωγή που κατατέθηκε στο ${d.court} με Αριθμό Κατάθεσης αγωγής: ${d.court_n} και θα προσκομισθεί μαζί με τις προτάσεις.<br>
 
 <div style="font-size: 10pt; color: #777777; margin-top: 25pt; border-top: 1pt dashed #ccc; padding-top: 15pt;"><b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ:</b> Στο παρόν πρακτικό περάτωσης της Υποχρεωτικής Αρχικής Συνεδρίας επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1), το οποίο αποτελεί αναπόσπαστο μέρος του παρόντος. Συντάσσεται από το διαμεσολαβητή μετά την περάτωση της Υποχρεωτικής Αρχικής Συνεδρίας, υπογράφεται από όλους τους παρισταμένους και το διαμεσολαβητή και καθένας λαμβάνει από ένα όμοιο πρωτότυπο. Μπορείτε να προσθέσετε περισσότερα ονόματα ανάλογα με τους συμμετέχοντες.</div>`;
+    } else if (d.type === 'entypo1') {
+        activeHtml = buildEntypo1(d);
     }
 
     // Αν είμαστε σε λειτουργία χειροκίνητης επεξεργασίας, ΜΗΝ ξαναγράφεις το έγγραφο
