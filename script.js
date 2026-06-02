@@ -4,6 +4,39 @@
 
 const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAZ0Inog6pOzlNLx5qh8viyfn0ifPvmKpHkNbGg5MT6fTEqfAcxKEO1IE7CGVFZsP8/exec"; 
 
+// Βοηθητική συνάρτηση: καλεί το Apps Script και ξεχωρίζει την πραγματική αιτία σφάλματος.
+async function gasFetch(url) {
+    let response;
+    try {
+        response = await fetch(url, { redirect: "follow" });
+    } catch (netErr) {
+        // Αποτυχία δικτύου / CORS / λάθος URL
+        throw { kind: "network", detail: netErr.message };
+    }
+    const text = await response.text();
+    if (!response.ok) {
+        throw { kind: "http", status: response.status, detail: text.slice(0, 300) };
+    }
+    try {
+        return JSON.parse(text);
+    } catch (parseErr) {
+        // Πήραμε απάντηση αλλά ΟΧΙ JSON (π.χ. HTML σελίδα σύνδεσης Google)
+        throw { kind: "notjson", detail: text.slice(0, 300) };
+    }
+}
+
+// Εμφανίζει κατανοητό μήνυμα ανάλογα με την αιτία.
+function reportGasError(e) {
+    console.error("[Apps Script] Σφάλμα:", e);
+    if (e && e.kind === "notjson") {
+        alert("❌ Το Google Script απάντησε αλλά ΟΧΙ με JSON (πιθανότατα σελίδα σύνδεσης Google).\n\nΔιόρθωση: Apps Script → Deploy → Manage deployments → Who has access = «Anyone».\nΛεπτομέρειες στην Κονσόλα (F12).");
+    } else if (e && e.kind === "http") {
+        alert("❌ Σφάλμα HTTP " + e.status + " από το Google Script.\nΈλεγξε ότι έχεις κάνει νέο Deployment μετά τις αλλαγές. (F12 για λεπτομέρειες)");
+    } else {
+        alert("❌ Σφάλμα σύνδεσης δικτύου. Έλεγξε το Internet ή το URL του script. (F12 για λεπτομέρειες)");
+    }
+}
+
 // Αρχικοποίηση με κενά πεδία
 let m_data = {
     n: "", s: "", f: "", am: "", iban: "", bank: "", addr: "", email: ""
@@ -40,8 +73,7 @@ async function registerMediator() {
     document.getElementById('reg_m_amd').value = "Αποθήκευση..."; 
     
     try {
-        let response = await fetch(url);
-        let data = await response.json();
+        let data = await gasFetch(url);
         
         if (data.status === "success") {
             alert("✅ Ο Διαμεσολαβητής αποθηκεύτηκε επιτυχώς στο Google Sheet!");
@@ -54,7 +86,7 @@ async function registerMediator() {
             document.getElementById('reg_m_amd').value = am;
         }
     } catch(e) {
-        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet.");
+        reportGasError(e);
         document.getElementById('reg_m_amd').value = am;
     }
 }
@@ -68,8 +100,7 @@ async function loadMediator() {
     const url = `${GOOGLE_APP_SCRIPT_URL}?action=readMediator&am=${encodeURIComponent(inputAMD)}`;
     
     try {
-        let response = await fetch(url);
-        let data = await response.json();
+        let data = await gasFetch(url);
         
         if (data.status === "success") {
             m_data = { ...data.data };
@@ -81,7 +112,7 @@ async function loadMediator() {
             document.getElementById('mediator_amd_input').value = inputAMD;
         }
     } catch(e) {
-        alert("❌ Σφάλμα σύνδεσης με το Google Sheet.");
+        reportGasError(e);
         document.getElementById('mediator_amd_input').value = inputAMD;
     }
 }
@@ -105,8 +136,7 @@ async function registerLawyer() {
     document.getElementById('reg_l_n').value = "Αποθήκευση...";
 
     try {
-        let response = await fetch(url);
-        let data = await response.json();
+        let data = await gasFetch(url);
         
         if (data.status === "success") {
             alert("✅ Ο Δικηγόρος αποθηκεύτηκε επιτυχώς στο Google Sheet!");
@@ -120,7 +150,7 @@ async function registerLawyer() {
             document.getElementById('reg_l_n').value = n;
         }
     } catch(e) {
-        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet.");
+        reportGasError(e);
         document.getElementById('reg_l_n').value = n;
     }
 }
@@ -138,8 +168,7 @@ async function autoFillLawyer(val, type, idx, isResp) {
     const url = `${GOOGLE_APP_SCRIPT_URL}?action=readLawyer&query=${encodeURIComponent(val.trim())}`;
     
     try {
-        let response = await fetch(url);
-        let data = await response.json();
+        let data = await gasFetch(url);
         
         if (data.status === "success") {
             arr[idx].l_afm = data.data.afm || '';
@@ -161,6 +190,7 @@ async function autoFillLawyer(val, type, idx, isResp) {
             renderLists();
         }
     } catch(e) {
+        console.error("[Apps Script] autoFillLawyer:", e);
         if(type === 'afm') arr[idx].l_afm = val.trim();
         if(type === 'mob') arr[idx].l_mob = val.trim();
         renderLists();
@@ -446,7 +476,43 @@ ${praktikoRespHTML}
 <div style="font-size: 10pt; color: #777777; margin-top: 25pt; border-top: 1pt dashed #ccc; padding-top: 15pt;"><b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ:</b> Στο παρόν πρακτικό περάτωσης της Υποχρεωτικής Αρχικής Συνεδρίας επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1), το οποίο αποτελεί αναπόσπαστο μέρος του παρόντος. Συντάσσεται από το διαμεσολαβητή μετά την περάτωση της Υποχρεωτικής Αρχικής Συνεδρίας, υπογράφεται από όλους τους παρισταμένους και το διαμεσολαβητή και καθένας λαμβάνει από ένα όμοιο πρωτότυπο. Μπορείτε να προσθέσετε περισσότερα ονόματα ανάλογα με τους συμμετέχοντες.</div>`;
     }
 
+    // Αν είμαστε σε λειτουργία χειροκίνητης επεξεργασίας, ΜΗΝ ξαναγράφεις το έγγραφο
+    // (αλλιώς θα σβήνονταν οι αλλαγές που έκανε ο χρήστης με το χέρι).
+    if (manualEdit) return;
     document.getElementById('preview').innerHTML = activeHtml;
+}
+
+// ==========================================
+// ΧΕΙΡΟΚΙΝΗΤΗ ΕΠΕΞΕΡΓΑΣΙΑ ΕΓΓΡΑΦΟΥ
+// ==========================================
+let manualEdit = false;
+
+function toggleEdit() {
+    const preview = document.getElementById('preview');
+    const btn = document.getElementById('edit_btn');
+    manualEdit = !manualEdit;
+
+    preview.contentEditable = manualEdit ? "true" : "false";
+    preview.classList.toggle('editing', manualEdit);
+
+    if (manualEdit) {
+        btn.innerHTML = "✅ ΤΕΛΟΣ ΕΠΕΞΕΡΓΑΣΙΑΣ";
+        btn.classList.add('btn-editing');
+        preview.focus();
+    } else {
+        btn.innerHTML = "✏️ ΕΠΕΞΕΡΓΑΣΙΑ ΚΕΙΜΕΝΟΥ";
+        btn.classList.remove('btn-editing');
+    }
+}
+
+// Επαναφορά: ξαναχτίζει το έγγραφο από τη φόρμα και σβήνει τις χειροκίνητες αλλαγές.
+function regenerateDoc() {
+    if (manualEdit && !confirm("Θα χαθούν οι χειροκίνητες αλλαγές και το έγγραφο θα ξαναδημιουργηθεί από τη φόρμα. Συνέχεια;")) {
+        return;
+    }
+    if (manualEdit) toggleEdit(); // βγες από τη λειτουργία επεξεργασίας
+    manualEdit = false;
+    draw();
 }
 
 function exportToWord() {
