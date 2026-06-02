@@ -159,13 +159,16 @@ async function autoFillLawyer(val, type, idx, isResp) {
     if(!val.trim()) return;
     
     let arr = isResp ? resps : reqs;
-    let oldVal = type === 'afm' ? arr[idx].l_afm : arr[idx].l_mob;
-    
-    if(type === 'afm') arr[idx].l_afm = "Φόρτωση...";
-    if(type === 'mob') arr[idx].l_mob = "Φόρτωση...";
+    // Αντιστοίχιση τύπου αναζήτησης -> πεδίο της φόρμας
+    const fieldMap = { afm: 'l_afm', mob: 'l_mob', tel: 'l_tel', am: 'l_am' };
+    const fkey = fieldMap[type] || 'l_afm';
+    const oldVal = val.trim();
+
+    arr[idx][fkey] = "Φόρτωση...";
     renderLists();
 
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readLawyer&query=${encodeURIComponent(val.trim())}`;
+    // Στέλνουμε και το πεδίο (field) ώστε ο server να ψάχνει τη σωστή στήλη.
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readLawyer&query=${encodeURIComponent(oldVal)}&field=${encodeURIComponent(type)}`;
     
     try {
         let data = await gasFetch(url);
@@ -185,16 +188,34 @@ async function autoFillLawyer(val, type, idx, isResp) {
             draw();
         } else {
             alert("❌ Δεν βρέθηκε Δικηγόρος στο Cloud με αυτά τα στοιχεία.");
-            if(type === 'afm') arr[idx].l_afm = val.trim();
-            if(type === 'mob') arr[idx].l_mob = val.trim();
+            arr[idx][fkey] = oldVal;
             renderLists();
         }
     } catch(e) {
         console.error("[Apps Script] autoFillLawyer:", e);
-        if(type === 'afm') arr[idx].l_afm = val.trim();
-        if(type === 'mob') arr[idx].l_mob = val.trim();
+        arr[idx][fkey] = oldVal;
         renderLists();
     }
+}
+
+// Έρευνα στο διαδίκτυο: ανοίγει αναζήτηση Google με τα διαθέσιμα στοιχεία του δικηγόρου.
+function searchLawyerWeb(idx, isResp) {
+    const arr = isResp ? resps : reqs;
+    const r = arr[idx];
+    const parts = [];
+    const fullName = `${r.l_n || ''} ${r.l_s || ''}`.trim();
+    if (fullName) parts.push(fullName);
+    if (r.l_am) parts.push(`ΑΜ ${r.l_am}`);
+    if (r.l_ds) parts.push(r.l_ds);
+    if (!fullName && r.l_afm) parts.push(`ΑΦΜ ${r.l_afm}`);
+    if (!fullName && !r.l_afm && (r.l_tel || r.l_mob)) parts.push(r.l_tel || r.l_mob);
+
+    if (!parts.length) {
+        alert("Συμπληρώστε πρώτα κάποιο στοιχείο (Όνομα/Επώνυμο, ΑΜ, ΔΣ, ΑΦΜ ή τηλέφωνο).");
+        return;
+    }
+    const query = ("δικηγόρος " + parts.join(" ")).trim();
+    window.open("https://www.google.com/search?q=" + encodeURIComponent(query), "_blank");
 }
 
 
@@ -233,11 +254,16 @@ function renderLists() {
             
             <div class="sub-title" style="display:flex; justify-content: space-between; align-items: center;">
                 <span>Νομικός Παραστάτης</span>
-                <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Cloud Αναζήτηση (Enter)</span>
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <button type="button" class="btn-web" onclick="searchLawyerWeb(${idx}, ${isResp})">🌐 Διαδίκτυο</button>
+                    <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Cloud Αναζήτηση (Enter)</span>
+                </span>
             </div>
-            <div class="row-2" style="background: #f0f9ff; padding: 10px; border-radius: 6px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; background: #f0f9ff; padding: 10px; border-radius: 6px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
                 <div class="form-group" style="margin:0;"><label>ΑΦΜ 🔍</label><input value="${r.l_afm}" placeholder="Βάλε ΑΦΜ & Enter..." onchange="autoFillLawyer(this.value, 'afm', ${idx}, ${isResp})"></div>
                 <div class="form-group" style="margin:0;"><label>Κινητό 🔍</label><input value="${r.l_mob}" placeholder="Βάλε Κινητό & Enter..." onchange="autoFillLawyer(this.value, 'mob', ${idx}, ${isResp})"></div>
+                <div class="form-group" style="margin:0;"><label>Σταθερό 🔍</label><input value="${r.l_tel}" placeholder="Βάλε Σταθερό & Enter..." onchange="autoFillLawyer(this.value, 'tel', ${idx}, ${isResp})"></div>
+                <div class="form-group" style="margin:0;"><label>ΑΜ 🔍</label><input value="${r.l_am}" placeholder="Βάλε ΑΜ & Enter..." onchange="autoFillLawyer(this.value, 'am', ${idx}, ${isResp})"></div>
             </div>
             <div class="row-3">
                 <div class="form-group"><label>Όνομα Δικηγόρου</label><input value="${r.l_n}" placeholder="Όνομα..." oninput="${arrName}[${idx}].l_n=this.value; draw()"></div>
