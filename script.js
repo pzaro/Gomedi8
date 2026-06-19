@@ -4,42 +4,8 @@
 
 const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylH-1N_pCIrRgf-HkC3g3G3Kk17Nijtef0VPlqm3nzwn972YalEMVsdag3QsxgypU3/exec"; 
 
-// Βοηθητική συνάρτηση: καλεί το Apps Script και ξεχωρίζει την πραγματική αιτία σφάλματος.
-async function gasFetch(url) {
-    let response;
-    try {
-        response = await fetch(url, { redirect: "follow" });
-    } catch (netErr) {
-        // Αποτυχία δικτύου / CORS / λάθος URL
-        throw { kind: "network", detail: netErr.message };
-    }
-    const text = await response.text();
-    if (!response.ok) {
-        throw { kind: "http", status: response.status, detail: text.slice(0, 300) };
-    }
-    try {
-        return JSON.parse(text);
-    } catch (parseErr) {
-        // Πήραμε απάντηση αλλά ΟΧΙ JSON (π.χ. HTML σελίδα σύνδεσης Google)
-        throw { kind: "notjson", detail: text.slice(0, 300) };
-    }
-}
-
-// Εμφανίζει κατανοητό μήνυμα ανάλογα με την αιτία.
-function reportGasError(e) {
-    console.error("[Apps Script] Σφάλμα:", e);
-    if (e && e.kind === "notjson") {
-        alert("❌ Το Google Script απάντησε αλλά ΟΧΙ με JSON (πιθανότατα σελίδα σύνδεσης Google).\n\nΔιόρθωση: Apps Script → Deploy → Manage deployments → Who has access = «Anyone».\nΛεπτομέρειες στην Κονσόλα (F12).");
-    } else if (e && e.kind === "http") {
-        alert("❌ Σφάλμα HTTP " + e.status + " από το Google Script.\nΈλεγξε ότι έχεις κάνει νέο Deployment μετά τις αλλαγές. (F12 για λεπτομέρειες)");
-    } else {
-        alert("❌ Σφάλμα σύνδεσης δικτύου. Έλεγξε το Internet ή το URL του script. (F12 για λεπτομέρειες)");
-    }
-}
-
-// Αρχικοποίηση με κενά πεδία
 let m_data = {
-    n: "", s: "", f: "", am: "", iban: "", bank: "", addr: "", email: ""
+    n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ", addr: "", email: ""
 };
 
 const emptyPerson = () => ({
@@ -73,7 +39,8 @@ async function registerMediator() {
     document.getElementById('reg_m_amd').value = "Αποθήκευση..."; 
     
     try {
-        let data = await gasFetch(url);
+        let response = await fetch(url);
+        let data = await response.json();
         
         if (data.status === "success") {
             alert("✅ Ο Διαμεσολαβητής αποθηκεύτηκε επιτυχώς στο Google Sheet!");
@@ -86,7 +53,7 @@ async function registerMediator() {
             document.getElementById('reg_m_amd').value = am;
         }
     } catch(e) {
-        reportGasError(e);
+        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet.");
         document.getElementById('reg_m_amd').value = am;
     }
 }
@@ -100,7 +67,8 @@ async function loadMediator() {
     const url = `${GOOGLE_APP_SCRIPT_URL}?action=readMediator&am=${encodeURIComponent(inputAMD)}`;
     
     try {
-        let data = await gasFetch(url);
+        let response = await fetch(url);
+        let data = await response.json();
         
         if (data.status === "success") {
             m_data = { ...data.data };
@@ -112,7 +80,7 @@ async function loadMediator() {
             document.getElementById('mediator_amd_input').value = inputAMD;
         }
     } catch(e) {
-        reportGasError(e);
+        alert("❌ Σφάλμα σύνδεσης με το Google Sheet.");
         document.getElementById('mediator_amd_input').value = inputAMD;
     }
 }
@@ -136,7 +104,8 @@ async function registerLawyer() {
     document.getElementById('reg_l_n').value = "Αποθήκευση...";
 
     try {
-        let data = await gasFetch(url);
+        let response = await fetch(url);
+        let data = await response.json();
         
         if (data.status === "success") {
             alert("✅ Ο Δικηγόρος αποθηκεύτηκε επιτυχώς στο Google Sheet!");
@@ -150,7 +119,7 @@ async function registerLawyer() {
             document.getElementById('reg_l_n').value = n;
         }
     } catch(e) {
-        reportGasError(e);
+        alert("❌ Σφάλμα σύνδεσης. Ελέγξτε το Internet.");
         document.getElementById('reg_l_n').value = n;
     }
 }
@@ -159,19 +128,16 @@ async function autoFillLawyer(val, type, idx, isResp) {
     if(!val.trim()) return;
     
     let arr = isResp ? resps : reqs;
-    // Αντιστοίχιση τύπου αναζήτησης -> πεδίο της φόρμας
-    const fieldMap = { afm: 'l_afm', mob: 'l_mob', tel: 'l_tel', am: 'l_am' };
-    const fkey = fieldMap[type] || 'l_afm';
-    const oldVal = val.trim();
-
-    arr[idx][fkey] = "Φόρτωση...";
+    
+    if(type === 'afm') arr[idx].l_afm = "Φόρτωση...";
+    if(type === 'mob') arr[idx].l_mob = "Φόρτωση...";
     renderLists();
 
-    // Στέλνουμε και το πεδίο (field) ώστε ο server να ψάχνει τη σωστή στήλη.
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readLawyer&query=${encodeURIComponent(oldVal)}&field=${encodeURIComponent(type)}`;
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readLawyer&query=${encodeURIComponent(val.trim())}`;
     
     try {
-        let data = await gasFetch(url);
+        let response = await fetch(url);
+        let data = await response.json();
         
         if (data.status === "success") {
             arr[idx].l_afm = data.data.afm || '';
@@ -188,153 +154,14 @@ async function autoFillLawyer(val, type, idx, isResp) {
             draw();
         } else {
             alert("❌ Δεν βρέθηκε Δικηγόρος στο Cloud με αυτά τα στοιχεία.");
-            arr[idx][fkey] = oldVal;
+            if(type === 'afm') arr[idx].l_afm = val.trim();
+            if(type === 'mob') arr[idx].l_mob = val.trim();
             renderLists();
         }
     } catch(e) {
-        console.error("[Apps Script] autoFillLawyer:", e);
-        arr[idx][fkey] = oldVal;
+        if(type === 'afm') arr[idx].l_afm = val.trim();
+        if(type === 'mob') arr[idx].l_mob = val.trim();
         renderLists();
-    }
-}
-
-// Έρευνα στο διαδίκτυο: ανοίγει αναζήτηση Google με τα διαθέσιμα στοιχεία του δικηγόρου.
-function searchLawyerWeb(idx, isResp) {
-    const arr = isResp ? resps : reqs;
-    const r = arr[idx];
-    const parts = [];
-    const fullName = `${r.l_n || ''} ${r.l_s || ''}`.trim();
-    if (fullName) parts.push(fullName);
-    if (r.l_am) parts.push(`ΑΜ ${r.l_am}`);
-    if (r.l_ds) parts.push(r.l_ds);
-    if (!fullName && r.l_afm) parts.push(`ΑΦΜ ${r.l_afm}`);
-    if (!fullName && !r.l_afm && (r.l_tel || r.l_mob)) parts.push(r.l_tel || r.l_mob);
-
-    if (!parts.length) {
-        alert("Συμπληρώστε πρώτα κάποιο στοιχείο (Όνομα/Επώνυμο, ΑΜ, ΔΣ, ΑΦΜ ή τηλέφωνο).");
-        return;
-    }
-    const query = ("δικηγόρος " + parts.join(" ")).trim();
-    window.open("https://www.google.com/search?q=" + encodeURIComponent(query), "_blank");
-}
-
-// ==========================================
-// ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ (ΕΝΤΥΠΟ 1)
-// ==========================================
-function buildEntypo1(d) {
-    const dot = (v) => (v && v.toString().trim()) ? v : "...............";
-
-    const bases = [
-        { id: '1a',  t: 'άρθρου 6 § 1α του ν.4640/2019 (οικογενειακή διαφορά)' },
-        { id: '1b1', t: 'άρθρου 6 § 1β του ν.4640/2019 (τακτική Μονομελούς άνω 30.000 ευρώ)' },
-        { id: '1b2', t: 'άρθρου 6 § 1β του ν.4640/2019 (τακτική Πολυμελούς)' },
-        { id: '1g',  t: 'άρθρου 6 § 1γ του ν.4640/2019 (ρήτρα διαμεσολάβησης)' }
-    ];
-    const basisHtml = bases.map(b => `${d.basis === b.id ? '[ ☒ ]' : '[ ☐ ]'} ${b.t}`).join('<br>');
-
-    const partyBlock = (r) => `Όνομα: ${dot(r.n)} &nbsp; Επώνυμο: ${dot(r.s)} &nbsp; Πατρώνυμο: ${dot(r.f)}<br>
-Διεύθυνση: ${dot(r.addr)}<br>
-ΑΦΜ: ${dot(r.afm)}<br>
-Αριθμός τηλεφώνου: ${dot(r.mob || r.tel)}<br>
-Email: ${dot(r.email)}<br>`;
-
-    const repBlock = (r) => {
-        const dsLabel = (r.l_ds && r.l_ds.toString().trim()) ? `ΑΜ ΔΣ ${r.l_ds}` : 'ΑΜ';
-        return `<i>Νομικός Παραστάτης:</i><br>
-Όνομα: ${dot(r.l_n)} &nbsp; Επώνυμο: ${dot(r.l_s)} &nbsp; Πατρώνυμο: ${dot(r.l_f)}<br>
-Διεύθυνση: ${dot(r.l_addr)}<br>
-${dsLabel}: ${dot(r.l_am)}<br>
-ΑΦΜ: ${dot(r.l_afm)}<br>
-Αριθμός τηλεφώνου: ${dot(r.l_mob || r.l_tel)}<br>
-Email: ${dot(r.l_email)}<br>`;
-    };
-
-    const reqHtml = reqs.map((r, i) =>
-        `<b>Α. Επισπεύδον μέρος ${reqs.length > 1 ? (i + 1) : ''}:</b><br>${partyBlock(r)}${repBlock(r)}<br>`
-    ).join('');
-
-    const respHtml = resps.map((r, i) =>
-        `<b>Β. Έτερο μέρος ${resps.length > 1 ? (i + 1) : ''}:</b><br>${partyBlock(r)}${repBlock(r)}<br>`
-    ).join('');
-
-    const medBlock = `Όνομα: ${dot(m_data.n)} &nbsp; Επώνυμο: ${dot(m_data.s)} &nbsp; Πατρώνυμο: ${dot(m_data.f)}<br>
-Διεύθυνση: ${dot(m_data.addr)}<br>
-ΑΦΜ: ${dot(m_data.afm)}<br>
-Αριθμός τηλεφώνου: ${dot(m_data.phone || m_data.tel)}<br>
-Email: ${dot(m_data.email)}<br>`;
-
-    const subjFull = `${d.subj}<br><br>
-Δικαστήριο: ${d.court}<br>
-Αριθμός Κατάθεσης Αγωγής: ${d.court_n} &nbsp; — &nbsp; Ημερομηνία: ${d.court_d}`;
-
-    return `<div style="text-align:center;"><b>ΕΝΤΥΠΟ 1</b><br><b style="font-size:13pt;">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</b></div><br>
-Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) διαμεσολάβησης βάσει εφαρμογής του:<br><br>
-${basisHtml}<br><br>
-<b style="font-size:12pt;">ΣΥΜΜΕΤΕΧΟΝΤΑ ΜΕΡΗ</b><br><br>
-${reqHtml}
-${respHtml}
-<b style="font-size:12pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</b><br>
-${medBlock}<br>
-<b style="font-size:12pt;">Σύντομη περιγραφή του αντικειμένου της διαφοράς</b><br>
-${subjFull}<br>
-
-<div style="font-size: 10pt; color: #777777; margin-top: 25pt; border-top: 1pt dashed #ccc; padding-top: 15pt;">
-<b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΗΝ ΧΡΗΣΗ ΤΟΥ ΕΝΤΥΠΟΥ 1</b><br>
-Το Φύλλο Βασικών Στοιχείων (Έντυπο 1) περιλαμβάνει τα στοιχεία όλων όσων αφορά η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) και την περιγραφή του αντικειμένου της διαφοράς.<br>
-Για τη διευκόλυνση της διαδικασίας συμπλήρωσης των υπολοίπων εντύπων (Έντυπο 2, Έντυπο 3 και Έντυπο 4) το Φύλλο Βασικών Στοιχείων επισυνάπτεται σε καθένα από τα έντυπα αυτά, αποτελώντας αναπόσπαστο μέρος τους.
-</div>`;
-}
-
-// ==========================================
-// ΑΠΟΘΗΚΕΥΣΗ / ΑΝΑΚΛΗΣΗ ΔΙΑΔΙΚΩΝ (CLOUD)
-// ==========================================
-async function saveParty(idx, isResp) {
-    const arr = isResp ? resps : reqs;
-    const r = arr[idx];
-    if (!r.afm && !r.mob) { alert("Συμπληρώστε ΑΦΜ ή Κινητό του διαδίκου, ώστε να μπορεί να ανακληθεί αργότερα."); return; }
-    if (!r.n || !r.s) { alert("Συμπληρώστε Όνομα και Επώνυμο του διαδίκου."); return; }
-
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeParty`
-        + `&afm=${encodeURIComponent(r.afm || '')}&mob=${encodeURIComponent(r.mob || '')}&tel=${encodeURIComponent(r.tel || '')}`
-        + `&n=${encodeURIComponent(r.n || '')}&s=${encodeURIComponent(r.s || '')}&f=${encodeURIComponent(r.f || '')}`
-        + `&addr=${encodeURIComponent(r.addr || '')}&email=${encodeURIComponent(r.email || '')}`;
-
-    try {
-        const data = await gasFetch(url);
-        if (data.status === "success") {
-            alert("✅ Ο διάδικος αποθηκεύτηκε στο Cloud!");
-        } else if (data.message === "Exists") {
-            alert("⚠️ Υπάρχει ήδη διάδικος με αυτό το ΑΦΜ ή Κινητό στο Cloud.");
-        } else {
-            alert("❌ " + (data.message || "Σφάλμα αποθήκευσης."));
-        }
-    } catch (e) {
-        reportGasError(e);
-    }
-}
-
-async function recallParty(idx, isResp) {
-    const arr = isResp ? resps : reqs;
-    const r = arr[idx];
-    const query = (r.afm || r.mob || '').toString().trim();
-    if (!query) { alert("Συμπληρώστε ΑΦΜ ή Κινητό του διαδίκου για να γίνει η αναζήτηση."); return; }
-
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=readParty&query=${encodeURIComponent(query)}`;
-    try {
-        const data = await gasFetch(url);
-        if (data.status === "success") {
-            const dd = data.data;
-            r.n = dd.n || ''; r.s = dd.s || ''; r.f = dd.f || '';
-            r.addr = dd.addr || ''; r.afm = dd.afm || '';
-            r.tel = dd.tel || ''; r.mob = dd.mob || ''; r.email = dd.email || '';
-            renderLists();
-            draw();
-            alert(`✅ Ανακλήθηκαν τα στοιχεία: ${getFullName(r.n, r.s)}`);
-        } else {
-            alert("❌ Δεν βρέθηκε διάδικος στο Cloud με αυτό το ΑΦΜ/Κινητό.");
-        }
-    } catch (e) {
-        reportGasError(e);
     }
 }
 
@@ -357,10 +184,6 @@ function renderLists() {
         <div class="party-block">
             <div class="party-title">${title}</div>
             ${idx > 0 ? `<button class="btn-rm" onclick="${isResp?'rmResp':'rmReq'}(${idx})">Διαγραφή</button>` : ''}
-            <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-                <button type="button" class="btn-party-save" onclick="saveParty(${idx}, ${isResp})">💾 Αποθήκευση διαδίκου</button>
-                <button type="button" class="btn-party-recall" onclick="recallParty(${idx}, ${isResp})">🔍 Ανάκληση (ΑΦΜ/Κινητό)</button>
-            </div>
             <div class="row-3">
                 <div class="form-group"><label>Όνομα</label><input value="${r.n}" oninput="${arrName}[${idx}].n=this.value; draw()"></div>
                 <div class="form-group"><label>Επώνυμο</label><input value="${r.s}" oninput="${arrName}[${idx}].s=this.value; draw()"></div>
@@ -378,16 +201,11 @@ function renderLists() {
             
             <div class="sub-title" style="display:flex; justify-content: space-between; align-items: center;">
                 <span>Νομικός Παραστάτης</span>
-                <span style="display:flex; align-items:center; gap:8px;">
-                    <button type="button" class="btn-web" onclick="searchLawyerWeb(${idx}, ${isResp})">🌐 Διαδίκτυο</button>
-                    <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Cloud Αναζήτηση (Enter)</span>
-                </span>
+                <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Cloud Αναζήτηση (Enter)</span>
             </div>
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; background: #f0f9ff; padding: 10px; border-radius: 6px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
+            <div class="row-2" style="background: #f0f9ff; padding: 10px; border-radius: 6px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
                 <div class="form-group" style="margin:0;"><label>ΑΦΜ 🔍</label><input value="${r.l_afm}" placeholder="Βάλε ΑΦΜ & Enter..." onchange="autoFillLawyer(this.value, 'afm', ${idx}, ${isResp})"></div>
                 <div class="form-group" style="margin:0;"><label>Κινητό 🔍</label><input value="${r.l_mob}" placeholder="Βάλε Κινητό & Enter..." onchange="autoFillLawyer(this.value, 'mob', ${idx}, ${isResp})"></div>
-                <div class="form-group" style="margin:0;"><label>Σταθερό 🔍</label><input value="${r.l_tel}" placeholder="Βάλε Σταθερό & Enter..." onchange="autoFillLawyer(this.value, 'tel', ${idx}, ${isResp})"></div>
-                <div class="form-group" style="margin:0;"><label>ΑΜ 🔍</label><input value="${r.l_am}" placeholder="Βάλε ΑΜ & Enter..." onchange="autoFillLawyer(this.value, 'am', ${idx}, ${isResp})"></div>
             </div>
             <div class="row-3">
                 <div class="form-group"><label>Όνομα Δικηγόρου</label><input value="${r.l_n}" placeholder="Όνομα..." oninput="${arrName}[${idx}].l_n=this.value; draw()"></div>
@@ -437,8 +255,7 @@ function draw() {
         z_pass: document.getElementById('z_pass').value || "................",
         notify_date: document.getElementById('notify_date').value,
         doc_date: document.getElementById('doc_date').value || "................",
-        type: document.getElementById('doc_type').value,
-        basis: (document.getElementById('entypo1_basis') || {}).value || '1a'
+        type: document.getElementById('doc_type').value
     };
 
     document.getElementById('party_select_container').style.display = (d.type === 'prosklisi') ? 'block' : 'none';
@@ -457,13 +274,6 @@ function draw() {
 
     const reqsEnarktiria = reqs.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${getFullName(r.l_n, r.l_s) || "......."}`).join(' και ');
     const respsEnarktiria = resps.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${getFullName(r.l_n, r.l_s) || "......."}`).join(' και ');
-
-    const warningMsg = "<span style='color: red;'>[Καταχωρίστε ΑΜΔ διαμεσολαβητή]</span>";
-    const mediatorFullName = m_data.n ? `${m_data.n} ${m_data.s}`.trim() : warningMsg;
-    const m_iban = m_data.iban || warningMsg;
-    const m_bank = m_data.bank || warningMsg;
-    const m_f = m_data.f || warningMsg;
-    const m_am = m_data.am || warningMsg;
 
     let praktikoReqHTML = '';
     reqs.forEach((r, i) => {
@@ -517,13 +327,14 @@ Email [ ☒ ]<br><br>
     });
 
     let activeHtml = '';
+    const mediatorFullName = `${m_data.n} ${m_data.s}`;
 
     if (d.type === 'email') {
         activeHtml = `Αξιότιμες κυρίες, Αξιότιμοι κύριοι,<br><br>
 Ονομάζομαι ${mediatorFullName} και είμαι Διαπιστευμένος Διαμεσολαβητής. Σε συνέχεια του διορισμού μου από την Κεντρική Επιτροπή Διαμεσολάβησης (ΚΕΔ), επικοινωνώ μαζί σας σχετικά με την ιδιωτική διαφορά που έχει ανακύψει μεταξύ σας, η οποία αποτελεί αντικείμενο της από ${d.court_d} αγωγής που κατατέθηκε στο ${d.court} με αριθμό κατάθεσης ${d.court_n}.<br><br>
 Με την παρούσα επιστολή, σας προσκαλώ στην Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) Διαμεσολάβησης, η οποία θα διεξαχθεί:<br>
 ${zoomFrame}<br>
-Η αμοιβή για τη διεξαγωγή της ΥΑΣ ανέρχεται στο ποσό των ${d.fee}. Το ποσό θα πρέπει να έχει κατατεθεί πριν την έναρξη της συνεδρίας στον λογαριασμό IBAN: ${m_iban}, Τράπεζα ${m_bank}.<br><br>
+Η αμοιβή για τη διεξαγωγή της ΥΑΣ ανέρχεται στο ποσό των ${d.fee}. Το ποσό θα πρέπει να έχει κατατεθεί πριν την έναρξη της συνεδρίας στον λογαριασμό IBAN: ${m_data.iban}, Τράπεζα ${m_data.bank}.<br><br>
 Θα ήθελα να αξιοποιήσω αυτή την ευκαιρία για να σας δώσω μια σαφέστερη εικόνα για τη διαδικασία που θα ακολουθήσουμε.<br><br>
 <b>Τι είναι η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ);</b><br>
 Σκεφτείτε αυτή τη συνάντηση όχι ως δικαστήριο, αλλά ως μια πρώτη γνωριμία. Είναι μια σύντομη, υποχρεωτική συνάντηση όπου, μαζί με τους δικηγόρους σας, θα έχουμε την ευκαιρία:<br>
@@ -576,13 +387,13 @@ ${zoomFrameEntypo}<br>
 Σημειώνεται ότι:<br>
 Σκοπός της Υποχρεωτικής Αρχικής Συνεδρίας είναι να εξετάσετε τη δυνατότητα εξωδικαστικής επίλυσης της διαφοράς σας με διαμεσολάβηση. Αν μετά την Υποχρεωτική Αρχική Συνεδρία δεν επιθυμείτε να συνεχίσετε τη διαδικασία της διαμεσολάβησης, μπορείτε να αποχωρήσετε χωρίς οποιαδήποτε αιτιολογία, κύρωση ή ποινή.<br>
 Σύμφωνα με το άρθρο 7 παρ. 6 του ν.4640/2019, εάν δεν προσέλθετε στην ΥΑΣ δύναται να σας επιβληθεί από το δικαστήριο χρηματική ποινή, ποσού 100-500 ευρώ, εφόσον η υπόθεσή σας προχωρήσει σε δικαστική διαδικασία.<br>
-Η αμοιβή του διαμεσολαβητή ορίζεται στα ${d.fee} για την ΥΑΣ, βαρύνει τα μέρη κατ’ ισομοιρία και θα πρέπει να καταβληθεί στον λογαριασμό ${m_iban} πριν από την έναρξη της διαδικασίας.<br><br>
+Η αμοιβή του διαμεσολαβητή ορίζεται στα ${d.fee} για την ΥΑΣ, βαρύνει τα μέρη κατ’ ισομοιρία και θα πρέπει να καταβληθεί στον λογαριασμό ${m_data.iban} πριν από την έναρξη της διαδικασίας.<br><br>
 Η παρούσα γνωστοποίηση αποστέλλεται σε σας σύμφωνα με το άρθρο 7 παρ. 2 ως εξής:<br>
 [ ☒ ] Με email<br>
 [ ☐ ] Με συστημένη επιστολή<br>
 [ ☐ ] Άλλως: .........................<br><br>
 
-Τόπος ΜΑΝΔΑΛΟ, την ${fmtD(d.notify_date)}<br><br>
+Τόπος ΜΑΝΔΑΛΟ, την ${d.doc_date}<br><br>
 <div style="text-align:right; padding-right: 50px;">
 Ο διαμεσολαβητής<br>
 (Υπογραφή)<br>
@@ -604,7 +415,7 @@ ${mediatorFullName}
     } else if (d.type === 'praktiko') {
         activeHtml = `<div style="text-align:center;"><b>ΠΡΑΚΤΙΚΟ ΠΕΡΑΤΩΣΗΣ ΑΡΧΙΚΗΣ ΥΠΟΧΡΕΩΤΙΚΗΣ ΣΥΝΕΔΡΙΑΣ</b><br>
 (άρθρο 7 παρ. 4 του ν.4640/2019)</div><br><br>
-Ο διαμεσολαβητής ${mediatorFullName} του ${m_f} (ΑΜΔ ${m_am}) βεβαιώνω ότι περατώθηκε η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων, κατά την οποία παραστάθηκαν τα μέρη, όπως παρακάτω αναφέρεται.<br><br>
+Ο διαμεσολαβητής ${mediatorFullName} του ${m_data.f} (ΑΜΔ ${m_data.am}) βεβαιώνω ότι περατώθηκε η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων, κατά την οποία παραστάθηκαν τα μέρη, όπως παρακάτω αναφέρεται.<br><br>
 Ημερομηνία ΥΑΣ : ${fmtD(d.z_date)}<br>
 Τόπος (διεύθυνση) ΥΑΣ: ΣΚΥΔΡΑ, ΜΑΝΔΑΛΟ ΤΚ 58500 ΜΕΣΩ ΤΗΛΕΔΙΑΣΚΕΨΗΣ<br><br>
 <b>ΣΥΜΜΕΤΕΧΟΝΤΕΣ ΣΤΗΝ ΥΑΣ:</b><br><br>
@@ -612,7 +423,7 @@ ${praktikoReqHTML}
 ${praktikoRespHTML}
 
 <b>Ο ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</b><br>
-Ονοματεπώνυμο: ${mediatorFullName} Πατρώνυμο: ${m_f}<br>
+Ονοματεπώνυμο: ${mediatorFullName} Πατρώνυμο: ${m_data.f}<br>
 Μάνδαλο, την ${d.doc_date}<br>
 <div style="text-align:right; padding-right:50px;">Υπογραφή Διαμεσολαβητή<br>……………………</div><br>
 
@@ -625,47 +436,9 @@ ${praktikoRespHTML}
 - Το παρόν Πρακτικό Περάτωσης Υποχρεωτικής Αρχικής Συνεδρίας διαμεσολάβησης, αφορά στη διαφορά των μερών που αναλυτικά περιγράφεται στην αγωγή που κατατέθηκε στο ${d.court} με Αριθμό Κατάθεσης αγωγής: ${d.court_n} και θα προσκομισθεί μαζί με τις προτάσεις.<br>
 
 <div style="font-size: 10pt; color: #777777; margin-top: 25pt; border-top: 1pt dashed #ccc; padding-top: 15pt;"><b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ:</b> Στο παρόν πρακτικό περάτωσης της Υποχρεωτικής Αρχικής Συνεδρίας επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1), το οποίο αποτελεί αναπόσπαστο μέρος του παρόντος. Συντάσσεται από το διαμεσολαβητή μετά την περάτωση της Υποχρεωτικής Αρχικής Συνεδρίας, υπογράφεται από όλους τους παρισταμένους και το διαμεσολαβητή και καθένας λαμβάνει από ένα όμοιο πρωτότυπο. Μπορείτε να προσθέσετε περισσότερα ονόματα ανάλογα με τους συμμετέχοντες.</div>`;
-    } else if (d.type === 'entypo1') {
-        activeHtml = buildEntypo1(d);
     }
 
-    // Αν είμαστε σε λειτουργία χειροκίνητης επεξεργασίας, ΜΗΝ ξαναγράφεις το έγγραφο
-    // (αλλιώς θα σβήνονταν οι αλλαγές που έκανε ο χρήστης με το χέρι).
-    if (manualEdit) return;
     document.getElementById('preview').innerHTML = activeHtml;
-}
-
-// ==========================================
-// ΧΕΙΡΟΚΙΝΗΤΗ ΕΠΕΞΕΡΓΑΣΙΑ ΕΓΓΡΑΦΟΥ
-// ==========================================
-let manualEdit = false;
-
-function toggleEdit() {
-    const preview = document.getElementById('preview');
-    const btn = document.getElementById('edit_btn');
-    manualEdit = !manualEdit;
-
-    preview.contentEditable = manualEdit ? "true" : "false";
-    preview.classList.toggle('editing', manualEdit);
-
-    if (manualEdit) {
-        btn.innerHTML = "✅ ΤΕΛΟΣ ΕΠΕΞΕΡΓΑΣΙΑΣ";
-        btn.classList.add('btn-editing');
-        preview.focus();
-    } else {
-        btn.innerHTML = "✏️ ΕΠΕΞΕΡΓΑΣΙΑ ΚΕΙΜΕΝΟΥ";
-        btn.classList.remove('btn-editing');
-    }
-}
-
-// Επαναφορά: ξαναχτίζει το έγγραφο από τη φόρμα και σβήνει τις χειροκίνητες αλλαγές.
-function regenerateDoc() {
-    if (manualEdit && !confirm("Θα χαθούν οι χειροκίνητες αλλαγές και το έγγραφο θα ξαναδημιουργηθεί από τη φόρμα. Συνέχεια;")) {
-        return;
-    }
-    if (manualEdit) toggleEdit(); // βγες από τη λειτουργία επεξεργασίας
-    manualEdit = false;
-    draw();
 }
 
 function exportToWord() {
@@ -690,328 +463,120 @@ function exportToWord() {
     link.click();
 }
 
-// Φτιάχνει γραφικό «ημερολογιακό» πλακίδιο ημερομηνίας (table-based για email).
-function buildCalendarBadge(dateStr, timeStr) {
-    const monthsGR = ["ΙΑΝΟΥΑΡΙΟΣ","ΦΕΒΡΟΥΑΡΙΟΣ","ΜΑΡΤΙΟΣ","ΑΠΡΙΛΙΟΣ","ΜΑΪΟΣ","ΙΟΥΝΙΟΣ","ΙΟΥΛΙΟΣ","ΑΥΓΟΥΣΤΟΣ","ΣΕΠΤΕΜΒΡΙΟΣ","ΟΚΤΩΒΡΙΟΣ","ΝΟΕΜΒΡΙΟΣ","ΔΕΚΕΜΒΡΙΟΣ"];
-    let dayNum = "—", monthLabel = "ΥΑΣ", weekday = "Ημερομηνία προς ορισμό";
-    if (dateStr) {
-        const parts = dateStr.split('-'); // yyyy-mm-dd
-        const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10);
-        if (!isNaN(d)) {
-            dayNum = d;
-            monthLabel = (monthsGR[m - 1] || "") + " " + y;
-            weekday = getDay(dateStr);
-        }
-    }
-    const timeRow = timeStr ? `
-                <tr><td align="center" style="padding:8px 6px 0 6px; font-family:Arial,sans-serif; font-size:13px; font-weight:bold; color:#c0392b;">🕒 ${timeStr}</td></tr>` : "";
-
-    return `
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="180" style="width:180px; border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; background:#ffffff;">
-        <tr>
-            <td align="center" bgcolor="#c0392b" style="background:#c0392b; padding:8px 6px; font-family:Arial,sans-serif; font-size:13px; font-weight:bold; color:#ffffff; letter-spacing:0.5px;">${monthLabel}</td>
-        </tr>
-        <tr>
-            <td align="center" bgcolor="#ffffff" style="padding:10px 6px 6px 6px; font-family:Arial,sans-serif; font-size:52px; line-height:52px; font-weight:bold; color:#2c3e50;">${dayNum}</td>
-        </tr>
-        <tr>
-            <td align="center" bgcolor="#ffffff" style="padding:0 6px 10px 6px; font-family:Arial,sans-serif; font-size:13px; color:#7f8c8d; text-transform:uppercase; letter-spacing:1px;">${weekday}</td>
-        </tr>${timeRow}
-        <tr><td style="height:8px; line-height:8px;">&nbsp;</td></tr>
-    </table>`;
-}
-
 function downloadMailTemplate() {
     const feeElem = document.getElementById('m_fee');
-    // Πλήρης διατύπωση που περιλαμβάνει το «ανά μέρος».
-    const fee = feeElem.value;
+    const fee = feeElem.options[feeElem.selectedIndex].text;
     const z_date = document.getElementById('yas_date').value;
     const z_time = document.getElementById('yas_time').value;
     const z_link = document.getElementById('z_link').value;
     const z_id = document.getElementById('z_id').value;
     const z_pass = document.getElementById('z_pass').value;
 
-    const calendar = buildCalendarBadge(z_date, z_time);
-    const linkHtml = z_link ? `<a href="${z_link}" style="color:#c0392b; word-break:break-all;">${z_link}</a>` : "—";
-
-    // Email τύπου Mailchimp: πίνακες + inline στυλ, ώστε να ανοίγει σωστά σε όλους τους clients.
-    const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="el">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Πρόσκληση σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης</title>
-</head>
-<body style="margin:0; padding:0; background-color:#eef1f4;">
-<!-- preheader (κρυφό) -->
-<div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">Πρόσκληση σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (Υ.Α.Σ.)</div>
-
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#eef1f4;">
-  <tr>
-    <td align="center" style="padding:24px 12px;">
-
-      <!-- Container 600px -->
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px; background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-
-        <!-- Header bar -->
-        <tr>
-          <td bgcolor="#2c3e50" style="background:#2c3e50; padding:22px 30px; font-family:Arial,sans-serif; color:#ffffff;">
-            <div style="font-size:18px; font-weight:bold; letter-spacing:0.5px;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ</div>
-            <div style="font-size:13px; color:#bdc3c7; margin-top:4px;">Διαμεσολάβηση — Πρόσκληση Συμμετοχής</div>
-          </td>
-        </tr>
-
-        <!-- Calendar badge -->
-        <tr>
-          <td align="center" style="padding:26px 30px 6px 30px;">
-            ${calendar}
-          </td>
-        </tr>
-
-        <!-- Body -->
-        <tr>
-          <td style="padding:10px 30px 0 30px; font-family:Arial,sans-serif; font-size:15px; line-height:1.6; color:#2c3e50;">
-            <p style="margin:0 0 14px 0;">Αξιότιμες Κυρίες &amp; Κύριοι,</p>
-            <p style="margin:0 0 14px 0;">Σε συνέχεια της επικοινωνίας μας αποστέλλω: την πρόσκληση για την υποχρεωτική αρχική συνεδρία διαμεσολάβησης καθώς και τον ΤΡΟΠΟ, ΤΟΠΟ και ΧΡΟΝΟ διεξαγωγής της Υποχρεωτικής Αρχικής Συνεδρίας, τα βασικά στοιχεία των μερών και τα δικά μου, και σύντομη περιγραφή της διαφοράς σας, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα.</p>
-            <p style="margin:0 0 14px 0;">Υπενθυμίζω ότι για τη διεξαγωγή της Υ.Α.Σ. η αμοιβή μου ανέρχεται στο ποσό των <strong>${fee}</strong>, το οποίο θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στη συνημμένη πρόσκληση.</p>
-            <p style="margin:0 0 14px 0;">Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.), ως αναπόσπαστο μέρος της διαμεσολάβησης, αποτελεί έναν νεοσύστατο θεσμό στη χώρα μας που λειτουργεί ως υποχρεωτικό προστάδιο λίγο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
-            <p style="margin:0 0 14px 0;">Η Διαμεσολάβηση αποτελεί μια προσπάθεια εξωδικαστικής επίλυσης της διαφοράς με επίκεντρο εσάς και θεματοφύλακες του νόμου τους νομικούς παραστάτες σας. Πρόκειται για μια διαρθρωμένη διαδικασία με βασικά χαρακτηριστικά την εμπιστευτικότητα και την ιδιωτική αυτονομία.</p>
-            <p style="margin:0 0 14px 0;">Ο διαμεσολαβητής νοείται ένα τρίτο πρόσωπο σε σχέση με τα συμμετέχοντα μέρη και τη διαφορά, το οποίο αναλαμβάνει να διαμεσολαβήσει με κατάλληλο, αποτελεσματικό και αμερόληπτο τρόπο, διευκολύνοντάς τα να βρουν μια κοινά αποδεκτή λύση για τη διαφορά τους.</p>
-          </td>
-        </tr>
-
-        <!-- Χαρακτηριστικά -->
-        <tr>
-          <td style="padding:6px 30px 0 30px; font-family:Arial,sans-serif; font-size:15px; line-height:1.6; color:#2c3e50;">
-            <p style="margin:0 0 6px 0;">Η διαμεσολάβηση είναι μια διαδικασία:</p>
-            <p style="margin:0 0 8px 0;">&bull; <strong style="color:#e67e22;">εκούσια</strong>, διότι προσέρχεστε και παραμένετε σε αυτήν εθελοντικά</p>
-            <p style="margin:0 0 8px 0;">&bull; <strong style="color:#e67e22;">μη δεσμευτική</strong>, μέχρι τη στιγμή που θα υπογράψετε τη συμφωνία σας</p>
-            <p style="margin:0 0 14px 0;">&bull; <strong style="color:#e67e22;">απόλυτα εμπιστευτική</strong>, διότι οτιδήποτε ακουστεί, οποιεσδήποτε προσφορές, παραχωρήσεις και παραδοχές που τυχόν προκύψουν, σε περίπτωση που δεν καταλήξετε σε συμφωνία δεν μπορούν να χρησιμοποιηθούν στο Δικαστήριο. Οτιδήποτε ειπωθεί κατά τη διάρκεια της διαδικασίας δεν μπορεί να κοινοποιηθεί σε τρίτους ούτε να αποτελέσει αποδεικτικό στοιχείο σε άλλες διαδικασίες, όπως διαιτησία ή Δικαστήριο.</p>
-            <p style="margin:0 0 14px 0;"><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
-            <p style="margin:0 0 18px 0;"><strong>Στόχος μας:</strong> μέσα από την καλόπιστη συμπεριφορά και τη συναλλακτική ευθύτητα όλων, η κατάληξη σε μια κοινά αποδεκτή συμφωνία!</p>
-          </td>
-        </tr>
-
-        <!-- Στοιχεία σύνδεσης -->
-        <tr>
-          <td style="padding:0 30px 26px 30px;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:2px solid #e67e22; border-radius:8px;">
-              <tr>
-                <td bgcolor="#fff8f1" style="background:#fff8f1; padding:16px 18px; font-family:Arial,sans-serif; color:#2c3e50; font-size:14px; line-height:1.6;">
-                  <div style="font-size:15px; font-weight:bold; color:#e67e22; margin-bottom:8px;">ΣΤΟΙΧΕΙΑ ΣΥΝΔΕΣΗΣ (ΔΙΑΔΙΚΤΥΑΚΑ)</div>
-                  <div><strong>Ημερομηνία / Ώρα:</strong> ${fmtD(z_date)}${z_time ? " στις " + z_time : ""}</div>
-                  <div style="margin-top:4px;"><strong>Σύνδεσμος:</strong> ${linkHtml}</div>
-                  <div style="margin-top:4px;"><strong>Meeting ID:</strong> ${z_id || "—"}</div>
-                  <div style="margin-top:4px;"><strong>Passcode:</strong> ${z_pass || "—"}</div>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Footer -->
-        <tr>
-          <td bgcolor="#2c3e50" style="background:#2c3e50; padding:16px 30px; font-family:Arial,sans-serif; font-size:12px; color:#bdc3c7; text-align:center;">
-            Διαπιστευμένος Διαμεσολαβητής — Υπουργείο Δικαιοσύνης
-          </td>
-        </tr>
-
-      </table>
-      <!-- /Container -->
-
-    </td>
-  </tr>
-</table>
-</body>
-</html>`;
+    const html = `<!DOCTYPE html><html lang="el"><body style="background:#2c3e50; padding:40px; font-family:Arial;"><div style="max-width:600px; margin:auto; background:#34495e; padding:30px; border-radius:10px; color:white; line-height:1.6;">
+    <p>Αξιότιμες Κυρίες & Κύριοι,</p><p>Σε συνέχεια της επικοινωνίας μας αποστέλλω: την πρόσκληση για την υποχρεωτική αρχική συνεδρία διαμεσολάβησης καθώς και τον ΤΡΟΠΟ, ΤΟΠΟ, και ΧΡΟΝΟ διεξαγωγής της Υποχρεωτικής Αρχικής Συνεδρίας, τα βασικά στοιχεία των μερών και τα δικά μου και σύντομη περιγραφή της διαφοράς σας, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα</p>
+    <p>Υπενθυμίζω ότι για την διεξαγωγή της Υ.Α.Σ η αμοιβή μου ανέρχεται στο ποσό των ${fee} το οποίο θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στην συνημμένη πρόσκληση.</p>
+    <p>Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.) ως αναπόσπαστο μέρος της διαμεσολάβησης, αποτελεί έναν νεοσύστατο θεσμό στην χώρα μας που λειτουργεί ως υποχρεωτικό προστάδιο λίγο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
+    <p>Η Διαμεσολάβηση αποτελεί μια προσπάθεια εξωδικαστικής επίλυσης της διαφοράς με επίκεντρο εσάς και θεματοφύλακες του νόμου τους νομικούς παραστάτες σας. Πρόκειται για μια διαρθρωμένη διαδικασία με βασικά χαρακτηριστικά την εμπιστευτικότητα και την ιδιωτική αυτονομία.</p>
+    <p>Ο διαμεσολαβητής, νοείται ένα τρίτο πρόσωπο σε σχέση με τα συμμετέχοντα μέρη και τη διαφορά, το οποίο αναλαμβάνει να διαμεσολαβήσει με κατάλληλο, αποτελεσματικό και αμερόληπτο τρόπο, διευκολύνοντας τα να βρουν μια κοινά αποδεκτή λύση για τη διαφορά τους.</p>
+    <p>Η διαμεσολάβηση είναι μια διαδικασία:<br>
+    - <strong><span style="color:rgb(255, 171, 1);">εκούσια</span></strong>, διότι προσέρχεστε και παραμένετε σε αυτήν εθελοντικά<br>
+    - <strong><span style="color:rgb(255, 171, 1);">μη δεσμευτική</span></strong>, μέχρι τη στιγμή που θα υπογράψετε τη συμφωνία σας<br>
+    - <strong><span style="color:rgb(255, 171, 1);">απόλυτα εμπιστευτική</span></strong> διότι οτιδήποτε ακουστεί, οποιεσδήποτε προσφορές, παραχωρήσεις και παραδοχές που τυχόν προκύψουν, σε περίπτωση που δεν καταλήξετε σε συμφωνία δεν μπορούν να χρησιμοποιηθούν στο Δικαστήριο. Οτιδήποτε ειπωθεί και προκύψει κατά τη διάρκεια της διαδικασίας δεν μπορεί να κοινοποιηθεί σε τρίτους ούτε και να αποτελέσει αποδεικτικό στοιχείο σε άλλες διαδικασίες, όπως διαιτησία ή Δικαστήριο.</p>
+    <p><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
+    <p><strong>Στόχος μας:</strong> μέσα από την καλόπιστη συμπεριφορά και την συναλλακτική ευθύτητα όλων είναι η κατάληξη σε μια κοινά αποδεκτή συμφωνία !!!</p>
+    <div style="border:2px solid orange; padding:15px; text-align:center; background:rgba(0,0,0,0.2);">
+    <h3 style="color:orange; margin-top: 0;">ΣΤΟΙΧΕΙΑ ΣΥΝΔΕΣΗΣ (ΔΙΑΔΙΚΤΥΑΚΑ)</h3><p>Ημερομηνία / Ώρα: ${fmtD(z_date)} στις ${z_time}</p><p>Link: <a href="${z_link}" style="color:orange;">${z_link}</a></p><p>Meeting ID: ${z_id} <br><br> Passcode: ${z_pass}</p></div></div></body></html>`;
 
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([html], {type:"text/html;charset=utf-8"}));
-    link.download = "Prosklisi_Mail.html";
+    link.href = URL.createObjectURL(new Blob([html], {type:"text/html"}));
+    link.download = "Mail_Template.html";
     link.click();
 }
 
 // ==========================================
 // 3. SMART EVALUATOR LOGIC
 // ==========================================
-// ==========================================
-// SMART QUESTIONNAIRE SYSTEM
-// ==========================================
-
-const smartCriteria = [
-    {
-        id: 'S', label: 'S – Specific', sublabel: 'Σαφήνεια & Εξειδίκευση', color: '#2563eb',
-        questions: [
-            { text: 'Ορίζει ξεκάθαρα το αντικείμενο της υποχρέωσης (τι ακριβώς θα γίνει, θα παραδοθεί ή θα καταβληθεί);', weight: 4 },
-            { text: 'Αναφέρει τα υπόχρεα μέρη και κατανέμει σαφώς τις αντίστοιχες ευθύνες τους;', weight: 3 },
-            { text: 'Αποκλείει ασάφειες ή δυνατότητα διαφορετικής ερμηνείας από τα μέρη;', weight: 3 }
-        ]
-    },
-    {
-        id: 'M', label: 'M – Measurable', sublabel: 'Μετρησιμότητα & Επαληθευσιμότητα', color: '#7c3aed',
-        questions: [
-            { text: 'Υπάρχει αντικειμενικός, αδιαμφισβήτητος τρόπος να αποδειχθεί η εκπλήρωση της υποχρέωσης;', weight: 4 },
-            { text: 'Περιλαμβάνει συγκεκριμένα, μετρήσιμα κριτήρια επιτυχίας (π.χ. ποσό, ημερομηνία, ποσότητα);', weight: 3 },
-            { text: 'Είναι σαφές το σημείο "εκπλήρωσης" — δηλ. πότε και πώς λήγει η υποχρέωση;', weight: 3 }
-        ]
-    },
-    {
-        id: 'A', label: 'A – Achievable', sublabel: 'Εφικτότητα & Βιωσιμότητα', color: '#059669',
-        questions: [
-            { text: 'Τα υπόχρεα μέρη διαθέτουν αποδεδειγμένα τους αναγκαίους οικονομικούς ή πρακτικούς πόρους;', weight: 4 },
-            { text: 'Η εκτέλεση δεν εξαρτάται από παράγοντες εκτός ελέγχου των μερών (τρίτους, δικαστήρια, αγορά);', weight: 3 },
-            { text: 'Είναι νομικά συμβατή και δεν αντίκειται σε ήδη υφιστάμενες υποχρεώσεις ή δεσμεύσεις;', weight: 3 }
-        ]
-    },
-    {
-        id: 'R', label: 'R – Relevant', sublabel: 'Σχετικότητα & Αμοιβαία Αποδοχή', color: '#d97706',
-        questions: [
-            { text: 'Απαντά στα πραγματικά υποκείμενα συμφέροντα (interests) — όχι απλώς στις δηλωμένες θέσεις (positions) — και των δύο μερών;', weight: 4 },
-            { text: 'Είναι αμοιβαία αποδεκτή ή τουλάχιστον ανεκτή ("αρκούντως ικανοποιητική") από όλα τα εμπλεκόμενα μέρη;', weight: 4 },
-            { text: 'Συμβάλλει στη διατήρηση ή βελτίωση της μελλοντικής σχέσης μεταξύ των μερών;', weight: 2 }
-        ]
-    },
-    {
-        id: 'T', label: 'T – Time-bound', sublabel: 'Χρονική Δέσμευση & Συνέπειες', color: '#dc2626',
-        questions: [
-            { text: 'Ορίζεται σαφής, συγκεκριμένη ημερομηνία ή προθεσμία εκτέλεσης;', weight: 4 },
-            { text: 'Υπάρχει μηχανισμός παρακολούθησης ή προβλέπονται συνέπειες σε περίπτωση μη τήρησης (ρήτρα, πρόστιμο, κλπ.);', weight: 3 },
-            { text: 'Το χρονοδιάγραμμα είναι ρεαλιστικό σε σχέση με τις αντικειμενικές δυνατότητες των μερών;', weight: 3 }
-        ]
-    }
-];
-
-const SMART_MAX = smartCriteria.reduce((t, c) => t + c.questions.reduce((s, q) => s + q.weight, 0), 0); // 50
-
-function renderSmartForm() {
-    const container = document.getElementById('smart_questions_container');
-    if (!container) return;
-
-    let html = '<div class="smart-q-grid">';
-    smartCriteria.forEach(crit => {
-        const maxScore = crit.questions.reduce((s, q) => s + q.weight, 0);
-        html += `<div class="smart-q-group">
-            <div class="smart-q-header" style="border-left-color:${crit.color};">
-                <span><b>${crit.label}</b> <span class="smart-q-sublabel">${crit.sublabel}</span></span>
-                <span class="smart-q-badge" id="score_${crit.id}" style="background:${crit.color}20; color:${crit.color};">–/${maxScore}</span>
-            </div>`;
-        crit.questions.forEach((q, qi) => {
-            const name = `sq_${crit.id}_${qi}`;
-            html += `<div class="smart-question">
-                <div class="smart-question-text">${q.text} <span class="smart-q-weight">(βαρύτητα: ${q.weight})</span></div>
-                <div class="smart-radio-group">
-                    <div class="smart-radio-btn">
-                        <input type="radio" name="${name}" id="${name}_y" value="full" onchange="calcSmart()">
-                        <label for="${name}_y" class="sq-yes">✓ Ναι</label>
-                    </div>
-                    <div class="smart-radio-btn">
-                        <input type="radio" name="${name}" id="${name}_p" value="partial" onchange="calcSmart()">
-                        <label for="${name}_p" class="sq-partial">≈ Εν μέρει</label>
-                    </div>
-                    <div class="smart-radio-btn">
-                        <input type="radio" name="${name}" id="${name}_n" value="none" onchange="calcSmart()">
-                        <label for="${name}_n" class="sq-no">✗ Όχι</label>
-                    </div>
-                </div>
-            </div>`;
-        });
-        html += '</div>';
-    });
-    html += '</div>';
-    container.innerHTML = html;
-}
-
 function calcSmart() {
-    let totalScore = 0;
-    let answeredCount = 0;
+    const s = parseInt(document.getElementById('smart_s').value);
+    const m = parseInt(document.getElementById('smart_m').value);
+    const a = parseInt(document.getElementById('smart_a').value);
+    const r = parseInt(document.getElementById('smart_r').value);
+    const t = parseInt(document.getElementById('smart_t').value);
 
-    smartCriteria.forEach(crit => {
-        let critScore = 0;
-        const maxCritScore = crit.questions.reduce((s, q) => s + q.weight, 0);
-        crit.questions.forEach((q, qi) => {
-            const checked = document.querySelector(`input[name="sq_${crit.id}_${qi}"]:checked`);
-            if (checked) {
-                answeredCount++;
-                if (checked.value === 'full') critScore += q.weight;
-                else if (checked.value === 'partial') critScore += q.weight * 0.5;
-            }
-        });
-        totalScore += critScore;
-        const el = document.getElementById(`score_${crit.id}`);
-        if (el) el.textContent = `${critScore % 1 === 0 ? critScore : critScore.toFixed(1)}/${maxCritScore}`;
-    });
+    document.getElementById('val_s').innerText = s;
+    document.getElementById('val_m').innerText = m;
+    document.getElementById('val_a').innerText = a;
+    document.getElementById('val_r').innerText = r;
+    document.getElementById('val_t').innerText = t;
 
-    if (answeredCount === 0) {
-        document.getElementById('smart_score').textContent = '–';
-        document.getElementById('smart_score').style.background = '#94a3b8';
-        document.getElementById('smart_title').textContent = 'Συμπληρώστε το ερωτηματολόγιο';
-        document.getElementById('smart_desc').textContent = 'Απαντήστε στις παραπάνω ερωτήσεις για να αξιολογηθεί η βιωσιμότητα και εφαρμοστικότητα της πρότασης.';
-        document.getElementById('smart_result_box').style.borderColor = '#e2e8f0';
-        return;
-    }
+    const total = s + m + a + r + t;
+    document.getElementById('smart_score').innerText = `${total}/25`;
 
-    const pct = (totalScore / SMART_MAX) * 100;
     let title, desc, color;
-
-    if (pct < 35) {
-        title = '⛔ Μη Βιώσιμη Πρόταση';
-        desc = 'Η πρόταση παρουσιάζει κρίσιμες ελλείψεις σε πολλαπλά επίπεδα. Δεν αποτελεί έτοιμη βάση για συμφωνία. Απαιτείται ουσιαστική αναδιατύπωση πριν συζητηθεί περαιτέρω.';
-        color = '#dc2626';
-    } else if (pct < 55) {
-        title = '⚠️ Πρόταση με Σοβαρές Ελλείψεις';
-        desc = 'Υπάρχει διάθεση και βάση, αλλά κρίσιμα στοιχεία εφαρμοστικότητας ή αποδοχής απουσιάζουν. Χρειάζεται εξειδίκευση στα αδύναμα κριτήρια πριν προχωρήσει η διαπραγμάτευση.';
-        color = '#f97316';
-    } else if (pct < 72) {
-        title = '🔶 Μέτρια Βιώσιμη Πρόταση';
-        desc = 'Η πρόταση έχει ουσία αλλά παρουσιάζει αδυναμίες. Εντοπίστε τα κριτήρια με χαμηλή βαθμολογία και ζητήστε διευκρινίσεις ή τροποποιήσεις για να ενισχυθεί.';
-        color = '#eab308';
-    } else if (pct < 88) {
-        title = '✅ Καλή Πρόταση';
-        desc = 'Η πρόταση είναι σε μεγάλο βαθμό βιώσιμη και εφαρμόσιμη. Μικρές βελτιώσεις στα αδύναμα σημεία μπορούν να την καταστήσουν ισχυρότερη βάση για συμφωνία.';
-        color = '#22c55e';
+    if (total <= 10) {
+        title = "Αδύναμη Πρόταση";
+        desc = "Η πρόταση πάσχει σε βασικά δομικά στοιχεία. Δεν είναι έτοιμη για διαπραγμάτευση. Πρέπει να ζητηθούν άμεσα διευκρινίσεις.";
+        color = "var(--danger)";
+    } else if (total <= 17) {
+        title = "Μέτρια Πρόταση";
+        desc = "Απαιτούνται διευκρινίσεις. Έχει βάση, αλλά πρέπει να εξειδικευτεί περαιτέρω (ειδικά στα κριτήρια που βαθμολογήθηκαν χαμηλά) πριν γίνει αποδεκτή.";
+        color = "#f59e0b"; // Orange
+    } else if (total <= 22) {
+        title = "Καλή Πρόταση";
+        desc = "Η πρόταση είναι ρεαλιστική και αξιολογήσιμη. Μικρές λεπτομέρειες πρέπει να ρυθμιστούν για την τελική συμφωνία.";
+        color = "var(--accent)"; // Green
     } else {
-        title = '🏆 Ισχυρή Πρόταση';
-        desc = 'Η πρόταση πληροί υψηλά κριτήρια βιωσιμότητας και εφαρμοστικότητας. Αποτελεί ισχυρή βάση για την υπογραφή του Ιδιωτικού Συμφωνητικού.';
-        color = '#059669';
+        title = "Εξαιρετική / Ισχυρή Πρόταση";
+        desc = "Η πρόταση είναι απόλυτα ξεκάθαρη, μετρήσιμη και ρεαλιστική. Αποτελεί ιδανική βάση για την υπογραφή του Ιδιωτικού Συμφωνητικού.";
+        color = "#15803d"; // Dark Green
     }
 
-    const scoreEl = document.getElementById('smart_score');
-    const displayScore = `${totalScore % 1 === 0 ? totalScore : totalScore.toFixed(1)}/${SMART_MAX}`;
-    scoreEl.textContent = displayScore;
-    scoreEl.style.background = color;
-    document.getElementById('smart_title').textContent = title;
-    document.getElementById('smart_desc').textContent = `${desc}  (Βαθμολογία: ${Math.round(pct)}%)`;
+    const resultBox = document.getElementById('smart_result_box');
+    document.getElementById('smart_title').innerText = title;
+    document.getElementById('smart_desc').innerText = desc;
     document.getElementById('smart_title').style.color = color;
-    document.getElementById('smart_result_box').style.borderColor = color;
+    document.getElementById('smart_score').style.backgroundColor = color;
+    resultBox.style.borderColor = color;
 }
 
 // ==========================================
 // 4. THE THEORY / LIBRARY DATA 
 // ==========================================
 const theoryData = {
-    // --- ΚΕΝΤΡΙΚΗ ΘΕΩΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ ---
-    mediation_concept_methods: `<h3>1. Η Έννοια και οι Μέθοδοι της Διαμεσολάβησης</h3>
-    <p>Η διαμεσολάβηση είναι μια εκούσια, εμπιστευτική και δομημένη διαδικασία επίλυσης διαφορών. Σε αυτήν, ένα τρίτο, ουδέτερο και αμερόληπτο μέρος (ο Διαμεσολαβητής) βοηθά τα μέρη να επικοινωνήσουν εποικοδομητικά, προκειμένου να καταλήξουν σε μια αμοιβαία αποδεκτή συμφωνία.</p>
-    <div class="highlight-box" style="border-left-color: #0ea5e9;">
-        <h4 style="margin-top:0; color: #0369a1;">Βασικές Μέθοδοι (Σχολές) Διαμεσολάβησης</h4>
+    conflict_methodology: `<h3>Μεθοδολογία Εφαρμογής Διαμεσολάβησης (Ψυχολογία & Θεωρία Διαπραγματεύσεων)</h3>
+    <p>Η σύγχρονη διαμεσολάβηση δεν είναι απλώς μια τυπική νομική διαδικασία, αλλά μια πολυδιάστατη παρέμβαση που αντλεί εργαλεία από τη γνωστική ψυχολογία, τη νευροβιολογία των συναισθημάτων και τη θεωρία των διαπραγματεύσεων (όπως το <i>Harvard Negotiation Project</i>).</p>
+    
+    <div class="highlight-box">
+        <h4 style="margin-top:0;">Στάδιο 1: Προετοιμασία & Εγκαθίδρυση Ψυχολογικής Ασφάλειας (Psychological Safety)</h4>
+        <p>Η σύγκρουση ενεργοποιεί την <b>αμυγδαλή</b> του εγκεφάλου (απόκριση "fight or flight"). Ο πρωταρχικός στόχος του διαμεσολαβητή είναι να δημιουργήσει ένα περιβάλλον ασφάλειας (Amy Edmondson), όπου τα μέρη νιώθουν ότι μπορούν να μιλήσουν χωρίς να κριθούν ή να τιμωρηθούν, μειώνοντας την αμυντικότητά τους.</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="margin-top:0;">Στάδιο 2: Αποφόρτιση & Ενεργητική Ακρόαση (Active Listening)</h4>
+        <p>Βασισμένο στην προσωποκεντρική προσέγγιση του <b>Carl Rogers</b>. Τα μέρη πρέπει να "αδειάσουν" το συναισθηματικό τους φορτίο. Ο διαμεσολαβητής χρησιμοποιεί τεχνικές "καθρεφτίσματος" (mirroring) και ενσυναίσθησης (empathy) για να επικυρώσει τα συναισθήματα χωρίς απαραίτητα να συμφωνεί με τα γεγονότα.</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="margin-top:0;">Στάδιο 3: Αναπλαισίωση (Reframing) & Η Μετάβαση στα "Συμφέροντα"</h4>
+        <p>Εφαρμογή των αρχών του <b>Fisher & Ury ("Getting to Yes")</b>: <i>"Διαχωρίστε τους ανθρώπους από το πρόβλημα"</i>. Ο διαμεσολαβητής βοηθά τα μέρη να μετακινηθούν από τις άκαμπτες <b>Θέσεις</b> (Positions - π.χ. "θέλω 10.000 ευρώ") στα βαθύτερα <b>Συμφέροντα</b> (Interests - π.χ. "θέλω οικονομική ασφάλεια" ή "θέλω αναγνώριση").</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="margin-top:0;">Στάδιο 4: Έλεγχος Πραγματικότητας (Reality Testing) & Γνωστικές Προκαταλήψεις</h4>
+        <p>Ο διαμεσολαβητής αντιμετωπίζει συχνές <b>Γνωστικές Προκαταλήψεις (Cognitive Biases)</b>, όπως:
         <ul>
-            <li><b>Διευκολυντική (Facilitative):</b> Η κλασική μέθοδος. Ο διαμεσολαβητής διευκολύνει την επικοινωνία, δεν προτείνει λύσεις και δεν εκφέρει γνώμη για το ποιος έχει δίκιο. Εστιάζει στα "Συμφέροντα" (Interests) και όχι στις "Θέσεις".</li>
-            <li><b>Αξιολογική (Evaluative):</b> Ο διαμεσολαβητής (συνήθως νομικός) αξιολογεί τη νομική βασιμότητα των ισχυρισμών, κάνει έλεγχο πραγματικότητας (Reality Testing) για το τι θα συμβεί στο δικαστήριο (BATNA/WATNA) και ενδέχεται να προτείνει επιλογές.</li>
-            <li><b>Μετασχηματιστική (Transformative):</b> Εστιάζει στην ενδυνάμωση (empowerment) των μερών και στην αναγνώριση (recognition) της οπτικής του άλλου. Ο στόχος δεν είναι απλώς η επίλυση του προβλήματος, αλλά η αποκατάσταση της σχέσης (χρησιμοποιείται συχνά στην Οικογενειακή Διαμεσολάβηση).</li>
+            <li><b>Αντιδραστική Υποτίμηση (Reactive Devaluation):</b> Η τάση να απορρίπτεται μια πρόταση απλά επειδή προέρχεται από την "άλλη πλευρά". Ο διαμεσολαβητής αναλαμβάνει συχνά την "πατρότητα" της ιδέας για να την κάνει αποδεκτή.</li>
+            <li><b>Αγκίστρωση (Anchoring):</b> Η εμμονή στο αρχικό ποσό της αγωγής.</li>
         </ul>
+        Γίνεται εκτενής χρήση του <b>BATNA</b> (Best Alternative to a Negotiated Agreement) και <b>WATNA</b> (Worst Alternative) για να κατανοήσουν τα μέρη το πραγματικό ρίσκο του δικαστηρίου.</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="margin-top:0;">Στάδιο 5: Παραγωγή Λύσεων (Brainstorming) & Σύνθεση Συμφωνίας</h4>
+        <p>Χρήση αποκλίνουσας σκέψης (divergent thinking) για τη δημιουργία επιλογών αμοιβαίου οφέλους (Win-Win). Στόχος είναι η "μεγέθυνση της πίτας" πριν τον τελικό διαμοιρασμό της.</p>
     </div>`,
 
-    mediation_phases: `<h3>2. Οι Φάσεις της Διαμεσολάβησης</h3>
-    <p>Μια τυπική διαδικασία διαμεσολάβησης ακολουθεί 5 διακριτά και κρίσιμα στάδια:</p>
-    <ol>
-        <li><b>Προετοιμασία:</b> Συλλογή πληροφοριών, έλεγχος σύγκρουσης συμφερόντων (conflict of interest), οργάνωση του χώρου, υπογραφή του Συμφωνητικού Υπαγωγής.</li>
-        <li><b>Εναρκτήρια Κοινή Συνεδρία (Opening Statement):</b> Καλωσόρισμα, παρουσίαση των κανόνων (εμπιστευτικότητα, εθελοντικότητα, ουδετερότητα) και σύντομες εναρκτήριες τοποθετήσεις από τα μέρη.</li>
-        <li><b>Διερεύνηση / Αποφόρτιση (Gathering Info):</b> Τα μέρη αφηγούνται την ιστορία τους (αδιαλείπτως). Ο διαμεσολαβητής ακούει ενεργητικά, "καθρεφτίζει" τα συναισθήματα και εντοπίζει τα κρυφά συμφέροντα (Interests) πίσω από τις θέσεις.</li>
-        <li><b>Διαπραγμάτευση / Κατ' ιδίαν Συνεδρίες (Caucuses):</b> Ιδιωτικές συναντήσεις του διαμεσολαβητή με κάθε πλευρά. Εδώ γίνεται ο Έλεγχος Πραγματικότητας (Reality Testing), η αναζήτηση BATNA/WATNA, η παραγωγή επιλογών (Brainstorming) και η ανταλλαγή προτάσεων (shuttle diplomacy).</li>
-        <li><b>Συμφωνία (Closure):</b> Αν βρεθεί κοινός τόπος (ZOPA), γίνεται η σύνταξη του Πρακτικού Επιτυχούς Διαμεσολάβησης. Αν δεν βρεθεί, γίνεται Πρακτικό Αποτυχίας. Και στις δύο περιπτώσεις η διαδικασία λήγει ομαλά και με σεβασμό.</li>
-    </ol>`,
-
-    harvard_model: `<h3>Το Μοντέλο του Harvard (Με Νευροβιολογία & BATNA/ZOPA)</h3>
+    harvard_model: `<h3>Η Μεθοδολογία του Harvard (Με Νευροβιολογία & BATNA/ZOPA)</h3>
     <p>Το μοντέλο διαπραγμάτευσης του Harvard αποκτά άλλη διάσταση όταν κατανοήσουμε πώς οι ερωτήσεις του Διαμεσολαβητή "καλωδιώνουν" τον εγκέφαλο. Ακολουθεί το πλήρες μοντέλο των 5 σταδίων, ενσωματώνοντας τη θεωρία των BATNA/ZOPA ως τον τελικό μηχανισμό λήψης απόφασης.</p>
 
     <div class="highlight-box" style="border-left-color: #be185d; background: #fff1f2;">
@@ -1176,73 +741,6 @@ const theoryData = {
         <li><b>Συνεργατικό (Διεκδικητικό & Συνεργατικό):</b> Αναζήτηση λύσεων Win-Win. Εστίαση στα βαθύτερα συμφέροντα (Interests) και όχι στις αρχικές θέσεις (Positions). <i>(Ο κύριος στόχος της Διαμεσολάβησης)</i></li>
     </ul>`,
 
-    // --- ΟΙΚΟΓΕΝΕΙΑΚΗ ΔΙΑΜΕΣΟΛΑΒΗΣΗ ---
-    family_intro: `<h3>3. Τι είναι η Οικογενειακή Διαμεσολάβηση</h3>
-    <p>Η Οικογενειακή Διαμεσολάβηση είναι μια ειδική μορφή εξωδικαστικής επίλυσης διαφορών, προσαρμοσμένη στις μοναδικές δυναμικές, τις έντονες συναισθηματικές φορτίσεις και τις μακροχρόνιες σχέσεις που διέπουν το οικογενειακό δίκαιο (διαζύγιο, διατροφή, επικοινωνία, επιμέλεια).</p>
-    <div class="highlight-box" style="border-left-color: #be185d; background: #fff1f2;">
-        <h4 style="margin-top:0; color: #be185d;">Βασικά Χαρακτηριστικά:</h4>
-        <ul>
-            <li><b>Εστίαση στο Μέλλον:</b> Σε αντίθεση με το δικαστήριο που ερευνά "ποιος φταίει για το παρελθόν", η διαμεσολάβηση σχεδιάζει το "πώς θα λειτουργούμε αύριο".</li>
-            <li><b>Το Βέλτιστο Συμφέρον του Παιδιού:</b> Αποτελεί τον απόλυτο γνώμονα. Ο διαμεσολαβητής οφείλει να διασφαλίζει ότι οι συμφωνίες των γονέων προστατεύουν την ευημερία των τέκνων (child-focused mediation).</li>
-            <li><b>Προστασία της Σχέσης (Co-parenting):</b> Το ζευγάρι χωρίζει ως σύζυγοι, αλλά παραμένει ζευγάρι ως "γονείς". Η διαμεσολάβηση προστατεύει αυτή την αναγκαία γονεϊκή συνεργασία από την τοξικότητα της αντιδικίας.</li>
-        </ul>
-    </div>`,
-
-    divorce_psychology: `<h3>4. Η Ψυχολογία του Διαζυγίου</h3>
-    <p>Το διαζύγιο δεν είναι απλώς μια νομική πράξη, αλλά μια βαθιά συναισθηματική κρίση που συχνά παρομοιάζεται με το <b>πένθος</b> (Μοντέλο της Kübler-Ross). Τα μέρη που προσέρχονται στη διαμεσολάβηση συχνά βρίσκονται σε διαφορετικά ψυχολογικά στάδια, γεγονός που προκαλεί ασυγχρονισμό και συγκρούσεις.</p>
-    <div class="moore-circle">
-        <div class="moore-node" style="border-left-color: #8b5cf6;">
-            <h4 style="color: #4338ca;">Τα Στάδια του Συναισθηματικού Διαζυγίου:</h4>
-            <ol>
-                <li><b>Άρνηση:</b> Σοκ και απροθυμία αποδοχής του χωρισμού. (<i>"Δεν συμβαίνει αυτό σε εμάς, θα αλλάξει γνώμη"</i>). Εδώ η διαμεσολάβηση είναι σχεδόν αδύνατη.</li>
-                <li><b>Θυμός:</b> Εκτόνωση ενέργειας, αναζήτηση ευθυνών, επιθυμία για εκδίκηση. Εδώ συχνά κατατίθενται οι πρώτες σκληρές αγωγές.</li>
-                <li><b>Διαπραγμάτευση:</b> Προσπάθεια επανασύνδεσης ή εύρεσης μιας συμβιβαστικής λύσης "υπό όρους".</li>
-                <li><b>Κατάθλιψη / Απόγνωση:</b> Επίγνωση της οριστικότητας του χωρισμού. Απώλεια ταυτότητας, θλίψη.</li>
-                <li><b>Αποδοχή:</b> Ανάληψη ευθύνης για τη νέα πραγματικότητα και σχεδιασμός του μέλλοντος. <b>(Είναι το ιδανικό στάδιο για να πετύχει η Διαμεσολάβηση).</b></li>
-            </ol>
-        </div>
-    </div>`,
-
-    family_mediator_training: `<h3>7-8. Εκπαίδευση & Πρότυπα Οικογενειακού Διαμεσολαβητή</h3>
-    <p>Λόγω της κρισιμότητας των οικογενειακών διαφορών, ο οικογενειακός διαμεσολαβητής δεν αρκεί να κατέχει μόνο τεχνικές διαπραγμάτευσης, αλλά απαιτείται <b>ειδική και διεπιστημονική εκπαίδευση</b>.</p>
-    <ul>
-        <li><b>Διεπιστημονικότητα (Interdisciplinary Knowledge):</b> Πρέπει να έχει βασικές γνώσεις <i>Οικογενειακού Δικαίου</i>, <i>Παιδοψυχολογίας</i> (για την κατανόηση των αναγκών των παιδιών ανά ηλικιακή φάση), και <i>Δυναμικής Οικογενειακών Συστημάτων</i>.</li>
-        <li><b>Αμεροληψία (Impartiality):</b> Δεν παίρνει το μέρος κανενός, ούτε του πιο "αδύναμου" ψυχολογικά.</li>
-        <li><b>Διαχείριση Εξουσίας (Power Imbalance):</b> Αναγνωρίζει ανισορροπίες (π.χ. οικονομική εξάρτηση, ψυχολογική βία) και εφαρμόζει τεχνικές ενδυνάμωσης (empowerment) ώστε τα μέρη να διαπραγματευτούν επί ίσοις όροις. Στις περιπτώσεις ενδοοικογενειακής βίας (Domestic Violence), η διαμεσολάβηση συνήθως <b>απαγορεύεται</b> (Screening for violence).</li>
-    </ul>`,
-
-    bafm_guidelines: `<h3>9. Οι Κατευθυντήριες Γραμμές της BAFM</h3>
-    <p>Η <b>BAFM</b> (Bundes-Arbeitsgemeinschaft für Familien-Mediation - Ομοσπονδιακή Ένωση Οικογενειακής Διαμεσολάβησης της Γερμανίας) αποτελεί έναν από τους σημαντικότερους ευρωπαϊκούς φορείς που θέσπισε αυστηρά πρότυπα (Guidelines) για την άσκηση του επαγγέλματος.</p>
-    <div class="highlight-box">
-        <h4 style="margin-top:0;">Βασικές Αρχές BAFM:</h4>
-        <ol>
-            <li><b>Εστίαση στο Παιδί (Child-Focus):</b> Τα παιδιά δεν είναι απλώς "αντικείμενο" της διαφοράς. Οι ανάγκες τους πρέπει να ακούγονται, ακόμα και μέσα από τη συμμετοχή παιδοψυχολόγου (αν χρειαστεί), προστατεύοντάς τα πάντα από τη σύγκρουση νομιμοφροσύνης (loyalty conflict).</li>
-            <li><b>Αυτοδιάθεση (Self-determination):</b> Ο διαμεσολαβητής δεν επιβάλλει "παιδαγωγικά" ή νομικά σωστές λύσεις. Οι ίδιοι οι γονείς παραμένουν οι "ειδικοί" για την οικογένειά τους.</li>
-            <li><b>Συν-Διαμεσολάβηση (Co-Mediation):</b> Η BAFM ενθαρρύνει έντονα τη χρήση δύο διαμεσολαβητών διαφορετικού φύλου ή διαφορετικής επιστημονικής αφετηρίας (π.χ. ένας νομικός και ένας ψυχολόγος), ώστε να καλύπτονται όλες οι πτυχές της κρίσης.</li>
-        </ol>
-    </div>`,
-
-    lawyer_role_family: `<h3>10. Ο Ρόλος του Δικηγόρου στην Οικογενειακή Διαμεσολάβηση</h3>
-    <p>Στη διαμεσολάβηση, ο ρόλος του νομικού παραστάτη (άρθρο 7 Ν. 4640/2019) μεταβάλλεται ριζικά. Παύει να είναι ο "πολεμιστής" του ακροατηρίου και γίνεται <b>"νομικός σύμβουλος"</b> (Legal Counsel) στη διαδικασία ειρήνευσης.</p>
-    <ul>
-        <li><b>Προετοιμασία Πελάτη:</b> Βοηθά τον πελάτη να ξεκαθαρίσει τα BATNA/WATNA του και να εστιάσει στο βέλτιστο συμφέρον του παιδιού, συγκρατώντας τον από υπερβολικές διεκδικήσεις.</li>
-        <li><b>Νομική Οριοθέτηση:</b> Κατά τη διάρκεια της συνεδρίας, διασφαλίζει ότι οι προτεινόμενες λύσεις είναι σύννομες (δεν αντίκεινται στην αναγκαστική νομοθεσία) και εφαρμόσιμες.</li>
-        <li><b>Συντάκτης (Drafter):</b> Είναι ο αποκλειστικός υπεύθυνος για τη νομική διατύπωση και σύνταξη του τελικού Ιδιωτικού Συμφωνητικού / Πρακτικού, ώστε αυτό να μπορεί να κατατεθεί στο δικαστήριο και να αποκτήσει εκτελεστότητα.</li>
-    </ul>`,
-
-    law_4800: `<h3>11. Ο Νόμος 4800/2021 (Μεταρρυθμίσεις & Συνεπιμέλεια)</h3>
-    <p>Ο Νόμος 4800/2021 επέφερε τομές στο Οικογενειακό Δίκαιο (άρθρα 1511 ΑΚ επ.), καθιστώντας την Οικογενειακή Διαμεσολάβηση πιο αναγκαία από ποτέ.</p>
-    <div class="highlight-box" style="border-left-color: #0ea5e9;">
-        <h4 style="color: #0369a1; margin-top:0;">Οι Βασικοί Πυλώνες:</h4>
-        <ol>
-            <li><b>Από Κοινού Άσκηση της Γονικής Μέριμνας (Συνεπιμέλεια):</b> Καθιερώνεται ως ο κανόνας μετά το διαζύγιο (άρθρο 1513 ΑΚ). Οι γονείς καλούνται να συναποφασίζουν. Αυτό απαιτεί συνεργασία και συνεννόηση — στοιχεία που μόνο η διαμεσολάβηση μπορεί να εξασφαλίσει, σε αντίθεση με τη στείρα δικαστική απόφαση.</li>
-            <li><b>Τεκμήριο Επικοινωνίας (1/3):</b> Θεσπίζεται μαχητό τεκμήριο ότι ο χρόνος επικοινωνίας του τέκνου με τον γονέα με τον οποίο δεν διαμένει (εφόσον δεν υπάρχει συνεπιμέλεια), δεν μπορεί να είναι μικρότερος από το 1/3 του συνολικού χρόνου (άρθρο 1520 ΑΚ).</li>
-            <li><b>Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ):</b> Για διαφορές που αφορούν επιμέλεια, διατροφή και επικοινωνία, η προσφυγή στην ΥΑΣ (βάσει του Ν. 4640/2019) είναι αυστηρά <b>υποχρεωτική</b> επί ποινή απαραδέκτου της συζήτησης της αγωγής στο δικαστήριο.</li>
-            <li><b>Διαμεσολάβηση & Πρόγραμμα Επικοινωνίας:</b> Ο νόμος δίνει ρητά προτεραιότητα στην εξωδικαστική ρύθμιση του χρόνου επικοινωνίας και του τόπου κατοικίας μέσω έγγραφης συμφωνίας των γονέων.</li>
-        </ol>
-    </div>`,
-
-    // --- ΝΟΜΟΘΕΣΙΑ ---
     law_4640: `<h3>Νόμος 4640/2019 - Διαμεσολάβηση</h3>
     <p><b>Άρθρο 6: Υπαγωγή στη διαδικασία της ΥΑΣ</b><br>
     1. Υπάγονται υποχρεωτικά στην αρχική συνεδρία (ΥΑΣ):<br>
@@ -1268,6 +766,257 @@ const theoryData = {
     <p>Εισάγει το Ενιαίο Ψηφιακό Μητρώο παρακολούθησης υποθέσεων διαφθοράς.</p>
     <p>Για τους Διαμεσολαβητές, ο νόμος αυτός ενισχύει το πλαίσιο ελέγχου και ψηφιοποίησης των νομικών διαδικασιών, επιβάλλοντας αυστηρότερους κανόνες διαφάνειας που πρέπει να λαμβάνονται υπόψη όταν διαμεσολαβούν σε υποθέσεις όπου εμπλέκονται δημόσια πρόσωπα ή φορείς.</p>`,
 
+    // ===== ΚΤΗΜΑΤΟΛΟΓΙΚΗ ΔΙΑΜΕΣΟΛΑΒΗΣΗ =====
+    ktima_intro: `<h3>🏠 Ν. 2308/1995 — Κτηματογράφηση & Εθνικό Κτηματολόγιο</h3>
+    <p>Ο Ν. 2308/1995 (ΦΕΚ Α' 114/15.6.1995) αποτελεί τον θεμελιώδη νόμο κτηματογράφησης για τη δημιουργία του Εθνικού Κτηματολογίου. Ρυθμίζει τη διαδικασία από τη συλλογή δηλώσεων έως τις πρώτες εγγραφές στα κτηματολογικά βιβλία. Έχει τροποποιηθεί πολλές φορές (Ν. 3127/03, Ν. 3481/06, Ν. 4164/13, Ν. 4512/18, Ν. 4821/21, Ν. 5142/24, Ν. 5172/25).</p>
+    <h4>Φορέας — «Ελληνικό Κτηματολόγιο» ΝΠΔΔ</h4>
+    <p>Από τον Ν. 4512/2018 η ΕΚΧΑ ΑΕ καταργήθηκε και συστάθηκε ΝΠΔΔ με την επωνυμία «Ελληνικό Κτηματολόγιο», το οποίο είναι πλέον ο αρμόδιος φορέας για τη διενέργεια κτηματογράφησης και τη λειτουργία του Κτηματολογίου.</p>
+    <h4>Βασικά Άρθρα</h4>
+    <ul>
+        <li><b>Άρθρο 1:</b> Κήρυξη περιοχής υπό κτηματογράφηση με απόφαση Υπουργού — δημοσίευση σε εφημερίδες και κοινοποίηση σε Υπουργεία, ΟΤΑ, ΤΕΕ, Δικηγορικούς & Συμβολαιογραφικούς Συλλόγους.</li>
+        <li><b>Άρθρο 2:</b> Δηλώσεις εγγραπτέων δικαιωμάτων — υποβολή σε 3 μήνες (6 για αλλοδαπούς & Δημόσιο). Πρόστιμο 300–2.000€ για εκπρόθεσμη δήλωση.</li>
+        <li><b>Άρθρο 3/3Α:</b> Σύνταξη προσωρινών διαγραμμάτων & νομικός έλεγχος τίτλων.</li>
+        <li><b>Άρθρο 4:</b> Ανάρτηση στοιχείων επί 2 μήνες — ανακοίνωση σε εφημερίδες και δημοτικό κατάστημα.</li>
+        <li><b>Άρθρο 5:</b> Από την ανάρτηση απαγορεύεται με ποινή ακυρότητας η σύνταξη συμβολαίων χωρίς «Πιστοποιητικό κτηματογραφούμενου ακινήτου».</li>
+        <li><b>Άρθρο 6/6Α:</b> Αιτήσεις διόρθωσης εντός 2 μηνών. Πρόδηλα σφάλματα: ατελώς, χωρίς προθεσμία.</li>
+        <li><b>Άρθρο 7/7Α:</b> Ενστάσεις & Επιτροπές Εξέτασης (τριμελείς: νομικός-μηχανικός-νομικός).</li>
+        <li><b>Άρθρα 11/12:</b> Περαίωση κτηματογράφησης & πρώτες εγγραφές στα κτηματολογικά βιβλία.</li>
+    </ul>
+    <div class="highlight-box">
+        <b>⚠️ Για τον Διαμεσολαβητή:</b> Η ιδιωτική διαφορά (π.χ. αμφισβήτηση ορίων, συνιδιοκτησία) μπορεί να επιλυθεί μέσω διαμεσολάβησης. Το Πρακτικό Επιτυχούς Διαμεσολάβησης αποτελεί εγγραπτέο τίτλο στο Κτηματολόγιο (Εγχειρίδιο 5.0/2025), εφόσον συνοδεύεται από εγκεκριμένα τοπογραφικά.
+    </div>`,
+
+    ktima_types: `<h3>🏠 Τύποι Κτηματολογικών Διαφορών</h3>
+    <p>Οι κτηματολογικές διαφορές που είναι κατάλληλες για διαμεσολάβηση κατηγοριοποιούνται ως εξής:</p>
+    <h4>1. Διαφορές Συνιδιοκτησίας</h4>
+    <p>Συγκύριοι αδυνατούν να συμφωνήσουν για τη χρήση, διαχείριση ή διανομή κοινής ακίνητης περιουσίας. Συνηθισμένο σε κληρονομικές υποθέσεις, εξ αδιαιρέτου ακίνητα.</p>
+    <h4>2. Αμφισβήτηση Ορίων (Εμπράγματη Αγωγή)</h4>
+    <p>Γειτονικές ιδιοκτησίες αμφισβητούν τα κοινά τους όρια. Συνήθως απαιτεί τοπογραφικό έλεγχο και συντονισμό με μηχανικό. Η συμφωνία κατοχυρώνεται στο Κτηματολόγιο μέσω του πρακτικού.</p>
+    <h4>3. Διαφορές από Μεταβιβάσεις Ακινήτων</h4>
+    <p>Διαφορές από συμβόλαια αγοραπωλησίας, δωρεάς, ανταλλαγής — συχνά σχετίζονται με ελαττώματα ακινήτου, μη συμφωνημένα τετραγωνικά ή βάρη που δεν είχαν γνωστοποιηθεί.</p>
+    <h4>4. Αγωγές Διανομής (κοινωνία δικαιώματος)</h4>
+    <p>Αντί δικαστικής διανομής, τα μέρη μπορούν μέσω διαμεσολάβησης να συμφωνήσουν τρόπο αυτούσιας ή χρηματικής κατανομής.</p>
+    <h4>5. Πρόδηλα Σφάλματα & Ανακρίβειες</h4>
+    <p>Περιπτώσεις λανθασμένων εγγραφών (εμβαδόν, ΓΑΚ, ΚΑΕΚ) που μπορεί να επιλυθούν εξωδικαστικά μεταξύ των ενδιαφερομένων, με υποβολή αιτήματος διόρθωσης που συνοδεύει το πρακτικό.</p>`,
+
+    ktima_process: `<h3>🏠 Διαδικασία & Πρακτικό ως Εγγραπτέος Τίτλος</h3>
+    <p>Η κτηματολογική διαμεσολάβηση ακολουθεί τη γενική διαδικασία του Ν. 4640/2019, με κρίσιμες ιδιαιτερότητες:</p>
+    <h4>Βήματα Διαδικασίας</h4>
+    <ol>
+        <li><b>Προ-Διαμεσολάβηση:</b> Συλλογή κτηματολογικών στοιχείων (αποσπάσματα κτηματολογικού χάρτη, φύλλο ιδιοκτησίας), τοπογραφικών διαγραμμάτων και συμβολαίων.</li>
+        <li><b>ΥΑΣ:</b> Ενημέρωση μερών για τη διαδικασία. Διαπίστωση βούλησης για συνέχιση.</li>
+        <li><b>Συνεδρίες Διαμεσολάβησης:</b> Με παρουσία νομικών παραστατών. Συνήθως απαιτείται και η συμμετοχή πολιτικού μηχανικού/τοπογράφου για τεχνικά ζητήματα.</li>
+        <li><b>Σύνταξη Πρακτικού:</b> Το Πρακτικό Επιτυχούς Διαμεσολάβησης καταρτίζεται κατά τους τύπους του Ν. 4640/2019.</li>
+        <li><b>Κατάθεση στο Δικαστήριο:</b> Κατόπιν αιτήσεως, το πρακτικό κηρύσσεται εκτελεστό.</li>
+        <li><b>Εγγραφή στο Κτηματολόγιο:</b> Το εκτελεστό πρακτικό κατατίθεται στο Κτηματολογικό Γραφείο ως εγγραπτέα πράξη, μαζί με τα απαιτούμενα τοπογραφικά.</li>
+    </ol>
+    <div class="highlight-box">
+        <b>📋 Έκδοση 5.0 Εγχειριδίου (2025):</b> Ρητά αναγνωρίζει το Πρακτικό Επιτυχούς Διαμεσολάβησης ως τίτλο εγγραπτέο για: (α) χωρικές μεταβολές, (β) διόρθωση πρόδηλων σφαλμάτων, (γ) δικαιώματα επί ακινήτου που απορρέουν από συμφωνία — εφόσον συνοδεύεται από διάγραμμα εγκεκριμένο από αρμόδιο μηχανικό.
+    </div>`,
+
+    ktima_errors: `<h3>🏠 Πρόδηλα Σφάλματα & Διόρθωση μέσω Διαμεσολάβησης</h3>
+    <p>Τα πρόδηλα σφάλματα αποτελούν έναν από τους συνηθέστερους λόγους προσφυγής σε κτηματολογική διαμεσολάβηση, καθώς η εξωδικαστική επίλυση είναι ταχύτερη και οικονομικότερη από τη δικαστική.</p>
+    <h4>Τι είναι Πρόδηλο Σφάλμα;</h4>
+    <p>Σύμφωνα με τον Ν. 2664/1998 (άρθρο 6), πρόδηλο σφάλμα είναι κάθε ανακρίβεια που προκύπτει από λάθος κατά την αρχική κτηματογράφηση ή κατά τη μεταγενέστερη εγγραφή, και η οποία είναι εμφανής από τα ίδια τα κτηματολογικά στοιχεία.</p>
+    <h4>Συνηθισμένα Παραδείγματα</h4>
+    <ul>
+        <li>Εσφαλμένο εμβαδόν ακινήτου (αναγραφή π.χ. 85τμ αντί 185τμ)</li>
+        <li>Λανθασμένη εγγραφή συνόρων (ΒΑ αντί ΝΑ)</li>
+        <li>Λάθος ονόματος ιδιοκτήτη λόγω ομωνυμίας</li>
+        <li>Διπλοεγγραφή τμήματος ακινήτου σε δύο ΚΑΕΚ</li>
+    </ul>
+    <h4>Ρόλος Διαμεσολάβησης</h4>
+    <p>Εάν το σφάλμα αφορά διαφορά μεταξύ δύο ή περισσότερων ιδιωτών (π.χ. γείτονες που διεκδικούν τμήμα που εσφαλμένα εγγράφηκε στον έτερο), η διαμεσολάβηση επιτρέπει στα μέρη να συμφωνήσουν την ορθή κατάσταση, να συντάξουν κοινό τοπογραφικό και να υποβάλουν από κοινού αίτηση διόρθωσης, αποφεύγοντας τη δικαστική αγωγή κτηματολογικής διόρθωσης.</p>`,
+
+    // ===== ΟΙΚΟΓΕΝΕΙΑΚΗ ΔΙΑΜΕΣΟΛΑΒΗΣΗ =====
+    family_intro: `<h3>👨‍👩‍👧 Οικογενειακή Διαμεσολάβηση — Εισαγωγή & Ορισμός</h3>
+    <p>Η Οικογενειακή Διαμεσολάβηση είναι μια εξειδικευμένη μορφή διαμεσολάβησης που αφορά διαφορές μεταξύ μελών της ίδιας οικογένειας, κυρίως σε περιπτώσεις διαζυγίου, διακοπής συμβίωσης ή αναθεώρησης οικογενειακών ρυθμίσεων.</p>
+    <h4>Τι Καλύπτει;</h4>
+    <ul>
+        <li>Επιμέλεια, διατροφή και επικοινωνία τέκνων</li>
+        <li>Διανομή οικογενειακής περιουσίας και κατοικίας</li>
+        <li>Σύνταξη γονικών συμφωνιών (Parenting Plans)</li>
+        <li>Διαφορές μεταξύ συγγενών (γονείς-ενήλικα τέκνα, αδέρφια)</li>
+        <li>Αναθεώρηση υφιστάμενων δικαστικών αποφάσεων</li>
+    </ul>
+    <h4>Ιδιαιτερότητες ως Προς τη Γενική Διαμεσολάβηση</h4>
+    <p>Ο οικογενειακός διαμεσολαβητής χρειάζεται πρόσθετες δεξιότητες ψυχολογίας, ενσυναίσθησης και γνώσης του αναπτυξιακού σταδίου των παιδιών. Η συναισθηματική φόρτιση των μερών είναι πολύ υψηλότερη απ' ό,τι σε εμπορικές διαφορές, και ο στόχος δεν είναι μόνο η νομική επίλυση αλλά η διατήρηση λειτουργικών σχέσεων για χάρη των παιδιών.
+    </p>
+    <div class="highlight-box"><b>Νομική Βάση:</b> Ν. 4640/2019, άρθρο 6 παρ. 1α — Οικογενειακές διαφορές (πλην εκείνων που αφορούν προσωπική κατάσταση) υπάγονται <b>υποχρεωτικά</b> στην ΥΑΣ πριν την κατάθεση αγωγής στο δικαστήριο.</div>`,
+
+    family_phases: `<h3>👨‍👩‍👧 Οι Φάσεις της Οικογενειακής Διαμεσολάβησης</h3>
+    <p>Η οικογενειακή διαμεσολάβηση ακολουθεί τη γενική δομή, αλλά με έμφαση στη συναισθηματική αποκλιμάκωση και τις ανάγκες των παιδιών.</p>
+    <h4>Φάση 1: Προπαρασκευαστική / Αξιολόγηση Καταλληλότητας</h4>
+    <p>Ο διαμεσολαβητής διεξάγει ατομικές προσυνεδρίες (pre-mediation) με κάθε μέρος ξεχωριστά. Αξιολογεί αν υπάρχει ισορροπία δυνάμεων ή αν η κατάσταση δεν είναι κατάλληλη για διαμεσολάβηση (π.χ. ενδοοικογενειακή βία, εξάρτηση).</p>
+    <h4>Φάση 2: Κοινή Πρώτη Συνεδρία</h4>
+    <p>Εισαγωγή κανόνων, αμοιβαίος σεβασμός, καθορισμός θεμάτων προς συζήτηση (agenda). Εδώ εμφανίζεται συχνά η πιο έντονη συναισθηματική αντιπαράθεση.</p>
+    <h4>Φάση 3: Εξερεύνηση Συμφερόντων & Αναγκών</h4>
+    <p>Ο διαμεσολαβητής βοηθά κάθε μέρος να εκφράσει τα πραγματικά του συμφέροντα πέρα από τις αρχικές του θέσεις. Κεντρικό ερώτημα: «Τι χρειάζονται τα παιδιά από τον καθένα σας;»</p>
+    <h4>Φάση 4: Δημιουργία Επιλογών</h4>
+    <p>Brainstorming λύσεων για επιμέλεια, επικοινωνία, διατροφή, περιουσία. Χρήση εργαλείων όπως το Parenting Plan (Σχέδιο Γονεϊκής Ευθύνης).</p>
+    <h4>Φάση 5: Αξιολόγηση & Συμφωνία</h4>
+    <p>Αξιολόγηση κάθε επιλογής με τη μέθοδο SMART. Σύνταξη του Πρακτικού Επιτυχούς Διαμεσολάβησης, το οποίο κατατίθεται στο Μονομελές Πρωτοδικείο για να αποκτήσει ισχύ δικαστικής απόφασης.</p>`,
+
+    family_divorce_psych: `<h3>👨‍👩‍👧 Ψυχολογία του Διαζυγίου</h3>
+    <p>Η κατανόηση της ψυχολογίας του διαζυγίου είναι θεμελιώδης για τον οικογενειακό διαμεσολαβητή, καθώς καθορίζει σε μεγάλο βαθμό τη δυναμική των συνεδριών.</p>
+    <h4>Στάδια Θλίψης (Kübler-Ross) στο Διαζύγιο</h4>
+    <p>Τα μέρη δεν βρίσκονται πάντα στο ίδιο στάδιο επεξεργασίας της απώλειας:</p>
+    <ul>
+        <li><b>Άρνηση:</b> «Αυτό δεν συμβαίνει πραγματικά.» – Δυσκολία αποδοχής χωρισμού.</li>
+        <li><b>Θυμός:</b> «Γιατί μου το έκανε αυτό;» – Συχνά ο τόνος που κυριαρχεί στις πρώτες συνεδρίες.</li>
+        <li><b>Διαπραγμάτευση:</b> «Αν αλλάξεις αυτό, ίσως...» – Δείγμα πιθανής ετοιμότητας για συμφωνία.</li>
+        <li><b>Κατάθλιψη:</b> Απόσυρση, αδιαφορία, δυσκολία λήψης αποφάσεων.</li>
+        <li><b>Αποδοχή:</b> Η φάση όπου η διαμεσολάβηση είναι πιο αποτελεσματική.</li>
+    </ul>
+    <h4>Σύνδρομο Αποξένωσης Γονέα (PAS)</h4>
+    <p>Ένα φαινόμενο που ο διαμεσολαβητής πρέπει να αναγνωρίζει: ένας γονέας συστηματικά υπονομεύει τη σχέση του παιδιού με τον άλλο γονέα. Δεν αποτελεί αντικείμενο κλινικής εκτίμησης από τον διαμεσολαβητή, αλλά πρέπει να παραπέμπεται σε ψυχολόγο.</p>
+    <h4>Ο Ρόλος της Αβεβαιότητας</h4>
+    <p>Η αβεβαιότητα για το οικονομικό μέλλον, τη στέγη και την επαφή με τα παιδιά τροφοδοτεί την εχθρότητα. Ο διαμεσολαβητής πρέπει να χτίσει ένα πλαίσιο ασφάλειας: «Εδώ μπορείτε να εκφραστείτε ελεύθερα, και θα εργαστούμε για να βρούμε ένα δρόμο μπροστά.»</p>`,
+
+    family_children: `<h3>👨‍👩‍👧 Επιμέλεια & Συμφέροντα Τέκνων</h3>
+    <p>Το <b>«συμφέρον του τέκνου»</b> (best interest of the child) είναι η βασική αρχή που διέπει κάθε απόφαση στην οικογενειακή διαμεσολάβηση. Ο διαμεσολαβητής δεν αντιπροσωπεύει τα παιδιά, αλλά οφείλει να τα θέτει στο κέντρο κάθε συζήτησης.</p>
+    <h4>Μοντέλα Επιμέλειας</h4>
+    <ul>
+        <li><b>Αποκλειστική Επιμέλεια:</b> Ένας γονέας έχει την αποφασιστική εξουσία για ζητήματα εκπαίδευσης, υγείας, διαμονής. Ο άλλος έχει δικαίωμα επικοινωνίας.</li>
+        <li><b>Κοινή Επιμέλεια (Ν. 4800/2021):</b> Και οι δύο γονείς ασκούν από κοινού τη γονική μέριμνα. Απαιτεί επικοινωνία και συνεργασία.</li>
+        <li><b>Εναλλασσόμενη Κατοικία:</b> Το παιδί κατοικεί εναλλάξ και με τους δύο γονείς. Λειτουργεί εφόσον υπάρχει γεωγραφική εγγύτητα και συνεργασία.</li>
+    </ul>
+    <h4>Το Parenting Plan (Σχέδιο Γονεϊκής Ευθύνης)</h4>
+    <p>Αναλυτικό έγγραφο που καταρτίζεται κατά τη διαμεσολάβηση και ρυθμίζει:</p>
+    <ul>
+        <li>Τόπο κύριας κατοικίας τέκνου</li>
+        <li>Πρόγραμμα επικοινωνίας (καθημερινές, σαββατοκύριακα, αργίες)</li>
+        <li>Διαδικασία λήψης σημαντικών αποφάσεων</li>
+        <li>Διαχείριση παιδικών εξόδων (ιατρικά, εκπαίδευση, δραστηριότητες)</li>
+        <li>Μηχανισμός επίλυσης μελλοντικών διαφωνιών</li>
+    </ul>`,
+
+    family_law_4800: `<h3>👨‍👩‍👧 Νόμος 4800/2021 — Μεταρρύθμιση Οικογενειακού Δικαίου</h3>
+    <p>Ο Ν. 4800/2021 αποτελεί τη σημαντικότερη μεταρρύθμιση του ελληνικού οικογενειακού δικαίου της τελευταίας δεκαετίας και έχει άμεσες συνέπειες στην οικογενειακή διαμεσολάβηση.</p>
+    <h4>Κύριες Αλλαγές</h4>
+    <ul>
+        <li><b>Τεκμήριο Κοινής Επιμέλειας (άρθρο 1513 ΑΚ):</b> Μετά τον χωρισμό, αμφότεροι οι γονείς ασκούν από κοινού τη γονική μέριμνα, εκτός εάν αποδειχθεί ότι αυτό αντιβαίνει στο συμφέρον του τέκνου.</li>
+        <li><b>Ελάχιστο Χρόνο Επικοινωνίας (άρθρο 1520 ΑΚ):</b> Τεκμαίρεται ελάχιστος χρόνος επικοινωνίας με τον γονέα που δεν έχει την επιμέλεια: τουλάχιστον το 1/3 του συνολικού χρόνου.</li>
+        <li><b>Μεταφορά Κατοικίας Τέκνου (άρθρο 1519 ΑΚ):</b> Γονέας που επιθυμεί να μεταφερθεί σε άλλη πόλη/χώρα υποχρεούται να ειδοποιήσει έγκαιρα τον άλλον γονέα.</li>
+        <li><b>Ενίσχυση Ρόλου Διαμεσολάβησης:</b> Ο νόμος ρητά ενθαρρύνει τη χρήση οικογενειακής διαμεσολάβησης πριν την προσφυγή στο δικαστήριο.</li>
+    </ul>
+    <div class="highlight-box"><b>Πρακτική Σημασία για τον Διαμεσολαβητή:</b> Το νέο πλαίσιο δημιουργεί κίνητρο για διαμεσολάβηση, καθώς τα μέρη μπορούν να συμφωνήσουν λεπτομερέστερες ρυθμίσεις απ' ό,τι θα έκρινε το δικαστήριο, προσαρμοσμένες στις πραγματικές τους ανάγκες.</div>`,
+
+    family_mediator_role: `<h3>👨‍👩‍👧 Ρόλος Διαμεσολαβητή & Δικηγόρου στην Οικογενειακή Διαμεσολάβηση</h3>
+    <h4>Ο Ρόλος του Οικογενειακού Διαμεσολαβητή</h4>
+    <p>Ο οικογενειακός διαμεσολαβητής λειτουργεί με βάση τις αρχές της <b>αμεροληψίας</b>, της <b>ουδετερότητας</b> και της <b>εμπιστευτικότητας</b>. Επιπλέον, σε υποθέσεις με παιδιά, υιοθετεί μια «οπτική εστιασμένη στο παιδί» (child-focused approach).</p>
+    <p>Δεν αποφασίζει, δεν συμβουλεύει νομικά, δεν ψυχοθεραπεύει. Διευκολύνει την επικοινωνία, βοηθά στον εντοπισμό συμφερόντων και στη δημιουργία επιλογών.</p>
+    <h4>Ο Ρόλος του Δικηγόρου</h4>
+    <p>Σύμφωνα με τον Ν. 4640/2019, η παρουσία νομικού παραστάτη στην ΥΑΣ είναι υποχρεωτική. Ο δικηγόρος στην οικογενειακή διαμεσολάβηση:</p>
+    <ul>
+        <li>Ενημερώνει τον εντολέα του για τα νομικά δικαιώματα και τον BATNA (Best Alternative to Negotiated Agreement)</li>
+        <li>Αξιολογεί τις προτεινόμενες λύσεις ως προς τη νομική τους βιωσιμότητα</li>
+        <li>Δεν «πολεμά» τη διαμεσολάβηση, αλλά στηρίζει τον εντολέα να λάβει τεκμηριωμένες αποφάσεις</li>
+        <li>Βοηθά στη διατύπωση της τελικής συμφωνίας νομικά ορθά</li>
+    </ul>
+    <div class="highlight-box"><b>Κρίσιμη Διάκριση:</b> Ο δικηγόρος συμβουλεύει· ο διαμεσολαβητής διευκολύνει. Η σύγχυση αυτών των ρόλων αποτελεί από τις πιο συνηθισμένες δυσλειτουργίες στην πράξη.</div>`,
+
+    family_bafm: `<h3>👨‍👩‍👧 Κατευθυντήριες Γραμμές BAFM</h3>
+    <p>Η <b>BAFM</b> (British Association for Family Mediation / Βρετανική Ένωση Οικογενειακής Διαμεσολάβησης) αποτελεί διεθνή σημείο αναφοράς για τα πρότυπα της οικογενειακής διαμεσολάβησης, τα οποία υιοθετούν και ευρωπαϊκοί φορείς, συμπεριλαμβανομένων ελληνικών οργανισμών κατάρτισης.</p>
+    <h4>Βασικές Αρχές BAFM</h4>
+    <ul>
+        <li><b>Εθελοντική Συμμετοχή:</b> Κανένα μέρος δεν αναγκάζεται να παραμείνει.</li>
+        <li><b>Ουδετερότητα Διαμεσολαβητή:</b> Δεν εκπροσωπεί κανέναν και δεν έχει συμφέρον στο αποτέλεσμα.</li>
+        <li><b>Εμπιστευτικότητα:</b> Προστατεύεται νομικά. Εξαιρείται μόνο αν υπάρχει κίνδυνος για παιδιά.</li>
+        <li><b>Child-Inclusive Mediation:</b> Σε ορισμένες περιπτώσεις, η φωνή του παιδιού (άνω των 10 ετών) ενσωματώνεται έμμεσα στη διαδικασία, μέσω εξειδικευμένου συνεργάτη.</li>
+        <li><b>Screening:</b> Υποχρεωτικός έλεγχος πριν για ενδοοικογενειακή βία, εξαναγκασμό, σοβαρές ανισορροπίες ισχύος.</li>
+    </ul>`,
+
+    family_standards: `<h3>👨‍👩‍👧 Πρότυπα Οικογενειακού Διαμεσολαβητή</h3>
+    <p>Ο οικογενειακός διαμεσολαβητής, πέρα από τη γενική πιστοποίηση του Ν. 4640/2019, οφείλει να πληροί πρόσθετες απαιτήσεις εκπαίδευσης και ηθικής.</p>
+    <h4>Εκπαίδευση & Κατάρτιση</h4>
+    <p>Σύμφωνα με τις οδηγίες του ΕΝ ΔΙΚΑΙΩ και αντίστοιχων φορέων, το πρόγραμμα οικογενειακής διαμεσολάβησης περιλαμβάνει:</p>
+    <ul>
+        <li>Θεωρία διαμεσολάβησης & τεχνικές (βασική εκπαίδευση)</li>
+        <li>Οικογενειακό δίκαιο (Ν. 4800/2021, ΑΚ 1385-1542)</li>
+        <li>Ψυχολογία διαζυγίου & αναπτυξιακή ψυχολογία παιδιών</li>
+        <li>Τεχνικές child-focused mediation</li>
+        <li>Διαχείριση ενδοοικογενειακής βίας & screening</li>
+        <li>Πρακτική εξάσκηση (role-plays)</li>
+    </ul>
+    <h4>Δεοντολογικές Υποχρεώσεις</h4>
+    <ul>
+        <li>Αναφορά στις αρχές εάν διαπιστωθεί κίνδυνος για παιδί</li>
+        <li>Αποχή εάν υπάρχει σύγκρουση συμφερόντων</li>
+        <li>Διαρκής επαγγελματική ανάπτυξη (CPD)</li>
+        <li>Εποπτεία από έμπειρο διαμεσολαβητή (supervision)</li>
+    </ul>`,
+
+    // ===== ΕΜΠΟΡΙΚΕΣ ΥΠΟΘΕΣΕΙΣ =====
+    commercial_intro: `<h3>💼 Εμπορικές Υποθέσεις — Εισαγωγή & Πεδίο Εφαρμογής</h3>
+    <p>Η εμπορική διαμεσολάβηση αφορά διαφορές που προκύπτουν από εμπορικές συναλλαγές μεταξύ επιχειρήσεων (B2B), μεταξύ επιχειρήσεων και καταναλωτών (B2C), ή στο πλαίσιο εταιρικών σχέσεων.</p>
+    <h4>Πεδίο Εφαρμογής (Ν. 4640/2019, άρθρο 6 παρ. 1β)</h4>
+    <p>Υπάγονται υποχρεωτικά στην ΥΑΣ διαφορές που:</p>
+    <ul>
+        <li>Εκδικάζονται κατά την τακτική διαδικασία</li>
+        <li>Υπάγονται στο Μονομελές Πρωτοδικείο με αντικείμενο <b>άνω των 30.000€</b></li>
+        <li>Υπάγονται στο Πολυμελές Πρωτοδικείο (ανεξαρτήτως ποσού)</li>
+    </ul>
+    <h4>Κατηγορίες Εμπορικών Διαφορών</h4>
+    <ul>
+        <li>Αθέτηση εμπορικών συμβάσεων (προμήθειας, έργου, υπηρεσιών)</li>
+        <li>Διαφορές από τραπεζικά δάνεια και εγγυήσεις</li>
+        <li>Εταιρικές διαφορές (μεταξύ εταίρων, με διοίκηση)</li>
+        <li>Διαφορές από franchise & αντιπροσωπεία</li>
+        <li>Αθέτηση ασφαλιστηρίων συμβολαίων</li>
+        <li>Εργατικές διαφορές ανώτατων στελεχών</li>
+    </ul>`,
+
+    commercial_types: `<h3>💼 Τύποι Εμπορικών Διαφορών — Ανάλυση</h3>
+    <h4>1. Συμβατικές Διαφορές</h4>
+    <p>Η πιο συνηθισμένη κατηγορία. Περιλαμβάνει: μη εκπλήρωση παράδοσης, ελαττωματικά προϊόντα/υπηρεσίες, αθέτηση πληρωμής, ερμηνεία ρητρών σύμβασης. Τα μέρη συνήθως επιθυμούν να διατηρήσουν τη συνεργασία τους, οπότε η διαμεσολάβηση είναι ιδιαίτερα αποτελεσματική.</p>
+    <h4>2. Εταιρικές Διαφορές</h4>
+    <p>Συγκρούσεις μεταξύ εταίρων ή μετόχων για στρατηγική, διανομή κερδών, διαχείριση. Η διαμεσολάβηση είναι προτιμότερη γιατί αποφεύγει τη δημοσιοποίηση εμπορικών μυστικών και επιτρέπει δημιουργικές λύσεις (buyout, αναδιάρθρωση).</p>
+    <h4>3. Τραπεζικές & Χρηματοδοτικές Διαφορές</h4>
+    <p>Ρύθμιση δανείων, αμφισβήτηση επιτοκίων, εγγυητικές επιστολές, leasing. Συχνά εμπλέκεται ο Συνήγορος του Καταναλωτή ή ο Χρηματοοικονομικός Διαμεσολαβητής ως εναλλακτικοί μηχανισμοί.</p>
+    <h4>4. Διαφορές Κατασκευαστικού Τομέα</h4>
+    <p>Συμβάσεις έργου, υπερβάσεις κόστους, καθυστερήσεις παράδοσης, ελαττώματα κατασκευής. Απαιτείται συχνά τεχνική πραγματογνωμοσύνη παράλληλα με τη διαμεσολάβηση.</p>
+    <h4>5. Franchise & Αντιπροσωπεία</h4>
+    <p>Διαφορές για αποζημίωση κατά λήξη σύμβασης, παραβίαση εδαφικής αποκλειστικότητας, αθέτηση royalty.</p>`,
+
+    commercial_advantages: `<h3>💼 Πλεονεκτήματα Εμπορικής Διαμεσολάβησης έναντι Δικαστηρίου</h3>
+    <div class="moore-circle">
+        <div class="moore-node">
+            <h4>⚡ Ταχύτητα</h4>
+            <p>Μια εμπορική διαφορά στο Πολυμελές Πρωτοδικείο μπορεί να διαρκέσει 3-7 χρόνια. Η διαμεσολάβηση επιλύεται σε εβδομάδες ή λίγους μήνες.</p>
+        </div>
+        <div class="moore-node">
+            <h4>💰 Κόστος</h4>
+            <p>Δικαστικό κόστος (δικηγορικές αμοιβές, δικαστικά τέλη, πραγματογνώμονες) πολλαπλάσιο της αμοιβής διαμεσολαβητή. Ιδιαίτερα κρίσιμο για ΜΜΕ.</p>
+        </div>
+        <div class="moore-node">
+            <h4>🔒 Εμπιστευτικότητα</h4>
+            <p>Εμπορικά μυστικά, οικονομικά στοιχεία και εταιρικές στρατηγικές παραμένουν εκτός δημόσιου αρχείου. Κρίσιμο για επιχειρήσεις.</p>
+        </div>
+        <div class="moore-node">
+            <h4>🤝 Διατήρηση Σχέσης</h4>
+            <p>Μακροχρόνιες εμπορικές σχέσεις μπορούν να συνεχιστούν μετά τη διαμεσολάβηση. Το δικαστήριο δημιουργεί «νικητή» και «ηττημένο».</p>
+        </div>
+        <div class="moore-node">
+            <h4>🎯 Εξειδίκευση</h4>
+            <p>Ο διαμεσολαβητής μπορεί να επιλεγεί με βάση την εξειδίκευσή του (εμπορικό δίκαιο, ναυτιλία, τεχνολογία), σε αντίθεση με τον δικαστή γενικής αρμοδιότητας.</p>
+        </div>
+        <div class="moore-node">
+            <h4>🌐 Εκτελεστότητα</h4>
+            <p>Το Πρακτικό Επιτυχούς Διαμεσολάβησης, αφού κηρυχθεί εκτελεστό από ελληνικό δικαστήριο, εκτελείται και σε άλλα κράτη ΕΕ βάσει Κανονισμού (ΕΕ) 1215/2012.</p>
+        </div>
+    </div>`,
+
+    commercial_icc: `<h3>💼 Διεθνής Εμπορική Διαμεσολάβηση (ICC & UNCITRAL)</h3>
+    <p>Στις διεθνείς εμπορικές διαφορές, η διαμεσολάβηση διέπεται από διεθνή κανονιστικά πλαίσια που ο Έλληνας διαμεσολαβητής πρέπει να γνωρίζει.</p>
+    <h4>ICC Mediation Rules (2021)</h4>
+    <p>Το Διεθνές Εμπορικό Επιμελητήριο (ICC) εκδίδει κανόνες διαμεσολάβησης που χρησιμοποιούνται ευρέως σε διεθνή συμβόλαια. Βασικά χαρακτηριστικά: πλήρης εμπιστευτικότητα, ελεύθερη επιλογή διαμεσολαβητή, δυνατότητα διεξαγωγής online.</p>
+    <h4>Σύμβαση της Σιγκαπούρης (UNCITRAL, 2019)</h4>
+    <p>Η «Σύμβαση των Ηνωμένων Εθνών για Διεθνείς Διακανονισμούς που Προκύπτουν από Διαμεσολάβηση» επιτρέπει την άμεση εκτέλεση συμφωνιών διαμεσολάβησης σε κράτη που την έχουν κυρώσει, χωρίς την ανάγκη δικαστικής αναγνώρισης. Η Ελλάδα δεν την έχει ακόμη κυρώσει, αλλά αποτελεί σημαντικό εξελισσόμενο πλαίσιο.</p>
+    <h4>Ευρωπαϊκό Πλαίσιο</h4>
+    <p>Οδηγία 2008/52/ΕΚ (ενσωματωμένη στον Ν. 4640/2019) διέπει τη διασυνοριακή διαμεσολάβηση εντός ΕΕ. Εξασφαλίζει αμοιβαία εκτελεστότητα πρακτικών μεταξύ κρατών-μελών.</p>
+    <div class="highlight-box"><b>Πρακτικό Σημείο:</b> Σε συμβόλαια με διεθνή αντισυμβαλλόμενο, ο Έλληνας δικηγόρος πρέπει να εισηγείται ρήτρα διαμεσολάβησης ICC ή UNCITRAL πριν την υπογραφή, αποφεύγοντας κοστοβόρες διεθνείς διαιτησίες.</div>`,
+
     manual_ktima: `<h3>Εγχειρίδιο Ενιαίων Κανόνων Νομικού Ελέγχου (Ελληνικό Κτηματολόγιο)</h3>
     <p>Σύμφωνα με την Έκδοση 5.0 (Δεκέμβριος 2025), ο έλεγχος των εγγραπτέων πράξεων στο Κτηματολόγιο ακολουθεί αυστηρούς κανόνες.</p>
     <p>Η Κτηματολογική Διαμεσολάβηση αποτελεί κρίσιμο εργαλείο. Σύμφωνα με το εγχειρίδιο, η κατάθεση Πρακτικού Επιτυχούς Διαμεσολάβησης αποτελεί τίτλο εγγραπτέο στο Κτηματολόγιο (π.χ. για διόρθωση χωρικών μεταβολών ή πρόδηλων σφαλμάτων), εφόσον πληροί τις προϋποθέσεις νομιμότητας και συνοδεύεται από τα απαραίτητα τοπογραφικά διαγράμματα.</p>`
@@ -1285,8 +1034,8 @@ function setTab(t, btn) {
     document.getElementById(t).classList.add('active');
     if (btn) btn.classList.add('active');
     
-    // Initialize SMART questionnaire if tab opened
-    if (t === 'smart_tool') renderSmartForm();
+    // Initialize SMART if tab opened
+    if (t === 'smart_tool') calcSmart();
 }
 
 window.onload = () => { 
@@ -1297,6 +1046,5 @@ window.onload = () => {
     document.getElementById('doc_date').value = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
     renderLists(); 
     draw(); 
-    renderSmartForm();
-    loadTheory('mediation_concept_methods', document.querySelector('.lib-item'));
+    loadTheory('conflict_methodology', document.querySelector('.lib-item'));
 };
