@@ -12,7 +12,7 @@
     <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΣΥΣΤΗΜΑ ΔΙΚΟΓΡΑΦΩΝ & ΕΡΓΑΛΕΙΑ ΥΑΣ</div>
     <div class="mediator-login" style="display: flex; gap: 10px; align-items: center;">
         <span style="font-size: 0.85rem; color: #cbd5e1;">ΑΜΔ Διαμεσολαβητή:</span>
-        <input type="text" id="mediator_amd_input" placeholder="Καταχωρίστε τον ΑΜΔ σας" style="width: 100px; padding: 5px; border-radius: 4px; border: none; text-align: center; font-weight: bold;">
+        <input type="text" id="mediator_amd_input" placeholder="π.χ. 2341" style="width: 100px; padding: 5px; border-radius: 4px; border: none; text-align: center; font-weight: bold;">
         <button onclick="loadMediator()" style="padding: 5px 12px; border: none; border-radius: 4px; background: #059669; color: white; cursor: pointer; font-weight: bold;">ΑΝΑΖΗΤΗΣΗ</button>
     </div>
 </header>
@@ -37,7 +37,6 @@
                         <option value="65 ευρώ πλέον ΦΠΑ 24% (σύνολο €80,60) ανά μέρος">65 ευρώ + ΦΠΑ (Σύνολο: 80,60€)</option>
                         <option value="70 ευρώ πλέον ΦΠΑ 24% (σύνολο €86,80) ανά μέρος">70 ευρώ + ΦΠΑ (Σύνολο: 86,80€)</option>
                         <option value="75 ευρώ πλέον ΦΠΑ 24% (σύνολο €93,00) ανά μέρος" selected>75 ευρώ + ΦΠΑ (Σύνολο: 93,00€)</option>
-                        <option value="80 ευρώ πλέον ΦΠΑ 24% (σύνολο €99,20) ανά μέρος">80 ευρώ + ΦΠΑ (Σύνολο: 99,20€)</option>
                     </select>
                 </div>
 
@@ -82,18 +81,7 @@
                     <option value="enarktiri">2. Εναρκτήρια Δήλωση ΥΑΣ</option>
                     <option value="prosklisi">3. Έντυπο 3: Γνωστοποίηση (Ατομική)</option>
                     <option value="praktiko">4. Πρακτικό Περάτωσης ΥΑΣ</option>
-                    <option value="entypo1">5. Φύλλο Βασικών Στοιχείων (Έντυπο 1)</option>
                 </select>
-
-                <div class="form-group" style="margin-top:10px;">
-                    <label>Νομική Βάση ΥΑΣ (για Έντυπο 1)</label>
-                    <select id="entypo1_basis" onchange="draw()">
-                        <option value="1a">άρθρο 6 §1α ν.4640/2019 (οικογενειακή διαφορά)</option>
-                        <option value="1b1">άρθρο 6 §1β ν.4640/2019 (τακτική Μονομελούς άνω 30.000€)</option>
-                        <option value="1b2">άρθρο 6 §1β ν.4640/2019 (τακτική Πολυμελούς)</option>
-                        <option value="1g">άρθρο 6 §1γ ν.4640/2019 (ρήτρα διαμεσολάβησης)</option>
-                    </select>
-                </div>
 
                 <div id="party_select_container">
                     <div class="form-group" style="margin:0;">
@@ -108,8 +96,6 @@
                     <div id="preview" class="printable"></div>
                 </div>
                 <div class="actions">
-                    <button class="btn btn-edit" id="edit_btn" onclick="toggleEdit()">✏️ ΕΠΕΞΕΡΓΑΣΙΑ ΚΕΙΜΕΝΟΥ</button>
-                    <button class="btn btn-regen" onclick="regenerateDoc()">🔄 ΕΠΑΝΑΦΟΡΑ ΑΠΟ ΦΟΡΜΑ</button>
                     <button class="btn btn-word" onclick="exportToWord()">📘 ΕΞΑΓΩΓΗ ΣΕ WORD (.doc)</button>
                     <button class="btn btn-print" onclick="window.print()">🖨️ ΕΚΤΥΠΩΣΗ / PDF</button>
                     <button class="btn btn-export" onclick="downloadMailTemplate()">📧 ΠΑΡΑΓΩΓΗ INDEX.HTML</button>
@@ -168,17 +154,60 @@
 
     <div id="smart_tool" class="tab-content">
         <div class="smart-container">
-            <h2 style="color: var(--sidebar); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">⚖️ Αξιολόγηση Βιωσιμότητας & Εφαρμοστικότητας Πρότασης (SMART)</h2>
+            <h2 style="color: var(--sidebar); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">Αυτόματη Αξιολόγηση Πρότασης (SMART)</h2>
             <div class="form-group">
                 <label>Κείμενο Πρότασης προς αξιολόγηση (Προαιρετικό)</label>
-                <textarea id="smart_text" rows="3" placeholder="Εισάγετε την πρόταση που έκανε το μέρος..."></textarea>
+                <textarea rows="3" placeholder="Εισάγετε την πρόταση που έκανε το μέρος..."></textarea>
             </div>
-            <div id="smart_questions_container"></div>
-            <div class="smart-result" id="smart_result_box" style="margin-top: 24px;">
-                <div class="score-circle" id="smart_score" style="background: #94a3b8; font-size: 1rem; width: 90px; height: 90px;">–</div>
+            
+            <div class="smart-grid">
+                <div class="smart-card">
+                    <h3>S - Specific (Συγκεκριμένη)</h3>
+                    <p>Είναι σαφής, εστιασμένη και καλά ορισμένη; Απαντά στο "τι ακριβώς προτείνεται";</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_s" oninput="calcSmart()">
+                        <span class="slider-val" id="val_s">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>M - Measurable (Μετρήσιμη)</h3>
+                    <p>Μπορούμε να πούμε με αντικειμενικό τρόπο (KPIs) πότε ο στόχος επιτεύχθηκε;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_m" oninput="calcSmart()">
+                        <span class="slider-val" id="val_m">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>A - Achievable (Εφικτή)</h3>
+                    <p>Είναι ρεαλιστική με βάση τους πόρους, τον προϋπολογισμό και τις ικανότητες;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_a" oninput="calcSmart()">
+                        <span class="slider-val" id="val_a">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>R - Relevant (Σχετική)</h3>
+                    <p>Απαντά στο πραγματικό πρόβλημα (συμφέροντα) και συνάδει με το όραμα;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_r" oninput="calcSmart()">
+                        <span class="slider-val" id="val_r">3</span>
+                    </div>
+                </div>
+                <div class="smart-card">
+                    <h3>T - Time-bound (Χρονική)</h3>
+                    <p>Υπάρχει σαφές, ρεαλιστικό χρονοδιάγραμμα και ορόσημα υλοποίησης;</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="smart_t" oninput="calcSmart()">
+                        <span class="slider-val" id="val_t">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="smart-result" id="smart_result_box">
+                <div class="score-circle" id="smart_score">15/25</div>
                 <div class="score-text">
-                    <h3 id="smart_title">Συμπληρώστε το ερωτηματολόγιο</h3>
-                    <p id="smart_desc">Απαντήστε στις παραπάνω ερωτήσεις για να αξιολογηθεί η βιωσιμότητα και εφαρμοστικότητα της πρότασης.</p>
+                    <h3 id="smart_title">Μέτρια Πρόταση</h3>
+                    <p id="smart_desc">Απαιτούνται διευκρινίσεις. Η πρόταση έχει βάση, αλλά πρέπει να εξειδικευτεί περαιτέρω πριν γίνει αποδεκτή.</p>
                 </div>
             </div>
         </div>
@@ -187,29 +216,44 @@
     <div id="library" class="tab-content">
         <div class="lib-grid">
             <div class="lib-menu">
-                <div class="lib-section-title">Γενική Θεωρία Συγκρούσεων</div>
-                <div class="lib-item active" onclick="loadTheory('mediation_concept_methods', this)">1. Έννοια & Μέθοδοι Διαμεσολάβησης</div>
-                <div class="lib-item" onclick="loadTheory('mediation_phases', this)">2. Οι Φάσεις της Διαμεσολάβησης</div>
+                <div class="lib-section-title">Θεωρία των Συγκρούσεων</div>
+                <div class="lib-item active" onclick="loadTheory('conflict_methodology', this)">Μεθοδολογία (Ψυχολογία & Πράξη)</div>
                 <div class="lib-item" onclick="loadTheory('harvard_model', this)">Το Μοντέλο του Harvard & BATNA</div>
                 <div class="lib-item" onclick="loadTheory('smart_theory', this)">Η Μεθοδολογία SMART (Αξιολόγηση)</div>
                 <div class="lib-item" onclick="loadTheory('conflict_moore', this)">Ο Κύκλος των Συγκρούσεων (C. Moore)</div>
+                <div class="lib-item" onclick="loadTheory('conflict_intro', this)">Φύση & Ορισμός της Σύγκρουσης</div>
                 <div class="lib-item" onclick="loadTheory('conflict_escalation', this)">Κλιμάκωση (Μοντέλο Glasl)</div>
                 <div class="lib-item" onclick="loadTheory('conflict_resolution', this)">Στυλ Επίλυσης (Thomas-Kilmann)</div>
-
-                <div class="lib-section-title" style="margin-top: 20px; color: #be185d;">Οικογενειακή Διαμεσολάβηση</div>
-                <div class="lib-item" onclick="loadTheory('family_intro', this)">3. Τι είναι η Οικογενειακή Διαμεσολάβηση</div>
-                <div class="lib-item" onclick="loadTheory('divorce_psychology', this)">4. Η Ψυχολογία του Διαζυγίου</div>
-                <div class="lib-item" onclick="loadTheory('family_mediator_training', this)">7-8. Εκπαίδευση & Πρότυπα Διαμεσολαβητή</div>
-                <div class="lib-item" onclick="loadTheory('bafm_guidelines', this)">9. Κατευθυντήριες γραμμές της BAFM</div>
-                <div class="lib-item" onclick="loadTheory('lawyer_role_family', this)">10. Ο ρόλος του Δικηγόρου</div>
-                <div class="lib-item" onclick="loadTheory('law_4800', this)">11. Ο Νόμος 4800/2021 (Συνεπιμέλεια)</div>
                 
-                <div class="lib-section-title" style="margin-top: 20px;">Νομοθεσία & Εγχειρίδια</div>
+                <div class="lib-section-title" style="margin-top: 20px;">Νομοθεσία Διαμεσολάβησης</div>
                 <div class="lib-item" onclick="loadTheory('law_4640', this)">Ν. 4640/2019 (Βασικός Νόμος)</div>
                 <div class="lib-item" onclick="loadTheory('law_5197', this)">Ν. 5197/2025 (Τροποποιήσεις Δικαστών)</div>
                 <div class="lib-item" onclick="loadTheory('law_5221', this)">Ν. 5221/2025 (ΚΠολΔ & Ανακοπές)</div>
                 <div class="lib-item" onclick="loadTheory('law_5232', this)">Ν. 5232/2025 (Κυρώσεις Ε.Ε.)</div>
+                <div class="lib-item" onclick="loadTheory('law_5282', this)">Ν. 5282/2026 (Ψηφιακό Μητρώο)</div>
                 <div class="lib-item" onclick="loadTheory('manual_ktima', this)">Εγχειρίδιο Κτηματολογίου (2024)</div>
+
+                <div class="lib-section-title" style="margin-top: 20px;">🏠 Κτηματολογική Διαμεσολάβηση</div>
+                <div class="lib-item" onclick="loadTheory('ktima_intro', this)">Ν. 2308/1995 — Κτηματογράφηση (Ανάλυση)</div>
+                <div class="lib-item" onclick="loadTheory('ktima_types', this)">Τύποι Κτηματολογικών Διαφορών</div>
+                <div class="lib-item" onclick="loadTheory('ktima_process', this)">Διαδικασία & Πρακτικό (Εγγραπτέος Τίτλος)</div>
+                <div class="lib-item" onclick="loadTheory('ktima_errors', this)">Πρόδηλα Σφάλματα & Διόρθωση</div>
+
+                <div class="lib-section-title" style="margin-top: 20px;">👨‍👩‍👧 Οικογενειακή Διαμεσολάβηση</div>
+                <div class="lib-item" onclick="loadTheory('family_intro', this)">Εισαγωγή & Ορισμός</div>
+                <div class="lib-item" onclick="loadTheory('family_phases', this)">Οι Φάσεις της Οικογενειακής Διαμεσολάβησης</div>
+                <div class="lib-item" onclick="loadTheory('family_divorce_psych', this)">Ψυχολογία του Διαζυγίου</div>
+                <div class="lib-item" onclick="loadTheory('family_children', this)">Επιμέλεια & Συμφέροντα Τέκνων</div>
+                <div class="lib-item" onclick="loadTheory('family_law_4800', this)">Ν. 4800/2021 (Οικογενειακό Δίκαιο)</div>
+                <div class="lib-item" onclick="loadTheory('family_mediator_role', this)">Ρόλος Διαμεσολαβητή & Δικηγόρου</div>
+                <div class="lib-item" onclick="loadTheory('family_bafm', this)">Κατευθυντήριες Γραμμές BAFM</div>
+                <div class="lib-item" onclick="loadTheory('family_standards', this)">Πρότυπα Οικογενειακού Διαμεσολαβητή</div>
+
+                <div class="lib-section-title" style="margin-top: 20px;">💼 Εμπορικές Υποθέσεις</div>
+                <div class="lib-item" onclick="loadTheory('commercial_intro', this)">Εισαγωγή & Πεδίο Εφαρμογής</div>
+                <div class="lib-item" onclick="loadTheory('commercial_types', this)">Τύποι Εμπορικών Διαφορών</div>
+                <div class="lib-item" onclick="loadTheory('commercial_advantages', this)">Πλεονεκτήματα έναντι Δικαστηρίου</div>
+                <div class="lib-item" onclick="loadTheory('commercial_icc', this)">Διεθνής Εμπορική Διαμεσολάβηση (ICC)</div>
             </div>
             <div class="lib-content" id="theory_content">
                 </div>
