@@ -1308,6 +1308,189 @@ const theoryData = {
         <b>5.</b> Περιλαμβάνει η συμφωνία μεταβίβαση εμπράγματου; → Απαιτείται συμβολαιογραφικό (αναβλητική αίρεση πρακτικού)
     </div>`,
 
+    ktima_quickref: `<h3>🔍 Πίνακας Γρήγορης Αναφοράς — Κτηματολογική Διαμεσολάβηση</h3>
+    <style>
+    .ref-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .ref-table th { padding:10px 12px; text-align:left; font-weight:500; font-size:12px; color:var(--color-text-secondary); border-bottom:1px solid var(--color-border-secondary); background:var(--color-background-secondary); }
+    .ref-table td { padding:9px 12px; border-bottom:0.5px solid var(--color-border-tertiary); vertical-align:top; color:var(--color-text-primary); line-height:1.5; }
+    .ref-table tr:last-child td { border-bottom:none; }
+    .ref-table tr:hover td { background:var(--color-background-secondary); }
+    .qbadge { display:inline-block; font-size:11px; font-weight:500; padding:2px 8px; border-radius:4px; white-space:nowrap; }
+    .qbadge-red { background:#FCEBEB; color:#A32D2D; }
+    .qbadge-green { background:#EAF3DE; color:#27500A; }
+    .qbadge-amber { background:#FAEEDA; color:#633806; }
+    .qbadge-gray { background:#F1EFE8; color:#444441; }
+    .qsection-header td { background:var(--color-background-tertiary); font-weight:500; font-size:12px; color:var(--color-text-secondary); padding:6px 12px; letter-spacing:0.03em; }
+    .qart { font-size:11px; color:var(--color-text-tertiary); display:block; margin-top:2px; }
+    </style>
+    <input type="text" id="qfilter" placeholder="Αναζήτηση περίπτωσης..." oninput="qFilterTable(this.value)" style="width:100%; margin-bottom:12px; font-size:13px;">
+    <div style="overflow-x:auto;">
+    <table class="ref-table" id="qmain-table">
+    <thead>
+    <tr>
+      <th style="width:26%">Περίπτωση</th>
+      <th style="width:18%">Νομική Βάση</th>
+      <th style="width:14%">Διαμεσολάβηση</th>
+      <th style="width:14%">Τύπος</th>
+      <th style="width:28%">Κρίσιμο Σημείο</th>
+    </tr>
+    </thead>
+    <tbody id="qtbody">
+    <tr class="qsection-header"><td colspan="5">Κατηγορία Α — Υπάγονται σε Διαμεσολάβηση</td></tr>
+    <tr>
+      <td>Αγωγή ανακριβούς πρώτης εγγραφής<span class="qart">άρθρο 6§2α ν.2664/98</span></td>
+      <td>Ν. 2664/98<br>Ν. 5232/2025</td>
+      <td><span class="qbadge qbadge-red">Υποχρεωτική</span></td>
+      <td>Ειδική κτηματολογική<br><span class="qart">Ειδικό μητρώο</span></td>
+      <td>ΥΑΣ πριν τη συζήτηση. Επιτυχές πρακτικό → άμεση καταχώριση + διάγρ. γεωμ. μεταβολής. Ισχύει από 16.9.2025.</td>
+    </tr>
+    <tr>
+      <td>Αγωγή διόρθωσης μεταγενέστερων εγγραφών<span class="qart">άρθρο 13§2 ν.2664/98</span></td>
+      <td>Ν. 2664/98<br>Ν. 4640/2019</td>
+      <td><span class="qbadge qbadge-amber">Υποχρεωτική</span></td>
+      <td>Κοινή (Ν.4640)<br><span class="qart">Γενικό μητρώο</span></td>
+      <td>Αν σωρεύεται με §6§2 → ακολουθείται η αυστηρότερη ειδική κτηματολογική.</td>
+    </tr>
+    <tr>
+      <td>Αγωγή αποζημίωσης εκτοπισθέντος<span class="qart">άρθρο 7§2 ν.2664/98</span></td>
+      <td>Ν. 2664/98<br>Ν. 4640/2019</td>
+      <td><span class="qbadge qbadge-amber">Υποχρεωτική</span></td>
+      <td>Κοινή (Ν.4640)<br><span class="qart">Γενικό μητρώο</span></td>
+      <td>Μόνο αποζημίωση — όχι αυτούσιο ακίνητο. Αμάχητο τεκμήριο έχει ήδη οριστικοποιηθεί.</td>
+    </tr>
+    <tr>
+      <td>Εμπορικές διαφορές<span class="qart">Ν. 4640/2019</span></td>
+      <td>Ν. 4640/2019</td>
+      <td><span class="qbadge qbadge-red">Υποχρεωτική</span></td>
+      <td>Κοινή (Ν.4640)<br><span class="qart">Γενικό μητρώο</span></td>
+      <td>&gt;30.000€ → Μονομελές. Ανεξαρτήτως ποσού → Πολυμελές.</td>
+    </tr>
+    <tr>
+      <td>Οικογενειακές διαφορές<span class="qart">Ν. 4640/2019</span></td>
+      <td>Ν. 4640/2019</td>
+      <td><span class="qbadge qbadge-red">Υποχρεωτική</span></td>
+      <td>Κοινή (Ν.4640)<br><span class="qart">Γενικό μητρώο</span></td>
+      <td>Εκτός περ. α',β',γ' παρ.1 και παρ.2 άρθρου 592 ΚΠολΔ.</td>
+    </tr>
+    <tr>
+      <td>Αγωγές αμφισβήτησης ορίων<span class="qart">εμπράγματο δίκαιο</span></td>
+      <td>Ν. 4640/2019</td>
+      <td><span class="qbadge qbadge-amber">Υποχρεωτική</span></td>
+      <td>Κοινή (Ν.4640)</td>
+      <td>Οριακές διαφορές γειτονικών ιδιοκτησιών.</td>
+    </tr>
+    <tr>
+      <td>Αγωγές διανομής — κοινωνία δικαιώματος<span class="qart">εμπράγματο δίκαιο</span></td>
+      <td>Ν. 4640/2019</td>
+      <td><span class="qbadge qbadge-amber">Υποχρεωτική</span></td>
+      <td>Κοινή (Ν.4640)</td>
+      <td>Αυτούσια ή χρηματική κατανομή μεταξύ συγκυρίων.</td>
+    </tr>
+    <tr>
+      <td>Υποθήκες / Προσημειώσεις (ΑΚ 1274)<span class="qart">εμπράγματο δίκαιο</span></td>
+      <td>ΑΚ 1274<br>Ν. 5095/2024</td>
+      <td><span class="qbadge qbadge-amber">Υποχρεωτική</span></td>
+      <td>Κοινή (Ν.4640)</td>
+      <td>Μετά τον Ν. 5095/2024.</td>
+    </tr>
+    <tr>
+      <td>Ανακοπές αναγκαστικής εκτέλεσης<span class="qart">π.χ. άρθρο 632 ΚΠολΔ</span></td>
+      <td>Ν. 5221/2025</td>
+      <td><span class="qbadge qbadge-green">Ενθαρρύνεται</span></td>
+      <td>Κοινή (Ν.4640)</td>
+      <td>Εντόνως ενθαρρυνόμενη εξωδικαστική ρύθμιση για αποσυμφόρηση.</td>
+    </tr>
+    <tr class="qsection-header"><td colspan="5">Κατηγορία Β — ΔΕΝ Υπάγονται σε Διαμεσολάβηση</td></tr>
+    <tr>
+      <td>Ακίνητο «αγνώστου ιδιοκτήτη»<span class="qart">άρθρο 6§3 ν.2664/98</span></td>
+      <td>Ν. 2664/98</td>
+      <td><span class="qbadge qbadge-gray">Εκούσια</span></td>
+      <td>Κτηματολογικός Δικαστής</td>
+      <td>Επίδοση στο Δημόσιο — τεκμήριο συναίνεσης μετά 60 ημέρες σιωπής.</td>
+    </tr>
+    <tr>
+      <td>Μεταφορά παρωχημένων πράξεων<span class="qart">άρθρο 6§4 ν.2664/98</span></td>
+      <td>Ν. 2664/98</td>
+      <td><span class="qbadge qbadge-gray">Εκούσια</span></td>
+      <td>ΠρΚΓ → αντιρρήσεις: ΚτημΔικ</td>
+      <td>Απαραίτητη ανυπαρξία ενδιαμέσως ασύμβιβαστης εγγραφής. ΔΕΝ εφαρμόζεται διαμεσολάβηση ούτε στις αντιρρήσεις.</td>
+    </tr>
+    <tr>
+      <td>Διόρθωση πρόδηλου σφάλματος<span class="qart">άρθρο 18 ν.2664/98</span></td>
+      <td>Ν. 2664/98</td>
+      <td><span class="qbadge qbadge-gray">Διοικητική</span></td>
+      <td>ΠρΚΓ</td>
+      <td>Αυτεπάγγελτα ή ατελής αίτηση. Χωρίς χρονικό περιορισμό (§α). Απόφαση εντός 30 εργάσιμων.</td>
+    </tr>
+    <tr>
+      <td>Διόρθωση γεωμετρικών στοιχείων<span class="qart">άρθρο 19§2 ν.2664/98</span></td>
+      <td>Ν. 2664/98</td>
+      <td><span class="qbadge qbadge-gray">Διοικητική</span></td>
+      <td>ΠρΚΓ → προσφυγή: ΚτημΔικ</td>
+      <td>Ατελώς. Χωρίς προθεσμία. Αρχικές και μεταγενέστερες εγγραφές (ΑΠ 1632/2011). Προσφυγή εντός 15 ημ.</td>
+    </tr>
+    <tr>
+      <td>Διόρθωση γενικών στοιχείων<span class="qart">άρθρο 19§1 ν.2664/98</span></td>
+      <td>Ν. 2664/98</td>
+      <td><span class="qbadge qbadge-gray">Εκούσια</span></td>
+      <td>Άρθρο 782 ΚΠολΔ</td>
+      <td>Κατόπιν αιτήσεως — εκούσια δικαιοδοσία.</td>
+    </tr>
+    <tr>
+      <td>Αυτεπάγγελτη διόρθωση δασικών<span class="qart">άρθρο 19§5 & Ν.5142/2024</span></td>
+      <td>Ν. 2664/98<br>Ν. 5142/2024</td>
+      <td><span class="qbadge qbadge-gray">Διοικητική</span></td>
+      <td>ΠρΚΓ αυτεπάγγελτα</td>
+      <td>Δεκτή αντίρρηση ΕπΕξ.Αντ. ή παραχωρητήριο ή εξαιρούμενη περιοχή. Χωρίς δίκη.</td>
+    </tr>
+    <tr>
+      <td>Μονομερής τροπ. σύστασης ιδιοκτησίας<span class="qart">Ν. 5142/2024</span></td>
+      <td>Ν. 5142/2024</td>
+      <td><span class="qbadge qbadge-gray">Διοικητική</span></td>
+      <td>Διοικητική διαδικασία</td>
+      <td>Χωρίς συναίνεση όλων των συνιδιοκτητών — μόνο υπό προϋποθέσεις.</td>
+    </tr>
+    <tr>
+      <td>Εγγραφή απόφασης αναδασμού<span class="qart">άρθρο 19§3 ν.2664/98</span></td>
+      <td>Ν. 2664/98</td>
+      <td><span class="qbadge qbadge-gray">Διοικητική</span></td>
+      <td>ΠρΚΓ</td>
+      <td>Αυτεπαγγέλτως ή κατόπιν αιτήσεως.</td>
+    </tr>
+    <tr>
+      <td>Σφάλματα χωρίς κυρωμένο δασικό χάρτη<span class="qart">άρθρο 19§4 ν.2664/98</span></td>
+      <td>Ν. 2664/98</td>
+      <td><span class="qbadge qbadge-gray">Διοικητική</span></td>
+      <td>ΠρΚΓ</td>
+      <td>Διόρθωση σε περιοχές χωρίς κυρωμένο δασικό χάρτη.</td>
+    </tr>
+    </tbody>
+    </table>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--color-text-secondary);">
+      <span><span class="qbadge qbadge-red">Υποχρεωτική</span> Ειδική κτηματολογική</span>
+      <span><span class="qbadge qbadge-amber">Υποχρεωτική</span> Κοινή ΥΑΣ</span>
+      <span><span class="qbadge qbadge-green">Ενθαρρύνεται</span> Προαιρετική</span>
+      <span><span class="qbadge qbadge-gray">Εκούσια / Διοικητική</span> Εκτός διαμεσολάβησης</span>
+    </div>
+    <script>
+    function qFilterTable(q) {
+      q = q.toLowerCase();
+      document.querySelectorAll('#qtbody tr:not(.qsection-header)').forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+      document.querySelectorAll('#qtbody tr.qsection-header').forEach(h => {
+        let next = h.nextElementSibling;
+        let vis = false;
+        while(next && !next.classList.contains('qsection-header')) {
+          if(next.style.display !== 'none') vis = true;
+          next = next.nextElementSibling;
+        }
+        h.style.display = vis ? '' : 'none';
+      });
+    }
+    <\/script>`,
+
     ktima_types: `<h3>🏠 Τύποι Κτηματολογικών Διαφορών</h3>
     <p>Οι κτηματολογικές διαφορές που είναι κατάλληλες για διαμεσολάβηση κατηγοριοποιούνται ως εξής:</p>
     <h4>1. Διαφορές Συνιδιοκτησίας</h4>
