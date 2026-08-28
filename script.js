@@ -198,6 +198,160 @@ async function autoFillParty(val, idx, isResp) {
 }
 
 // ==========================================
+// ΑΠΟΘΗΚΕΥΣΗ / ΦΟΡΤΩΣΗ — localStorage + JSON backup
+// ==========================================
+
+function getFormState() {
+    return {
+        version: 1,
+        saved_at: new Date().toISOString(),
+        m_data,
+        reqs,
+        resps,
+        fields: {
+            mediator_amd: document.getElementById('mediator_amd_input')?.value || '',
+            m_fee:        document.getElementById('m_fee')?.value || '',
+            p_court:      document.getElementById('p_court')?.value || '',
+            p_court_d:    document.getElementById('p_court_d')?.value || '',
+            p_court_n:    document.getElementById('p_court_n')?.value || '',
+            yas_date:     document.getElementById('yas_date')?.value || '',
+            yas_time:     document.getElementById('yas_time')?.value || '',
+            z_link:       document.getElementById('z_link')?.value || '',
+            z_id:         document.getElementById('z_id')?.value || '',
+            z_pass:       document.getElementById('z_pass')?.value || '',
+            notify_date:  document.getElementById('notify_date')?.value || '',
+            doc_date:     document.getElementById('doc_date')?.value || '',
+            doc_type:     document.getElementById('doc_type')?.value || 'email'
+        }
+    };
+}
+
+function applyFormState(state) {
+    if (!state || !state.fields) return;
+    if (state.m_data) Object.assign(m_data, state.m_data);
+    if (state.reqs)   reqs  = state.reqs;
+    if (state.resps)  resps = state.resps;
+    const f = state.fields;
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+    set('mediator_amd_input', f.mediator_amd);
+    set('m_fee',       f.m_fee);
+    set('p_court',     f.p_court);
+    set('p_court_d',   f.p_court_d);
+    set('p_court_n',   f.p_court_n);
+    set('yas_date',    f.yas_date);
+    set('yas_time',    f.yas_time);
+    set('z_link',      f.z_link);
+    set('z_id',        f.z_id);
+    set('z_pass',      f.z_pass);
+    set('notify_date', f.notify_date);
+    set('doc_date',    f.doc_date);
+    set('doc_type',    f.doc_type);
+    if (f.yas_date) showYasDay(f.yas_date);
+    renderLists();
+    draw();
+}
+
+function autoSave() {
+    try {
+        localStorage.setItem('mediationPortal_state', JSON.stringify(getFormState()));
+        showSaveIndicator();
+    } catch(e) { console.warn('AutoSave failed:', e); }
+}
+
+function loadLocalDB() {
+    try {
+        const raw = localStorage.getItem('mediationPortal_state');
+        if (!raw) return;
+        const state = JSON.parse(raw);
+        applyFormState(state);
+        const d = new Date(state.saved_at);
+        const label = d.toLocaleDateString('el-GR') + ' ' + d.toLocaleTimeString('el-GR', {hour:'2-digit', minute:'2-digit'});
+        showToast('✅ Φορτώθηκαν δεδομένα (' + label + ')', '#059669');
+    } catch(e) { console.warn('loadLocalDB failed:', e); }
+}
+
+function exportJSON() {
+    const state = getFormState();
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    a.href = url;
+    a.download = `diameso_backup_${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('💾 Εξαγωγή backup ολοκληρώθηκε', '#2563eb');
+}
+
+function importJSON() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const state = JSON.parse(ev.target.result);
+                if (!state.version || !state.fields) throw new Error('Μη έγκυρο αρχείο');
+                applyFormState(state);
+                autoSave();
+                showToast('✅ Τα δεδομένα φορτώθηκαν επιτυχώς!', '#059669');
+            } catch(err) {
+                showToast('❌ Σφάλμα: Μη έγκυρο αρχείο backup', '#dc2626');
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function clearAll() {
+    if (!confirm('Να διαγραφούν όλα τα δεδομένα της φόρμας;')) return;
+    reqs  = [emptyPerson()];
+    resps = [emptyPerson()];
+    Object.assign(m_data, { n:'', s:'', f:'', am:'', iban:'', bank:'', addr:'', email:'' });
+    ['mediator_amd_input','m_fee','p_court','p_court_d','p_court_n',
+     'yas_date','yas_time','z_link','z_id','z_pass','notify_date','doc_date'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const dt = document.getElementById('doc_type');
+    if (dt) dt.value = 'email';
+    const yd = document.getElementById('yas_day_label');
+    if (yd) yd.textContent = '';
+    localStorage.removeItem('mediationPortal_state');
+    renderLists();
+    draw();
+    showToast('🗑️ Η φόρμα καθαρίστηκε', '#6b7280');
+}
+
+function showToast(msg, color = '#1d4ed8') {
+    let t = document.getElementById('save_toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'save_toast';
+        t.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.background = color;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+function showSaveIndicator() {
+    const el = document.getElementById('save_indicator');
+    if (!el) return;
+    el.textContent = '💾 ' + new Date().toLocaleTimeString('el-GR', {hour:'2-digit', minute:'2-digit'});
+    el.style.opacity = '1';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = '0.4'; }, 3000);
+}
+
+// ==========================================
 // 2. UI RENDERING FUNCTIONS
 // ==========================================
 function addReq() { reqs.push(emptyPerson()); renderLists(); draw(); }
@@ -279,6 +433,7 @@ function updatePartySelect() {
 function changeParty() { currentPartyIdx = parseInt(document.getElementById('party_select').value); draw(); }
 
 function draw() {
+    autoSave();
     const d = {
         fee: document.getElementById('m_fee').value,
         subj: document.getElementById('p_subj').value || "................",
