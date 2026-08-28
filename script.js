@@ -643,8 +643,62 @@ function exportToWord() {
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head><meta charset='utf-8'>
         <style>
-            @page { size: 21cm 29.7cm; margin: 2.54cm; }
-            body { font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.5; text-align: justify; }
+            @page {
+                size: 21cm 29.7cm;
+                margin: 2.54cm 2.54cm 2.54cm 2.54cm;
+                mso-page-orientation: portrait;
+            }
+            body {
+                font-family: "Times New Roman", serif;
+                font-size: 12pt;
+                line-height: 1.5;
+                text-align: justify;
+                text-justify: inter-word;
+                word-spacing: normal;
+                letter-spacing: normal;
+                hyphens: auto;
+                -webkit-hyphens: auto;
+                margin: 0;
+                padding: 0;
+                color: #000000;
+            }
+            p, div {
+                line-height: 1.5;
+                text-align: justify;
+                text-justify: inter-word;
+                word-spacing: normal;
+                letter-spacing: normal;
+                margin-bottom: 6pt;
+            }
+            b, strong {
+                font-weight: bold;
+            }
+            h1, h2, h3 {
+                text-align: center;
+                font-family: "Times New Roman", serif;
+                font-size: 13pt;
+                font-weight: bold;
+                line-height: 1.5;
+                margin-bottom: 12pt;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 11pt;
+                line-height: 1.4;
+            }
+            td, th {
+                border: 1pt solid #000;
+                padding: 4pt 6pt;
+                vertical-align: top;
+            }
+            .printable {
+                font-family: "Times New Roman", serif;
+                font-size: 12pt;
+                line-height: 1.5;
+                text-align: justify;
+            }
+            a { color: #000; text-decoration: underline; }
         </style>
         </head>
         <body>${html}</body></html>`;
@@ -661,26 +715,83 @@ function downloadMailTemplate() {
     const z_date = document.getElementById('yas_date').value;
     const z_time = document.getElementById('yas_time').value;
     const z_link = document.getElementById('z_link').value;
-    const z_id = document.getElementById('z_id').value;
+    const z_id   = document.getElementById('z_id').value;
     const z_pass = document.getElementById('z_pass').value;
 
-    const html = `<!DOCTYPE html><html lang="el"><body style="background:#2c3e50; padding:40px; font-family:Arial;"><div style="max-width:600px; margin:auto; background:#34495e; padding:30px; border-radius:10px; color:white; line-height:1.6;">
-    <p>Αξιότιμες Κυρίες & Κύριοι,</p><p>Σε συνέχεια της επικοινωνίας μας αποστέλλω: την πρόσκληση για την υποχρεωτική αρχική συνεδρία διαμεσολάβησης καθώς και τον ΤΡΟΠΟ, ΤΟΠΟ, και ΧΡΟΝΟ διεξαγωγής της Υποχρεωτικής Αρχικής Συνεδρίας, τα βασικά στοιχεία των μερών και τα δικά μου και σύντομη περιγραφή της διαφοράς σας, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα</p>
-    <p>Υπενθυμίζω ότι για την διεξαγωγή της Υ.Α.Σ η αμοιβή μου ανέρχεται στο ποσό των ${fee} το οποίο θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στην συνημμένη πρόσκληση.</p>
-    <p>Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.) ως αναπόσπαστο μέρος της διαμεσολάβησης, αποτελεί έναν νεοσύστατο θεσμό στην χώρα μας που λειτουργεί ως υποχρεωτικό προστάδιο λίγο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
-    <p>Η Διαμεσολάβηση αποτελεί μια προσπάθεια εξωδικαστικής επίλυσης της διαφοράς με επίκεντρο εσάς και θεματοφύλακες του νόμου τους νομικούς παραστάτες σας. Πρόκειται για μια διαρθρωμένη διαδικασία με βασικά χαρακτηριστικά την εμπιστευτικότητα και την ιδιωτική αυτονομία.</p>
-    <p>Ο διαμεσολαβητής, νοείται ένα τρίτο πρόσωπο σε σχέση με τα συμμετέχοντα μέρη και τη διαφορά, το οποίο αναλαμβάνει να διαμεσολαβήσει με κατάλληλο, αποτελεσματικό και αμερόληπτο τρόπο, διευκολύνοντας τα να βρουν μια κοινά αποδεκτή λύση για τη διαφορά τους.</p>
-    <p>Η διαμεσολάβηση είναι μια διαδικασία:<br>
-    - <strong><span style="color:rgb(255, 171, 1);">εκούσια</span></strong>, διότι προσέρχεστε και παραμένετε σε αυτήν εθελοντικά<br>
-    - <strong><span style="color:rgb(255, 171, 1);">μη δεσμευτική</span></strong>, μέχρι τη στιγμή που θα υπογράψετε τη συμφωνία σας<br>
-    - <strong><span style="color:rgb(255, 171, 1);">απόλυτα εμπιστευτική</span></strong> διότι οτιδήποτε ακουστεί, οποιεσδήποτε προσφορές, παραχωρήσεις και παραδοχές που τυχόν προκύψουν, σε περίπτωση που δεν καταλήξετε σε συμφωνία δεν μπορούν να χρησιμοποιηθούν στο Δικαστήριο. Οτιδήποτε ειπωθεί και προκύψει κατά τη διάρκεια της διαδικασίας δεν μπορεί να κοινοποιηθεί σε τρίτους ούτε και να αποτελέσει αποδεικτικό στοιχείο σε άλλες διαδικασίες, όπως διαιτησία ή Δικαστήριο.</p>
-    <p><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
-    <p><strong>Στόχος μας:</strong> μέσα από την καλόπιστη συμπεριφορά και την συναλλακτική ευθύτητα όλων είναι η κατάληξη σε μια κοινά αποδεκτή συμφωνία !!!</p>
-    <div style="border:2px solid orange; padding:15px; text-align:center; background:rgba(0,0,0,0.2);">
-    <h3 style="color:orange; margin-top: 0;">ΣΤΟΙΧΕΙΑ ΣΥΝΔΕΣΗΣ (ΔΙΑΔΙΚΤΥΑΚΑ)</h3><p>Ημερομηνία / Ώρα: ${fmtD(z_date)} στις ${z_time}</p><p>Link: <a href="${z_link}" style="color:orange;">${z_link}</a></p><p>Meeting ID: ${z_id} <br><br> Passcode: ${z_pass}</p></div></div></body></html>`;
+    // Μορφοποίηση ημερομηνίας για ημερολόγιο
+    const MONTHS_GR = ['ΙΑΝΟΥΑΡΙΟΥ','ΦΕΒΡΟΥΑΡΙΟΥ','ΜΑΡΤΙΟΥ','ΑΠΡΙΛΙΟΥ','ΜΑΪΟΥ','ΙΟΥΝΙΟΥ',
+                       'ΙΟΥΛΙΟΥ','ΑΥΓΟΥΣΤΟΥ','ΣΕΠΤΕΜΒΡΙΟΥ','ΟΚΤΩΒΡΙΟΥ','ΝΟΕΜΒΡΙΟΥ','ΔΕΚΕΜΒΡΙΟΥ'];
+    const DAYS_GR   = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+    let calDay = '??', calMonth = '???', calYear = '????', calDayName = '?????';
+    if (z_date) {
+        const dt = new Date(z_date + 'T12:00:00');
+        calDay     = dt.getDate();
+        calMonth   = MONTHS_GR[dt.getMonth()];
+        calYear    = dt.getFullYear();
+        calDayName = DAYS_GR[dt.getDay()];
+    }
+
+    const calendarWidget = `
+<div style="margin:20px auto; max-width:340px; font-family:Arial, sans-serif; border-radius:14px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,0.35);">
+  <!-- Κεφαλίδα ημερολογίου -->
+  <div style="background:#e67e22; padding:14px 20px; text-align:center;">
+    <div style="color:#fff; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; opacity:0.9;">${calMonth} ${calYear}</div>
+  </div>
+  <!-- Ημέρα -->
+  <div style="background:#fff; padding:16px 20px 10px; text-align:center; border-left:1px solid #ddd; border-right:1px solid #ddd;">
+    <div style="font-size:72px; font-weight:900; color:#2c3e50; line-height:1; margin-bottom:4px;">${calDay}</div>
+    <div style="font-size:18px; font-weight:700; color:#e67e22; text-transform:uppercase; letter-spacing:1px;">${calDayName}</div>
+  </div>
+  <!-- Ώρα -->
+  <div style="background:#2c3e50; padding:12px 20px; text-align:center; border-left:1px solid #ddd; border-right:1px solid #ddd; border-bottom:1px solid #ddd; border-radius:0 0 14px 14px;">
+    <div style="color:#f39c12; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px;">ΩΡΑ ΕΝΑΡΞΗΣ</div>
+    <div style="color:#fff; font-size:32px; font-weight:900; letter-spacing:3px;">${z_time || '--:--'}</div>
+  </div>
+</div>`;
+
+    const calendarWidgetZoom = `
+<div style="margin:20px auto; max-width:400px; font-family:Arial, sans-serif;">
+  ${calendarWidget}
+  <!-- Στοιχεία σύνδεσης -->
+  <div style="background:rgba(0,0,0,0.25); border:2px solid #e67e22; border-radius:10px; padding:15px; margin-top:14px; text-align:center;">
+    <div style="color:#e67e22; font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:8px;">🔗 ΣΤΟΙΧΕΙΑ ΤΗΛΕΔΙΑΣΚΕΨΗΣ</div>
+    <p style="margin:6px 0; font-size:13px;">Link: <a href="${z_link}" style="color:#f39c12; word-break:break-all;">${z_link}</a></p>
+    <p style="margin:6px 0; font-size:13px;">Meeting ID: <strong>${z_id}</strong></p>
+    <p style="margin:6px 0; font-size:13px;">Passcode: <strong>${z_pass}</strong></p>
+  </div>
+</div>`;
+
+    const html = `<!DOCTYPE html>
+<html lang="el">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="background:#2c3e50; padding:30px 20px; font-family:Arial, sans-serif; margin:0;">
+<div style="max-width:600px; margin:auto; background:#34495e; padding:30px; border-radius:12px; color:white; line-height:1.7;">
+
+  <p>Αξιότιμες Κυρίες &amp; Αξιότιμοι Κύριοι,</p>
+  <p>Σε συνέχεια της επικοινωνίας μας αποστέλλω: την πρόσκληση για την Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης, καθώς και τον <strong>ΤΡΟΠΟ, ΤΟΠΟ και ΧΡΟΝΟ</strong> διεξαγωγής της, τα βασικά στοιχεία των μερών και σύντομη περιγραφή της διαφοράς σας, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα.</p>
+  <p>Υπενθυμίζω ότι για τη διεξαγωγή της Υ.Α.Σ. η αμοιβή μου ανέρχεται στο ποσό των <strong>${fee}</strong>, το οποίο θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στη συνημμένη πρόσκληση.</p>
+
+  <!-- ΗΜΕΡΟΛΟΓΙΟ + ΣΤΟΙΧΕΙΑ ZOOM -->
+  <div style="border-top:1px solid rgba(255,255,255,0.15); border-bottom:1px solid rgba(255,255,255,0.15); padding:20px 0; margin:20px 0;">
+    <div style="text-align:center; color:#f39c12; font-size:14px; font-weight:700; letter-spacing:1px; margin-bottom:16px;">📅 ΗΜΕΡΟΜΗΝΙΑ &amp; ΩΡΑ ΥΠΟΧΡΕΩΤΙΚΗΣ ΑΡΧΙΚΗΣ ΣΥΝΕΔΡΙΑΣ</div>
+    ${calendarWidgetZoom}
+  </div>
+
+  <p>Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.) αποτελεί αναπόσπαστο μέρος της διαμεσολάβησης και λειτουργεί ως υποχρεωτικό προστάδιο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
+  <p>Η Διαμεσολάβηση είναι μια διαρθρωμένη διαδικασία με βασικά χαρακτηριστικά την εμπιστευτικότητα και την ιδιωτική αυτονομία. Ο διαμεσολαβητής είναι ένα τρίτο, ουδέτερο και αμερόληπτο πρόσωπο, που διευκολύνει τα μέρη να βρουν μια κοινά αποδεκτή λύση.</p>
+  <p>Η διαμεσολάβηση είναι:<br>
+  &nbsp;– <strong><span style="color:#f1c40f;">εκούσια</span></strong>, διότι προσέρχεστε και παραμένετε εθελοντικά<br>
+  &nbsp;– <strong><span style="color:#f1c40f;">μη δεσμευτική</span></strong>, μέχρι την υπογραφή της συμφωνίας<br>
+  &nbsp;– <strong><span style="color:#f1c40f;">απόλυτα εμπιστευτική</span></strong> — οτιδήποτε ειπωθεί δεν μπορεί να χρησιμοποιηθεί στο Δικαστήριο ούτε να κοινοποιηθεί σε τρίτους</p>
+  <p><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
+  <p><strong>Στόχος μας:</strong> μέσα από την καλόπιστη συνεργασία όλων, η κατάληξη σε μια κοινά αποδεκτή συμφωνία.</p>
+  <p style="margin-top:20px; font-size:13px; color:rgba(255,255,255,0.6);">Θα ακολουθήσει τηλεφωνική επικοινωνία τόσο με εσάς όσο και με τους δικηγόρους σας.<br>Παραμένω στη διάθεσή σας για οποιαδήποτε διευκρίνιση.</p>
+
+</div>
+</body></html>`;
 
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([html], {type:"text/html"}));
+    link.href = URL.createObjectURL(new Blob([html], {type:"text/html;charset=utf-8"}));
     link.download = "Mail_Template.html";
     link.click();
 }
