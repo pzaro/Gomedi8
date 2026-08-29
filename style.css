@@ -47,8 +47,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 .printable { 
     font-family: 'Times New Roman', Times, serif; 
     font-size: 12pt; 
-    line-height: 1.5; 
-    text-align: justify; 
+    line-height: 1.5;
+    text-align: justify;
+    text-justify: inter-word;
+    word-spacing: normal;
+    letter-spacing: normal;
     color: #000; 
     background: #fff;
     padding: 2.54cm; 
@@ -102,15 +105,25 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 @media (max-width: 1100px) { .grid, .lib-grid { grid-template-columns: 1fr; } .form-panel { max-height: none; } }
 @media print {
     /* Τα περιθώρια τα ορίζει αποκλειστικά η @page (όχι padding/margin στο έγγραφο) */
-    @page { size: A4; margin: 2cm; }
+    @page {
+        size: A4;
+        margin: 2.54cm 2.54cm 2.54cm 2.54cm;
+    }
 
     /* Απόκρυψη όλων των στοιχείων του UI που δεν ανήκουν στο έγγραφο */
     header, nav, .nav-btn, .form-panel, .actions,
     #register, #smart_tool, #library { display: none !important; }
 
-    html, body { height: auto; background: #fff !important; }
+    html, body {
+        height: auto;
+        background: #fff !important;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 12pt;
+        line-height: 1.5;
+        color: #000;
+    }
 
-    /* Ξετυλίγουμε το layout ώστε το #preview να ρέει φυσιολογικά (όχι absolute) */
+    /* Ξετυλίγουμε το layout ώστε το #preview να ρέει φυσιολογικά */
     main, #docs, .grid, .preview-panel, .doc-viewer {
         display: block !important;
         flex: none !important;
@@ -126,7 +139,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
     }
     .grid { grid-template-columns: 1fr !important; gap: 0 !important; }
 
-    /* Το ίδιο το έγγραφο: φυσικό πλάτος, χωρίς δικά του περιθώρια/σκιά */
+    /* Το ίδιο το έγγραφο */
     #preview, .printable {
         position: static !important;
         width: auto !important;
@@ -135,6 +148,38 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
         padding: 0 !important;
         box-shadow: none !important;
         background: #fff !important;
+        font-family: 'Times New Roman', Times, serif !important;
+        font-size: 12pt !important;
+        line-height: 1.5 !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        word-spacing: normal !important;
+        letter-spacing: normal !important;
+        color: #000 !important;
+    }
+
+    /* Κείμενο μέσα στο έγγραφο */
+    #preview p, #preview div, #preview span,
+    #preview li, #preview td, #preview th {
+        line-height: 1.5 !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        word-spacing: normal !important;
+        letter-spacing: normal !important;
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* Κεντραρισμένα στοιχεία να παραμένουν κεντραρισμένα */
+    #preview [style*="text-align:center"],
+    #preview [style*="text-align: center"] {
+        text-align: center !important;
+    }
+
+    /* Δεξιά στοίχιση (υπογραφές) */
+    #preview [style*="text-align:right"],
+    #preview [style*="text-align: right"] {
+        text-align: right !important;
     }
 
     /* Να τυπώνονται τα χρωματιστά πλαίσια (Zoom/Έντυπο 3) όπως στην οθόνη */
