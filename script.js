@@ -2,7 +2,7 @@
 // 1. GOOGLE SHEETS & DATA SETUP
 // ==========================================
 
-const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwXtuVAXbIAGsa9qxZoPnVObzjU06abdxnHjmqZ82ixZmR5Y3GmliP-hiBiF-XGnkQWUA/exec"; 
+const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw388JrxxR7SdRrLtkPhLYbCQsr8ENgm2ggzQ4gaB21FbbDS6Y_hGDy3eJKQJzx84DBQQ/exec";
 
 let m_data = {
     n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ", addr: "", email: ""
@@ -953,7 +953,7 @@ function downloadMailTemplate() {
     aHtml.download = 'Mail_Template_Gmail.html';
     aHtml.click();
 
-    // ── Κατέβασμα TXT (μετά από 400ms για να μην μπλοκαριστεί ο browser) ──
+    // ── Κατέβασμα TXT ──
     setTimeout(() => {
         const aTxt = document.createElement('a');
         aTxt.href = URL.createObjectURL(new Blob([txtBody], {type:'text/plain;charset=utf-8'}));
@@ -961,7 +961,155 @@ function downloadMailTemplate() {
         aTxt.click();
     }, 400);
 
-    showToast('📧 Κατεβάστηκαν: .html (για Gmail) + .txt (για Notepad)', '#059669');
+    // ── Κατέβασμα .ICS (iCalendar) ──
+    setTimeout(() => {
+        const icsContent = generateICS(z_date, z_time, z_link, z_id, z_pass);
+        if (icsContent) {
+            const aIcs = document.createElement('a');
+            aIcs.href = URL.createObjectURL(new Blob([icsContent], {type:'text/calendar;charset=utf-8'}));
+            aIcs.download = 'YAS_Diameso.ics';
+            aIcs.click();
+        }
+    }, 800);
+
+    showToast('📧 Κατεβάστηκαν: .html + .txt + .ics (ημερολόγιο)', '#059669');
+}
+
+// ── Δημιουργία ICS αρχείου ──
+function generateICS(z_date, z_time, z_link, z_id, z_pass) {
+    if (!z_date || !z_time) {
+        showToast('⚠️ Συμπληρώστε ημερομηνία και ώρα ΥΑΣ για το .ics', '#f59e0b');
+        return null;
+    }
+
+    // Υπολογισμός start/end σε UTC format
+    const [hour, min] = z_time.split(':').map(Number);
+    const dtStart = new Date(`${z_date}T${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}:00`);
+    const dtEnd   = new Date(dtStart.getTime() + 60 * 60 * 1000); // +1 ώρα
+
+    const fmt = (d) => d.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+
+    // Συλλογή emails εμπλεκομένων
+    const attendees = [];
+    [...reqs, ...resps].forEach(p => {
+        if (p.email) attendees.push(`ATTENDEE;CN="${p.n} ${p.s}";RSVP=TRUE:mailto:${p.email}`);
+        if (p.l_email) attendees.push(`ATTENDEE;CN="${p.l_n} ${p.l_s}";RSVP=TRUE:mailto:${p.l_email}`);
+    });
+    if (m_data.email) attendees.push(`ATTENDEE;CN="${m_data.n} ${m_data.s}";RSVP=TRUE:mailto:${m_data.email}`);
+
+    const mediatorName = [m_data.n, m_data.s].filter(Boolean).join(' ') || 'Διαμεσολαβητής';
+
+    const description = [
+        'Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (Υ.Α.Σ.)',
+        '',
+        z_link  ? `Zoom Link: ${z_link}` : '',
+        z_id    ? `Meeting ID: ${z_id}`  : '',
+        z_pass  ? `Passcode: ${z_pass}`  : '',
+        '',
+        `Διαμεσολαβητής: ${mediatorName}`,
+        'Σύμφωνα με τον Ν. 4640/2019',
+    ].filter(l => l !== null).join('\\n');
+
+    const location = z_link || 'Τηλεδιάσκεψη μέσω Zoom';
+
+    return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Mediation Portal//YAS//GR',
+        'CALSCALE:GREGORIAN',
+        'METHOD:REQUEST',
+        'BEGIN:VEVENT',
+        `UID:yas-${Date.now()}@mediationportal.gr`,
+        `DTSTAMP:${fmt(new Date())}`,
+        `DTSTART:${fmt(dtStart)}`,
+        `DTEND:${fmt(dtEnd)}`,
+        `SUMMARY:ΥΑΣ Διαμεσολάβησης — ${mediatorName}`,
+        `DESCRIPTION:${description}`,
+        `LOCATION:${location}`,
+        `ORGANIZER;CN="${mediatorName}":mailto:${m_data.email || 'noreply@mediationportal.gr'}`,
+        ...attendees,
+        'STATUS:CONFIRMED',
+        'SEQUENCE:0',
+        'BEGIN:VALARM',
+        'TRIGGER:-PT24H',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:Υπενθύμιση ΥΑΣ Διαμεσολάβησης (24 ώρες πριν)',
+        'END:VALARM',
+        'BEGIN:VALARM',
+        'TRIGGER:-PT1H',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:Υπενθύμιση ΥΑΣ Διαμεσολάβησης (1 ώρα πριν)',
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR',
+    ].join('\r\n');
+}
+
+// ── Google Calendar Invite μέσω Apps Script ──
+async function createCalendarInvite() {
+    if (!GOOGLE_APP_SCRIPT_URL) {
+        showToast('❌ Δεν έχει οριστεί Google Apps Script URL', '#dc2626');
+        return;
+    }
+
+    const z_date = document.getElementById('yas_date').value;
+    const z_time = document.getElementById('yas_time').value;
+    const z_link = document.getElementById('z_link').value || '';
+    const z_id   = document.getElementById('z_id').value || '';
+    const z_pass = document.getElementById('z_pass').value || '';
+
+    if (!z_date || !z_time) {
+        showToast('⚠️ Συμπληρώστε ημερομηνία και ώρα ΥΑΣ', '#f59e0b');
+        return;
+    }
+
+    // Συλλογή emails
+    const emails = [];
+    [...reqs, ...resps].forEach(p => {
+        if (p.email)   emails.push(p.email);
+        if (p.l_email) emails.push(p.l_email);
+    });
+    if (m_data.email) emails.push(m_data.email);
+    const uniqueEmails = [...new Set(emails.filter(Boolean))];
+
+    if (uniqueEmails.length === 0) {
+        showToast('⚠️ Δεν υπάρχουν emails εμπλεκομένων', '#f59e0b');
+        return;
+    }
+
+    const mediatorName = [m_data.n, m_data.s].filter(Boolean).join(' ') || 'Διαμεσολαβητής';
+    const description  = [
+        'Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (Υ.Α.Σ.)',
+        z_link ? `Zoom: ${z_link}` : '',
+        z_id   ? `Meeting ID: ${z_id}` : '',
+        z_pass ? `Passcode: ${z_pass}` : '',
+        `Διαμεσολαβητής: ${mediatorName}`,
+    ].filter(Boolean).join('\n');
+
+    showToast('⏳ Δημιουργία Calendar event...', '#2563eb');
+
+    try {
+        const params = new URLSearchParams({
+            action:      'createCalendarEvent',
+            date:        z_date,
+            time:        z_time,
+            title:       `ΥΑΣ Διαμεσολάβησης — ${mediatorName}`,
+            description: description,
+            location:    z_link || 'Τηλεδιάσκεψη μέσω Zoom',
+            emails:      uniqueEmails.join(','),
+        });
+
+        const res  = await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`);
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            showToast(`✅ Calendar invite στάλθηκε σε ${uniqueEmails.length} εμπλεκόμενους!`, '#059669');
+        } else {
+            showToast('❌ Σφάλμα: ' + (data.message || 'Άγνωστο σφάλμα'), '#dc2626');
+        }
+    } catch(e) {
+        showToast('❌ Αδυναμία επικοινωνίας με Apps Script', '#dc2626');
+    }
 }
 
 
