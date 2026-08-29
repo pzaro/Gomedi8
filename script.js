@@ -741,11 +741,11 @@ function exportToWord() {
 function downloadMailTemplate() {
     const feeInfo = getFeeInfo();
     const feeText = feeInfo.totalParties > 1
-        ? `${feeInfo.perPartyText} <strong>ανά μέρος</strong> (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = <strong>${feeInfo.totalGross}€ συνολικά</strong>)`
-        : `${feeInfo.perPartyText} <strong>ανά μέρος</strong>`;
+        ? `${feeInfo.perPartyValue} (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = <strong>${feeInfo.totalGross}€ συνολικά</strong>)`
+        : `${feeInfo.perPartyValue}`;
     const feeTxtPlain = feeInfo.totalParties > 1
-        ? `${feeInfo.perPartyText} ανά μέρος (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = ${feeInfo.totalGross}€ συνολικά)`
-        : `${feeInfo.perPartyText} ανά μέρος`;
+        ? `${feeInfo.perPartyValue} (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = ${feeInfo.totalGross}€ συνολικά)`
+        : `${feeInfo.perPartyValue}`;
     const z_date = document.getElementById('yas_date').value;
     const z_time = document.getElementById('yas_time').value || '--:--';
     const z_link = document.getElementById('z_link').value || '';
