@@ -421,6 +421,34 @@ function showYasDay(val) {
     if (!el) return;
     el.textContent = val ? '📅 ' + getDay(val) : '';
 }
+
+// Επιστρέφει πλήρη πληροφορία αμοιβής (ανά μέρος + σύνολο μερών + γενικό σύνολο)
+function getFeeInfo() {
+    const el = document.getElementById('m_fee');
+    const feeValue = el ? el.value : '';            // π.χ. "75 ευρώ πλέον ΦΠΑ 24% (σύνολο €93,00) ανά μέρος"
+    const feeText  = el ? el.options[el.selectedIndex].text : ''; // π.χ. "75 ευρώ + ΦΠΑ (Σύνολο: 93,00€)"
+    const totalParties = reqs.length + resps.length;
+
+    // Εξαγωγή αριθμητικής τιμής ανά μέρος από το value
+    const matchNet   = feeValue.match(/^(\d+)\s*ευρώ/);
+    const matchTotal = feeValue.match(/σύνολο[^\d€]*[€]?\s*([\d.,]+)/i);
+    const netPerParty   = matchNet   ? parseFloat(matchNet[1])   : null;
+    const grossPerParty = matchTotal ? parseFloat(matchTotal[1].replace(',','.')) : null;
+    const totalGross    = grossPerParty ? (grossPerParty * totalParties).toFixed(2) : null;
+
+    return {
+        perPartyText:  feeText,                          // "75 ευρώ + ΦΠΑ (Σύνολο: 93,00€)"
+        perPartyValue: feeValue,                         // για έγγραφα
+        totalParties,
+        netPerParty,
+        grossPerParty,
+        totalGross,
+        // Πλήρης πρόταση για email/έγγραφα
+        fullSentence: grossPerParty
+            ? `${feeText} ανά μέρος (${totalParties} μέρη × ${grossPerParty}€ = <strong>${totalGross}€ συνολικά</strong>)`
+            : feeText
+    };
+}
 const getFullName = (n, s) => [n, s].filter(Boolean).join(' ') || "................";
 
 function updatePartySelect() {
@@ -436,6 +464,7 @@ function draw() {
     autoSave();
     const d = {
         fee: document.getElementById('m_fee').value,
+        feeInfo: getFeeInfo(),
         subj: document.getElementById('p_subj').value || "................",
         court: document.getElementById('p_court').value || "................",
         court_d: document.getElementById('p_court_d').value || "................",
@@ -526,7 +555,7 @@ Email [ ☒ ]<br><br>
 Ονομάζομαι ${mediatorFullName} και είμαι Διαπιστευμένος Διαμεσολαβητής. Σε συνέχεια του διορισμού μου από την Κεντρική Επιτροπή Διαμεσολάβησης (ΚΕΔ), επικοινωνώ μαζί σας σχετικά με την ιδιωτική διαφορά που έχει ανακύψει μεταξύ σας, η οποία αποτελεί αντικείμενο της από ${d.court_d} αγωγής που κατατέθηκε στο ${d.court} με αριθμό κατάθεσης ${d.court_n}.<br><br>
 Με την παρούσα επιστολή, σας προσκαλώ στην Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) Διαμεσολάβησης, η οποία θα διεξαχθεί <b>μέσω τηλεδιάσκεψης</b>:<br>
 ${zoomFrame}<br>
-Η αμοιβή για τη διεξαγωγή της ΥΑΣ ανέρχεται στο ποσό των ${d.fee}. Το ποσό θα πρέπει να έχει κατατεθεί πριν την έναρξη της συνεδρίας στον λογαριασμό IBAN: ${m_data.iban}, Τράπεζα ${m_data.bank}.<br><br>
+Η αμοιβή για τη διεξαγωγή της ΥΑΣ ανέρχεται στο ποσό των ${d.feeInfo.perPartyText} <b>ανά μέρος</b> (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>). Το ποσό θα πρέπει να έχει κατατεθεί πριν την έναρξη της συνεδρίας στον λογαριασμό IBAN: ${m_data.iban}, Τράπεζα ${m_data.bank}.<br><br>
 Θα ήθελα να αξιοποιήσω αυτή την ευκαιρία για να σας δώσω μια σαφέστερη εικόνα για τη διαδικασία που θα ακολουθήσουμε.<br><br>
 <b>Τι είναι η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ);</b><br>
 Σκεφτείτε αυτή τη συνάντηση όχι ως δικαστήριο, αλλά ως μια πρώτη γνωριμία. Είναι μια σύντομη, υποχρεωτική συνάντηση όπου, μαζί με τους δικηγόρους σας, θα έχουμε την ευκαιρία:<br>
@@ -579,7 +608,7 @@ ${zoomFrameEntypo}<br>
 Σημειώνεται ότι:<br>
 Σκοπός της Υποχρεωτικής Αρχικής Συνεδρίας είναι να εξετάσετε τη δυνατότητα εξωδικαστικής επίλυσης της διαφοράς σας με διαμεσολάβηση. Αν μετά την Υποχρεωτική Αρχική Συνεδρία δεν επιθυμείτε να συνεχίσετε τη διαδικασία της διαμεσολάβησης, μπορείτε να αποχωρήσετε χωρίς οποιαδήποτε αιτιολογία, κύρωση ή ποινή.<br>
 Σύμφωνα με το άρθρο 7 παρ. 6 του ν.4640/2019, εάν δεν προσέλθετε στην ΥΑΣ δύναται να σας επιβληθεί από το δικαστήριο χρηματική ποινή, ποσού 100-500 ευρώ, εφόσον η υπόθεσή σας προχωρήσει σε δικαστική διαδικασία.<br>
-Η αμοιβή του διαμεσολαβητή ορίζεται στα ${d.fee} για την ΥΑΣ, βαρύνει τα μέρη κατ’ ισομοιρία και θα πρέπει να καταβληθεί στον λογαριασμό ${m_data.iban} πριν από την έναρξη της διαδικασίας.<br><br>
+Η αμοιβή του διαμεσολαβητή ορίζεται στα ${d.feeInfo.perPartyText} <b>ανά μέρος</b> (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>), βαρύνει τα μέρη κατ' ισομοιρία και καταβάλλεται στον λογαριασμό ${m_data.iban}, Τράπεζα ${m_data.bank}, πριν από την έναρξη της διαδικασίας.<br><br>
 Η παρούσα γνωστοποίηση αποστέλλεται σε σας σύμφωνα με το άρθρο 7 παρ. 2 ως εξής:<br>
 [ ☒ ] Με email<br>
 [ ☐ ] Με συστημένη επιστολή<br>
@@ -710,8 +739,13 @@ function exportToWord() {
 }
 
 function downloadMailTemplate() {
-    const feeElem = document.getElementById('m_fee');
-    const fee = feeElem.options[feeElem.selectedIndex].text;
+    const feeInfo = getFeeInfo();
+    const feeText = feeInfo.totalParties > 1
+        ? `${feeInfo.perPartyText} <strong>ανά μέρος</strong> (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = <strong>${feeInfo.totalGross}€ συνολικά</strong>)`
+        : `${feeInfo.perPartyText} <strong>ανά μέρος</strong>`;
+    const feeTxtPlain = feeInfo.totalParties > 1
+        ? `${feeInfo.perPartyText} ανά μέρος (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = ${feeInfo.totalGross}€ συνολικά)`
+        : `${feeInfo.perPartyText} ανά μέρος`;
     const z_date = document.getElementById('yas_date').value;
     const z_time = document.getElementById('yas_time').value || '--:--';
     const z_link = document.getElementById('z_link').value || '';
@@ -750,13 +784,6 @@ function downloadMailTemplate() {
 </head>
 <body>
 
-<!-- ΟΔΗΓΙΑ ΧΡΗΣΗΣ — δεν εκτυπώνεται, δεν αντιγράφεται στο Gmail -->
-<div class="gmail-note">
-  <strong>📋 Οδηγία αποστολής μέσω Gmail</strong>
-  Πατήστε <kbd>Ctrl+A</kbd> για να επιλέξετε όλα → <kbd>Ctrl+C</kbd> → ανοίξτε το Gmail → Νέο email → <kbd>Ctrl+V</kbd> για επικόλληση.
-  Το email θα εμφανιστεί με πλήρη μορφοποίηση.
-</div>
-
 <!-- ΕΝΑΡΞΗ ΠΕΡΙΕΧΟΜΕΝΟΥ EMAIL — αυτό αντιγράφεται -->
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f4f4f4; padding:20px 0;">
   <tr>
@@ -777,7 +804,7 @@ function downloadMailTemplate() {
           <td valign="top" style="padding:26px 16px 20px 30px; color:#ecf0f1; font-size:14px; line-height:1.75;">
             <p style="margin:0 0 12px 0; font-size:15px;">Αξιότιμες Κυρίες &amp; Αξιότιμοι Κύριοι,</p>
             <p style="margin:0 0 12px 0;">Σε συνέχεια της επικοινωνίας μας αποστέλλω την πρόσκληση για την <strong>Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης</strong> (Υ.Α.Σ.), καθώς και τον <strong>ΤΡΟΠΟ, ΤΟΠΟ και ΧΡΟΝΟ</strong> διεξαγωγής της, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα.</p>
-            <p style="margin:0;">Υπενθυμίζω ότι η αμοιβή για τη διεξαγωγή της Υ.Α.Σ. ανέρχεται στο ποσό των <strong style="color:#f39c12;">${fee}</strong> και θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στη συνημμένη πρόσκληση.</p>
+            <p style="margin:0;">Υπενθυμίζω ότι η αμοιβή για τη διεξαγωγή της Υ.Α.Σ. ανέρχεται στο ποσό των <strong style="color:#f39c12;">${feeText}</strong> και θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στη συνημμένη πρόσκληση.</p>
           </td>
 
           <!-- Ημερολόγιο δεξιά -->
@@ -873,10 +900,11 @@ function downloadMailTemplate() {
 έγγραφα.
 
 Υπενθυμίζω ότι η αμοιβή για τη διεξαγωγή της
-Υ.Α.Σ. ανέρχεται στο ποσό των ${fee} και θα
-πρέπει να έχει κατατεθεί πριν την εκκίνηση της
-διαδικασίας στον τραπεζικό λογαριασμό που
-αναγράφεται στη συνημμένη πρόσκληση.
+Υ.Α.Σ. ανέρχεται στο ποσό των ${feeTxtPlain}
+και θα πρέπει να έχει κατατεθεί πριν την
+εκκίνηση της διαδικασίας στον τραπεζικό
+λογαριασμό που αναγράφεται στη συνημμένη
+πρόσκληση.
 
 ────────────────────────────────────────────────
 📅  ΗΜΕΡΟΜΗΝΙΑ ΚΑΙ ΩΡΑ Υ.Α.Σ.
