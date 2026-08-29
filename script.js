@@ -422,14 +422,16 @@ function showYasDay(val) {
     el.textContent = val ? '📅 ' + getDay(val) : '';
 }
 
-// Επιστρέφει πλήρη πληροφορία αμοιβής (ανά μέρος + σύνολο μερών + γενικό σύνολο)
+// Επιστρέφει πλήρη πληροφορία αμοιβής (ανά πλευρά × 2 πλευρές πάντα)
 function getFeeInfo() {
     const el = document.getElementById('m_fee');
     const feeValue = el ? el.value : '';            // π.χ. "75 ευρώ πλέον ΦΠΑ 24% (σύνολο €93,00) ανά μέρος"
     const feeText  = el ? el.options[el.selectedIndex].text : ''; // π.χ. "75 ευρώ + ΦΠΑ (Σύνολο: 93,00€)"
-    const totalParties = reqs.length + resps.length;
 
-    // Εξαγωγή αριθμητικής τιμής ανά μέρος από το value
+    // Πάντα 2 πλευρές (Επισπεύδον + Έτερο μέρος) — ανεξάρτητα από τον αριθμό ατόμων
+    const totalParties = 2;
+
+    // Εξαγωγή αριθμητικής τιμής ανά πλευρά από το value
     const matchNet   = feeValue.match(/^(\d+)\s*ευρώ/);
     const matchTotal = feeValue.match(/σύνολο[^\d€]*[€]?\s*([\d.,]+)/i);
     const netPerParty   = matchNet   ? parseFloat(matchNet[1])   : null;
@@ -740,12 +742,8 @@ function exportToWord() {
 
 function downloadMailTemplate() {
     const feeInfo = getFeeInfo();
-    const feeText = feeInfo.totalParties > 1
-        ? `${feeInfo.perPartyValue} (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = <strong>${feeInfo.totalGross}€ συνολικά</strong>)`
-        : `${feeInfo.perPartyValue}`;
-    const feeTxtPlain = feeInfo.totalParties > 1
-        ? `${feeInfo.perPartyValue} (${feeInfo.totalParties} μέρη × ${feeInfo.grossPerParty}€ = ${feeInfo.totalGross}€ συνολικά)`
-        : `${feeInfo.perPartyValue}`;
+    const feeText = `${feeInfo.perPartyValue} (2 πλευρές × ${feeInfo.grossPerParty}€ = <strong>${feeInfo.totalGross}€ συνολικά</strong>)`;
+    const feeTxtPlain = `${feeInfo.perPartyValue} (2 πλευρές × ${feeInfo.grossPerParty}€ = ${feeInfo.totalGross}€ συνολικά)`;
     const z_date = document.getElementById('yas_date').value;
     const z_time = document.getElementById('yas_time').value || '--:--';
     const z_link = document.getElementById('z_link').value || '';
