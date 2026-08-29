@@ -723,113 +723,119 @@ function downloadMailTemplate() {
                        'ΙΟΥΛΙΟΥ','ΑΥΓΟΥΣΤΟΥ','ΣΕΠΤΕΜΒΡΙΟΥ','ΟΚΤΩΒΡΙΟΥ','ΝΟΕΜΒΡΙΟΥ','ΔΕΚΕΜΒΡΙΟΥ'];
     const DAYS_GR   = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
     let calDay = '??', calMonth = '???', calYear = '????', calDayName = '?????';
+    let dateLabel = '................';
     if (z_date) {
         const dt = new Date(z_date + 'T12:00:00');
         calDay     = dt.getDate();
         calMonth   = MONTHS_GR[dt.getMonth()];
         calYear    = dt.getFullYear();
         calDayName = DAYS_GR[dt.getDay()];
+        dateLabel  = `${calDay} ${calMonth} ${calYear}, ${calDayName}`;
     }
 
-    const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    // ── 1. HTML (για Gmail: ανοίγεις στον browser, Ctrl+A, Ctrl+C, Paste στο Gmail) ──
+    const htmlBody = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="el">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Πρόσκληση ΥΑΣ Διαμεσολάβησης</title>
+  <style>
+    body { margin:0; padding:0; background:#f4f4f4; font-family:Arial,Helvetica,sans-serif; }
+    .gmail-note { background:#fff3cd; border:1px solid #ffc107; padding:12px 20px; font-size:13px;
+                  color:#856404; text-align:center; font-family:Arial,sans-serif; }
+    .gmail-note strong { display:block; font-size:15px; margin-bottom:4px; }
+    @media print { .gmail-note { display:none; } }
+  </style>
 </head>
-<body style="margin:0; padding:0; background-color:#2c3e50; font-family:Arial, Helvetica, sans-serif;">
+<body>
 
-<!-- WRAPPER -->
-<table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#2c3e50;">
+<!-- ΟΔΗΓΙΑ ΧΡΗΣΗΣ — δεν εκτυπώνεται, δεν αντιγράφεται στο Gmail -->
+<div class="gmail-note">
+  <strong>📋 Οδηγία αποστολής μέσω Gmail</strong>
+  Πατήστε <kbd>Ctrl+A</kbd> για να επιλέξετε όλα → <kbd>Ctrl+C</kbd> → ανοίξτε το Gmail → Νέο email → <kbd>Ctrl+V</kbd> για επικόλληση.
+  Το email θα εμφανιστεί με πλήρη μορφοποίηση.
+</div>
+
+<!-- ΕΝΑΡΞΗ ΠΕΡΙΕΧΟΜΕΝΟΥ EMAIL — αυτό αντιγράφεται -->
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f4f4f4; padding:20px 0;">
   <tr>
-    <td align="center" style="padding:30px 10px;">
-
-      <!-- CONTAINER -->
-      <table border="0" cellpadding="0" cellspacing="0" width="620" style="background-color:#34495e; border-radius:12px; overflow:hidden;">
+    <td align="center">
+      <table border="0" cellpadding="0" cellspacing="0" width="620" style="background-color:#34495e; border-radius:8px; overflow:hidden; font-family:Arial,Helvetica,sans-serif;">
 
         <!-- HEADER -->
         <tr>
           <td colspan="2" align="center" style="background-color:#1a252f; padding:18px 30px; border-bottom:3px solid #e67e22;">
             <p style="margin:0; color:#e67e22; font-size:11px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;">ΔΙΑΠΙΣΤΕΥΜΕΝΟΣ ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</p>
-            <p style="margin:6px 0 0 0; color:#ffffff; font-size:16px; font-weight:bold; letter-spacing:1px;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</p>
+            <p style="margin:6px 0 0 0; color:#ffffff; font-size:16px; font-weight:bold;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</p>
           </td>
         </tr>
 
-        <!-- INTRO + CALENDAR -->
+        <!-- INTRO + ΗΜΕΡΟΛΟΓΙΟ -->
         <tr>
           <!-- Κείμενο αριστερά -->
-          <td valign="top" style="padding:28px 20px 20px 30px; color:#ecf0f1; font-size:14px; line-height:1.7;">
+          <td valign="top" style="padding:26px 16px 20px 30px; color:#ecf0f1; font-size:14px; line-height:1.75;">
             <p style="margin:0 0 12px 0; font-size:15px;">Αξιότιμες Κυρίες &amp; Αξιότιμοι Κύριοι,</p>
             <p style="margin:0 0 12px 0;">Σε συνέχεια της επικοινωνίας μας αποστέλλω την πρόσκληση για την <strong>Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης</strong> (Υ.Α.Σ.), καθώς και τον <strong>ΤΡΟΠΟ, ΤΟΠΟ και ΧΡΟΝΟ</strong> διεξαγωγής της, τα οποία αναλυτικά περιλαμβάνονται στα επισυναπτόμενα έγγραφα.</p>
             <p style="margin:0;">Υπενθυμίζω ότι η αμοιβή για τη διεξαγωγή της Υ.Α.Σ. ανέρχεται στο ποσό των <strong style="color:#f39c12;">${fee}</strong> και θα πρέπει να έχει κατατεθεί πριν την εκκίνηση της διαδικασίας στον τραπεζικό λογαριασμό που αναγράφεται στη συνημμένη πρόσκληση.</p>
           </td>
 
           <!-- Ημερολόγιο δεξιά -->
-          <td valign="top" style="padding:20px 24px 20px 0; width:155px;">
-            <table border="0" cellpadding="0" cellspacing="0" width="148" style="border-radius:10px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,0.5);">
-              <!-- Μήνας -->
+          <td valign="top" align="center" style="padding:20px 24px 20px 0; width:155px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="145" style="border-radius:8px; overflow:hidden;">
               <tr>
-                <td align="center" style="background-color:#e67e22; padding:10px 8px 6px 8px;">
-                  <p style="margin:0; color:#ffffff; font-size:10px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">${calMonth}</p>
-                  <p style="margin:2px 0 0 0; color:rgba(255,255,255,0.75); font-size:10px;">${calYear}</p>
+                <td align="center" style="background-color:#e67e22; padding:10px 6px 6px;">
+                  <p style="margin:0; color:#fff; font-size:10px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">${calMonth}</p>
+                  <p style="margin:2px 0 0; color:rgba(255,255,255,0.8); font-size:10px;">${calYear}</p>
                 </td>
               </tr>
-              <!-- Αριθμός ημέρας -->
               <tr>
-                <td align="center" style="background-color:#ffffff; padding:8px 8px 4px 8px;">
-                  <p style="margin:0; color:#2c3e50; font-size:56px; font-weight:900; line-height:1;">${calDay}</p>
-                  <p style="margin:2px 0 6px 0; color:#e67e22; font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">${calDayName}</p>
+                <td align="center" style="background-color:#ffffff; padding:8px 6px 4px;">
+                  <p style="margin:0; color:#2c3e50; font-size:54px; font-weight:900; line-height:1;">${calDay}</p>
+                  <p style="margin:2px 0 6px; color:#e67e22; font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">${calDayName}</p>
                 </td>
               </tr>
-              <!-- Ώρα -->
               <tr>
-                <td align="center" style="background-color:#2c3e50; border-top:2px solid #e67e22; padding:8px;">
-                  <p style="margin:0; color:#f39c12; font-size:9px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;">ΩΡΑ ΕΝΑΡΞΗΣ</p>
-                  <p style="margin:4px 0 0 0; color:#ffffff; font-size:26px; font-weight:900; letter-spacing:2px;">${z_time}</p>
+                <td align="center" style="background-color:#2c3e50; border-top:2px solid #e67e22; padding:8px 6px;">
+                  <p style="margin:0; color:#f39c12; font-size:9px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">ΩΡΑ ΕΝΑΡΞΗΣ</p>
+                  <p style="margin:4px 0 0; color:#ffffff; font-size:24px; font-weight:900; letter-spacing:2px;">${z_time}</p>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- ΣΤΟΙΧΕΙΑ ZOOM -->
+        <!-- ZOOM -->
         <tr>
-          <td colspan="2" style="padding:0 30px 24px 30px;">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:rgba(0,0,0,0.2); border:2px solid #e67e22; border-radius:8px;">
+          <td colspan="2" style="padding:0 30px 24px;">
+            <table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:rgba(0,0,0,0.2); border:2px solid #e67e22; border-radius:8px;">
               <tr>
-                <td align="center" style="padding:14px 16px;">
-                  <p style="margin:0 0 8px 0; color:#e67e22; font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">&#128279; ΣΤΟΙΧΕΙΑ ΤΗΛΕΔΙΑΣΚΕΨΗΣ (ZOOM)</p>
+                <td align="center">
+                  <p style="margin:0 0 8px; color:#e67e22; font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">&#128279; ΣΤΟΙΧΕΙΑ ΤΗΛΕΔΙΑΣΚΕΨΗΣ (ZOOM)</p>
                   <p style="margin:4px 0; color:#ecf0f1; font-size:13px;">Σύνδεσμος: <a href="${z_link}" style="color:#f39c12; text-decoration:underline; word-break:break-all;">${z_link}</a></p>
-                  <p style="margin:4px 0; color:#ecf0f1; font-size:13px;">Meeting ID: <strong style="color:#ffffff;">${z_id}</strong> &nbsp;&nbsp; Passcode: <strong style="color:#ffffff;">${z_pass}</strong></p>
+                  <p style="margin:4px 0; color:#ecf0f1; font-size:13px;">Meeting ID: <strong style="color:#fff;">${z_id}</strong> &nbsp;&nbsp; Passcode: <strong style="color:#fff;">${z_pass}</strong></p>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <!-- ΔΙΑΧΩΡΙΣΤΙΚΗ ΓΡΑΜΜΗ -->
-        <tr>
-          <td colspan="2" style="padding:0 30px;">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%">
-              <tr><td style="border-top:1px solid rgba(255,255,255,0.15); font-size:0;">&nbsp;</td></tr>
-            </table>
-          </td>
-        </tr>
+        <!-- ΔΙΑΧΩΡΙΣΤΗΣ -->
+        <tr><td colspan="2" style="padding:0 30px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid rgba(255,255,255,0.15); height:1px; font-size:0;">&nbsp;</td></tr></table></td></tr>
 
-        <!-- ΥΠΟΛΟΙΠΟ ΚΕΙΜΕΝΟ -->
+        <!-- ΚΥΡΙΟ ΚΕΙΜΕΝΟ -->
         <tr>
-          <td colspan="2" style="padding:22px 30px; color:#ecf0f1; font-size:14px; line-height:1.75;">
-            <p style="margin:0 0 12px 0;">Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.) αποτελεί αναπόσπαστο μέρος της διαμεσολάβησης και λειτουργεί ως υποχρεωτικό προστάδιο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
-            <p style="margin:0 0 12px 0;">Η Διαμεσολάβηση είναι μια διαρθρωμένη διαδικασία με βασικά χαρακτηριστικά την εμπιστευτικότητα και την ιδιωτική αυτονομία. Ο διαμεσολαβητής, ως τρίτο ουδέτερο πρόσωπο, διευκολύνει τα μέρη να βρουν μια κοινά αποδεκτή λύση — χωρίς να αποφασίζει ο ίδιος.</p>
-            <p style="margin:0 0 4px 0;">Η διαμεσολάβηση είναι:</p>
-            <table border="0" cellpadding="4" cellspacing="0" width="100%">
-              <tr><td width="18" valign="top" style="color:#f39c12; font-size:14px;">–</td><td style="color:#ecf0f1; font-size:14px; line-height:1.6;"><strong style="color:#f1c40f;">εκούσια</strong>, διότι προσέρχεστε και παραμένετε εθελοντικά</td></tr>
-              <tr><td width="18" valign="top" style="color:#f39c12; font-size:14px;">–</td><td style="color:#ecf0f1; font-size:14px; line-height:1.6;"><strong style="color:#f1c40f;">μη δεσμευτική</strong>, μέχρι την υπογραφή της συμφωνίας</td></tr>
-              <tr><td width="18" valign="top" style="color:#f39c12; font-size:14px;">–</td><td style="color:#ecf0f1; font-size:14px; line-height:1.6;"><strong style="color:#f1c40f;">απόλυτα εμπιστευτική</strong> — οτιδήποτε ειπωθεί δεν μπορεί να χρησιμοποιηθεί στο Δικαστήριο ούτε να κοινοποιηθεί σε τρίτους</td></tr>
+          <td colspan="2" style="padding:22px 30px 28px; color:#ecf0f1; font-size:14px; line-height:1.8;">
+            <p style="margin:0 0 12px;">Η Υποχρεωτική Αρχική Συνεδρία (Υ.Α.Σ.) αποτελεί αναπόσπαστο μέρος της διαμεσολάβησης και λειτουργεί ως υποχρεωτικό προστάδιο πριν την είσοδο της υπόθεσής σας στο δικαστήριο.</p>
+            <p style="margin:0 0 12px;">Ο διαμεσολαβητής, ως τρίτο ουδέτερο και αμερόληπτο πρόσωπο, διευκολύνει τα μέρη να βρουν μια κοινά αποδεκτή λύση — χωρίς να αποφασίζει ο ίδιος.</p>
+            <p style="margin:0 0 8px;">Η διαμεσολάβηση είναι:</p>
+            <table border="0" cellpadding="3" cellspacing="0" width="100%">
+              <tr><td width="16" valign="top" style="color:#f39c12;">–</td><td style="color:#ecf0f1; font-size:14px; line-height:1.7;"><strong style="color:#f1c40f;">εκούσια</strong> — προσέρχεστε και παραμένετε εθελοντικά</td></tr>
+              <tr><td width="16" valign="top" style="color:#f39c12;">–</td><td style="color:#ecf0f1; font-size:14px; line-height:1.7;"><strong style="color:#f1c40f;">μη δεσμευτική</strong> — μέχρι την υπογραφή της συμφωνίας</td></tr>
+              <tr><td width="16" valign="top" style="color:#f39c12;">–</td><td style="color:#ecf0f1; font-size:14px; line-height:1.7;"><strong style="color:#f1c40f;">απόλυτα εμπιστευτική</strong> — οτιδήποτε ειπωθεί δεν μπορεί να χρησιμοποιηθεί στο Δικαστήριο ούτε να κοινοποιηθεί σε τρίτους</td></tr>
             </table>
-            <p style="margin:14px 0 12px 0;"><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
-            <p style="margin:0 0 20px 0;"><strong>Στόχος μας:</strong> μέσα από την καλόπιστη συνεργασία όλων, η κατάληξη σε μια κοινά αποδεκτή συμφωνία.</p>
+            <p style="margin:14px 0 12px;"><strong>Κανείς από εμάς δεν μπορεί να κληθεί στο Δικαστήριο ως μάρτυρας.</strong></p>
+            <p style="margin:0 0 20px;"><strong>Στόχος μας:</strong> η κατάληξη σε μια κοινά αποδεκτή συμφωνία μέσα από την καλόπιστη συνεργασία όλων.</p>
             <p style="margin:0; font-size:13px; color:rgba(236,240,241,0.6);">Θα ακολουθήσει τηλεφωνική επικοινωνία τόσο με εσάς όσο και με τους δικηγόρους σας.<br />Παραμένω στη διάθεσή σας για οποιαδήποτε διευκρίνιση.</p>
           </td>
         </tr>
@@ -842,21 +848,96 @@ function downloadMailTemplate() {
         </tr>
 
       </table>
-      <!-- / CONTAINER -->
-
     </td>
   </tr>
 </table>
-<!-- / WRAPPER -->
+<!-- ΤΕΛΟΣ ΠΕΡΙΕΧΟΜΕΝΟΥ EMAIL -->
 
 </body>
 </html>`;
 
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([html], {type:"text/html;charset=utf-8"}));
-    link.download = "Mail_Template.html";
-    link.click();
+    // ── 2. TXT (για Notepad — plain text με ευανάγνωστη μορφή) ──
+    const txtBody =
+`════════════════════════════════════════════════
+   ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ
+   ΔΙΑΠΙΣΤΕΥΜΕΝΟΣ ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ
+════════════════════════════════════════════════
+
+Αξιότιμες Κυρίες & Αξιότιμοι Κύριοι,
+
+Σε συνέχεια της επικοινωνίας μας αποστέλλω την
+πρόσκληση για την Υποχρεωτική Αρχική Συνεδρία
+Διαμεσολάβησης (Υ.Α.Σ.), καθώς και τον ΤΡΟΠΟ,
+ΤΟΠΟ και ΧΡΟΝΟ διεξαγωγής της, τα οποία
+αναλυτικά περιλαμβάνονται στα επισυναπτόμενα
+έγγραφα.
+
+Υπενθυμίζω ότι η αμοιβή για τη διεξαγωγή της
+Υ.Α.Σ. ανέρχεται στο ποσό των ${fee} και θα
+πρέπει να έχει κατατεθεί πριν την εκκίνηση της
+διαδικασίας στον τραπεζικό λογαριασμό που
+αναγράφεται στη συνημμένη πρόσκληση.
+
+────────────────────────────────────────────────
+📅  ΗΜΕΡΟΜΗΝΙΑ ΚΑΙ ΩΡΑ Υ.Α.Σ.
+
+    ${dateLabel}
+    Ώρα έναρξης: ${z_time}
+
+🔗  ΣΤΟΙΧΕΙΑ ΤΗΛΕΔΙΑΣΚΕΨΗΣ (ZOOM)
+
+    Σύνδεσμος : ${z_link}
+    Meeting ID: ${z_id}
+    Passcode  : ${z_pass}
+────────────────────────────────────────────────
+
+Η Υποχρεωτική Αρχική Συνεδρία αποτελεί
+αναπόσπαστο μέρος της διαμεσολάβησης και
+λειτουργεί ως υποχρεωτικό προστάδιο πριν την
+είσοδο της υπόθεσής σας στο δικαστήριο.
+
+Η διαμεσολάβηση είναι:
+  – ΕΚΟΥΣΙΑ: προσέρχεστε και παραμένετε
+    εθελοντικά
+  – ΜΗ ΔΕΣΜΕΥΤΙΚΗ: μέχρι την υπογραφή της
+    συμφωνίας
+  – ΑΠΟΛΥΤΑ ΕΜΠΙΣΤΕΥΤΙΚΗ: οτιδήποτε ειπωθεί
+    δεν μπορεί να χρησιμοποιηθεί στο Δικαστήριο
+    ούτε να κοινοποιηθεί σε τρίτους
+
+Κανείς από εμάς δεν μπορεί να κληθεί στο
+Δικαστήριο ως μάρτυρας.
+
+Στόχος μας: η κατάληξη σε μια κοινά αποδεκτή
+συμφωνία μέσα από την καλόπιστη συνεργασία όλων.
+
+Θα ακολουθήσει τηλεφωνική επικοινωνία τόσο με
+εσάς όσο και με τους δικηγόρους σας.
+Παραμένω στη διάθεσή σας για οποιαδήποτε
+διευκρίνιση.
+
+════════════════════════════════════════════════
+Αποστέλλεται σύμφωνα με το άρθρο 7 παρ. 2
+του ν. 4640/2019
+════════════════════════════════════════════════`;
+
+    // ── Κατέβασμα HTML ──
+    const aHtml = document.createElement('a');
+    aHtml.href = URL.createObjectURL(new Blob([htmlBody], {type:'text/html;charset=utf-8'}));
+    aHtml.download = 'Mail_Template_Gmail.html';
+    aHtml.click();
+
+    // ── Κατέβασμα TXT (μετά από 400ms για να μην μπλοκαριστεί ο browser) ──
+    setTimeout(() => {
+        const aTxt = document.createElement('a');
+        aTxt.href = URL.createObjectURL(new Blob([txtBody], {type:'text/plain;charset=utf-8'}));
+        aTxt.download = 'Mail_Template_Notepad.txt';
+        aTxt.click();
+    }, 400);
+
+    showToast('📧 Κατεβάστηκαν: .html (για Gmail) + .txt (για Notepad)', '#059669');
 }
+
 
 // ==========================================
 // 3. SMART EVALUATOR LOGIC
