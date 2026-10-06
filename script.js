@@ -2,7 +2,7 @@
 // 1. GOOGLE SHEETS & DATA SETUP
 // ==========================================
 
-const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw388JrxxR7SdRrLtkPhLYbCQsr8ENgm2ggzQ4gaB21FbbDS6Y_hGDy3eJKQJzx84DBQQ/exec";
+const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxx9im3z-DoKc7zlY-aPIRz1SPP7mcZuC2DuYT7zgteQXska1tyZ6cr6xbCERYtNc4IYg/exec";
 
 let m_data = {
     n: "Παναγιώτης", s: "Ζαρογουλίδης", f: "Αριστοτέλης", am: "2341", iban: "GR89 0172 252 000 5252 01616 0277", bank: "ΤΡΑΠΕΖΑ ΠΕΙΡΑΙΩΣ", addr: "", email: ""
