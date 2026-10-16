@@ -43,11 +43,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 
 .doc-viewer { flex: 1; overflow-y: auto; padding: 30px; border: 1px solid #e2e8f0; background: #cbd5e1; display: flex; justify-content: center;}
 
-/* Official Court Document Styling */
+/* Official Court Document Styling — Times New Roman 12pt, περιθώρια 2.54×3.17cm, διάστιχο 1.15 (Word line=276/240) */
 .printable {
     font-family: 'Times New Roman', Times, serif;
     font-size: 12pt;
-    line-height: 1.5;
+    line-height: 1.15;
     text-align: justify;
     text-align-last: left;
     text-justify: inter-word;

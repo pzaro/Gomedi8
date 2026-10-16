@@ -508,7 +508,7 @@ function draw() {
         praktikoReqHTML += `
 <div style="text-align:left;"><b>Α. ΕΠΙΣΠΕΥΔΟΝ ΜΕΡΟΣ ${reqs.length > 1 ? i+1 : ''}</b></div>
 <div style="text-align:left;">Ονοματεπώνυμο: ${getFullName(r.n, r.s)} του ${r.f || "......."}</div>
-<div style="text-align:left;">παραστάθηκε: ${chkParty} &nbsp;&nbsp; δεν παραστάθηκε: ${chkPartyNot}</div>
+<div style="text-align:left;">Παραστάθηκε: ${chkParty} δεν παραστάθηκε: ${chkPartyNot}</div>
 <div style="text-align:left;">Ημερομηνία: ${d.doc_date}</div>
 <div style="text-align:right; padding-right:50px;">Υπογραφή επισπεύδοντας<br>…………………………….</div>
 <div style="text-align:left;">Μέσο γνωστοποίησης:</div>
@@ -644,12 +644,12 @@ ${mediatorFullName}
 <div style="text-align:center;"><b>ΠΡΑΚΤΙΚΟ ΠΕΡΑΤΩΣΗΣ ΑΡΧΙΚΗΣ ΥΠΟΧΡΕΩΤΙΚΗΣ ΣΥΝΕΔΡΙΑΣ</b></div>
 <div style="text-align:center;">(άρθρο 7 παρ. 4 του ν.4640/2019)</div>
 <div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;">Ο διαμεσολαβητής ${mediatorFullName} του ${m_data.f} (Αριθμός Μητρώου Διαμεσολαβητών ${m_data.am}) βεβαιώνω ότι περατώθηκε η Υποχρεωτική Αρχική Συνεδρία για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων, κατά την οποία παραστάθηκαν τα μέρη, όπως παρακάτω αναφέρεται.</div>
+<div style="text-align:left;">Ο διαμεσολαβητής ${mediatorFullName} του ${m_data.f} (ΑΜΔ ${m_data.am}) βεβαιώνω ότι περατώθηκε η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων, κατά την οποία παραστάθηκαν τα μέρη, όπως παρακάτω αναφέρεται.</div>
 <div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;">Ημερομηνία Υποχρεωτικής Αρχικής Συνεδρίας: ${fmtD(d.z_date)}</div>
-<div style="text-align:left;">Τόπος (διεύθυνση) Υποχρεωτικής Αρχικής Συνεδρίας: ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ ΜΕΣΩ ΤΗΛΕΔΙΑΣΚΕΨΗΣ</div>
+<div style="text-align:left;">Ημερομηνία ΥΑΣ : ${fmtD(d.z_date)}</div>
+<div style="text-align:left;">Τόπος (διεύθυνση) ΥΑΣ: ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ ΜΕΣΩ ΤΗΛΕΔΙΑΣΚΕΨΗΣ</div>
 <div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;"><b>ΣΥΜΜΕΤΕΧΟΝΤΕΣ ΣΤΗΝ ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ:</b></div>
+<div style="text-align:left;"><b>ΣΥΜΜΕΤΕΧΟΝΤΕΣ ΣΤΗΝ ΥΑΣ:</b></div>
 <div style="text-align:left;">&nbsp;</div>
 ${praktikoReqHTML}
 ${praktikoRespHTML}
@@ -690,7 +690,7 @@ function exportToWord() {
             body {
                 font-family: "Times New Roman", serif;
                 font-size: 12pt;
-                line-height: 1.5;
+                line-height: 1.15;
                 text-align: justify;
                 text-align-last: left;
                 text-justify: inter-word;
@@ -703,7 +703,7 @@ function exportToWord() {
                 color: #000000;
             }
             p, div {
-                line-height: 1.5;
+                line-height: 1.15;
                 text-align: justify;
                 text-align-last: left;
                 text-justify: inter-word;
@@ -720,7 +720,7 @@ function exportToWord() {
                 font-family: "Times New Roman", serif;
                 font-size: 14pt;
                 font-weight: bold;
-                line-height: 1.5;
+                line-height: 1.15;
                 margin-bottom: 12pt;
                 margin-top: 0pt;
             }
@@ -728,7 +728,7 @@ function exportToWord() {
                 border-collapse: collapse;
                 width: 100%;
                 font-size: 12pt;
-                line-height: 1.5;
+                line-height: 1.15;
             }
             td, th {
                 border: 1pt solid #000;
@@ -738,7 +738,7 @@ function exportToWord() {
             .printable {
                 font-family: "Times New Roman", serif;
                 font-size: 12pt;
-                line-height: 1.5;
+                line-height: 1.15;
                 text-align: justify;
             }
             a { color: #000; text-decoration: underline; }
