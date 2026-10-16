@@ -676,13 +676,13 @@ function exportToWord() {
         <style>
             @page {
                 size: 21cm 29.7cm;
-                margin: 2.54cm 2.54cm 2.54cm 2.54cm;
+                margin: 2.54cm 3.17cm 2.54cm 3.17cm;
                 mso-page-orientation: portrait;
             }
             body {
                 font-family: "Times New Roman", serif;
                 font-size: 12pt;
-                line-height: 1.5;
+                line-height: 2;
                 text-align: justify;
                 text-justify: inter-word;
                 word-spacing: normal;
@@ -694,12 +694,13 @@ function exportToWord() {
                 color: #000000;
             }
             p, div {
-                line-height: 1.5;
+                line-height: 2;
                 text-align: justify;
                 text-justify: inter-word;
                 word-spacing: normal;
                 letter-spacing: normal;
-                margin-bottom: 6pt;
+                margin-bottom: 0pt;
+                margin-top: 0pt;
             }
             b, strong {
                 font-weight: bold;
@@ -707,16 +708,17 @@ function exportToWord() {
             h1, h2, h3 {
                 text-align: center;
                 font-family: "Times New Roman", serif;
-                font-size: 13pt;
+                font-size: 14pt;
                 font-weight: bold;
-                line-height: 1.5;
-                margin-bottom: 12pt;
+                line-height: 2;
+                margin-bottom: 0pt;
+                margin-top: 0pt;
             }
             table {
                 border-collapse: collapse;
                 width: 100%;
-                font-size: 11pt;
-                line-height: 1.4;
+                font-size: 12pt;
+                line-height: 2;
             }
             td, th {
                 border: 1pt solid #000;
@@ -726,7 +728,7 @@ function exportToWord() {
             .printable {
                 font-family: "Times New Roman", serif;
                 font-size: 12pt;
-                line-height: 1.5;
+                line-height: 2;
                 text-align: justify;
             }
             a { color: #000; text-decoration: underline; }
