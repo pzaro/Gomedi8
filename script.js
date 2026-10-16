@@ -684,6 +684,7 @@ function exportToWord() {
                 font-size: 12pt;
                 line-height: 1.5;
                 text-align: justify;
+                text-align-last: left;
                 text-justify: inter-word;
                 word-spacing: normal;
                 letter-spacing: normal;
@@ -696,6 +697,7 @@ function exportToWord() {
             p, div {
                 line-height: 1.5;
                 text-align: justify;
+                text-align-last: left;
                 text-justify: inter-word;
                 word-spacing: normal;
                 letter-spacing: normal;

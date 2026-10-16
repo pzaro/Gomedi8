@@ -49,6 +49,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
     font-size: 12pt;
     line-height: 1.5;
     text-align: justify;
+    text-align-last: left;
     text-justify: inter-word;
     word-spacing: normal;
     letter-spacing: normal;
@@ -163,6 +164,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
     #preview li, #preview td, #preview th {
         line-height: 1.5 !important;
         text-align: justify !important;
+        text-align-last: left !important;
         text-justify: inter-word !important;
         word-spacing: normal !important;
         letter-spacing: normal !important;
