@@ -682,7 +682,7 @@ function exportToWord() {
             body {
                 font-family: "Times New Roman", serif;
                 font-size: 12pt;
-                line-height: 2;
+                line-height: 1.5;
                 text-align: justify;
                 text-justify: inter-word;
                 word-spacing: normal;
@@ -694,12 +694,12 @@ function exportToWord() {
                 color: #000000;
             }
             p, div {
-                line-height: 2;
+                line-height: 1.5;
                 text-align: justify;
                 text-justify: inter-word;
                 word-spacing: normal;
                 letter-spacing: normal;
-                margin-bottom: 0pt;
+                margin-bottom: 6pt;
                 margin-top: 0pt;
             }
             b, strong {
@@ -710,15 +710,15 @@ function exportToWord() {
                 font-family: "Times New Roman", serif;
                 font-size: 14pt;
                 font-weight: bold;
-                line-height: 2;
-                margin-bottom: 0pt;
+                line-height: 1.5;
+                margin-bottom: 12pt;
                 margin-top: 0pt;
             }
             table {
                 border-collapse: collapse;
                 width: 100%;
                 font-size: 12pt;
-                line-height: 2;
+                line-height: 1.5;
             }
             td, th {
                 border: 1pt solid #000;
@@ -728,7 +728,7 @@ function exportToWord() {
             .printable {
                 font-family: "Times New Roman", serif;
                 font-size: 12pt;
-                line-height: 2;
+                line-height: 1.5;
                 text-align: justify;
             }
             a { color: #000; text-decoration: underline; }
