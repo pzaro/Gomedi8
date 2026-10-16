@@ -512,8 +512,8 @@ function draw() {
 <div style="text-align:left;">Ημερομηνία: ${d.doc_date}</div>
 <div style="text-align:right; padding-right:50px;">Υπογραφή επισπεύδοντας<br>…………………………….</div>
 <div style="text-align:left;">Μέσο γνωστοποίησης:</div>
-<div style="text-align:left;">Συστημένη Επιστολή &nbsp; [ ☒ ]</div>
-<div style="text-align:left;">Email &nbsp; [ ☐ ]</div>
+<div style="text-align:left;">Συστημένη Επιστολή &nbsp; [ ☐ ]</div>
+<div style="text-align:left;">Email &nbsp; [ ☒ ]</div>
 <div style="text-align:left;">Άλλο (προσδιορίστε) [ ☐ ] ........................</div>
 <div style="text-align:left;">&nbsp;</div>
 <div style="text-align:left;">Νομικός παραστάτης επισπεύδοντας</div>
