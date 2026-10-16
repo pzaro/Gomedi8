@@ -22,6 +22,7 @@
     <button class="nav-btn" onclick="setTab('register', this)">👤 ΕΓΓΡΑΦΗ ΧΡΗΣΤΩΝ</button>
     <button class="nav-btn" onclick="setTab('smart_tool', this)">⚖️ ΑΞΙΟΛΟΓΗΣΗ ΠΡΟΤΑΣΗΣ (SMART)</button>
     <button class="nav-btn" onclick="setTab('library', this)">📚 ΝΟΜΟΘΕΣΙΑ & ΘΕΩΡΙΑ</button>
+    <button class="nav-btn" onclick="setTab('slides_yas', this)">🎯 ΔΙΑΦΑΝΕΙΑ ΥΑΣ</button>
 </nav>
 
 <main>
@@ -280,6 +281,143 @@
                 </div>
         </div>
     </div>
+
+    <!-- ===== ΚΑΡΤΕΛΑ: ΔΙΑΦΑΝΕΙΑ ΥΑΣ ===== -->
+    <div id="slides_yas" class="tab-content">
+        <div style="max-width:960px; margin:0 auto; padding:1rem 0;">
+
+            <!-- Κεφαλίδα + κουμπί εξαγωγής -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <div>
+                    <div style="font-size:1.25rem; font-weight:900; color:#1e293b;">🎯 Βασικά Σημεία Υποχρεωτικής Αρχικής Συνεδρίας Διαμεσολάβησης</div>
+                    <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">Ν. 4640/2019 — Κώδικας Εναλλακτικής Επίλυσης Διαφορών</div>
+                </div>
+                <button onclick="exportSlidesToWord()" class="btn btn-word" style="white-space:nowrap;">
+                    📄 Εξαγωγή σε Word
+                </button>
+            </div>
+
+            <!-- ΔΙΑΦΑΝΕΙΑ 1 — Εμπιστευτικότητα + Ουδέτερος τρίτος -->
+            <div class="yas-slide">
+                <div class="yas-slide-num">01</div>
+                <div class="yas-slide-body">
+                    <div class="yas-slide-title">🔒 Εμπιστευτικότητα &amp; Ουδέτερος Τρίτος</div>
+                    <div class="yas-slide-subtitle">Άρθρο 7 παρ. 3 &amp; άρθρο 8 ν. 4640/2019</div>
+                    <div class="yas-points">
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#2563eb;"></span>
+                            <span>Η Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (ΥΑΣ) διέπεται από <b>απόλυτη εμπιστευτικότητα</b>. Οτιδήποτε λεχθεί ή αποκαλυφθεί κατά τη διαδικασία δεν δύναται να χρησιμοποιηθεί ως αποδεικτικό στοιχείο σε μελλοντική δικαστική ή διαιτητική διαδικασία.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#2563eb;"></span>
+                            <span>Ο διαμεσολαβητής ενεργεί ως <b>ουδέτερος και αμερόληπτος τρίτος</b>. Δεν εκπροσωπεί κανένα μέρος, δεν εκδίδει απόφαση και δεν επιβάλλει λύση. Ο ρόλος του είναι αποκλειστικά διευκολυντικός και επικοινωνιακός.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#2563eb;"></span>
+                            <span>Πριν από την έναρξη της ΥΑΣ, <b>όλοι οι συμμετέχοντες</b> — μέρη, νομικοί παραστάτες και διαμεσολαβητής — δεσμεύονται εγγράφως να τηρήσουν το απόρρητο της διαδικασίας.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ΔΙΑΦΑΝΕΙΑ 2 — Ελεύθερη Βούληση + Σκοπός -->
+            <div class="yas-slide">
+                <div class="yas-slide-num">02</div>
+                <div class="yas-slide-body">
+                    <div class="yas-slide-title">🤝 Ελεύθερη Βούληση &amp; Σκοπός</div>
+                    <div class="yas-slide-subtitle">Άρθρα 4 &amp; 7 ν. 4640/2019</div>
+                    <div class="yas-points">
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#059669;"></span>
+                            <span>Η συμμετοχή στη διαμεσολάβηση διέπεται από την αρχή της <b>ελεύθερης βούλησης</b>. Κανένα μέρος δεν υποχρεούται να αποδεχθεί οποιαδήποτε πρόταση ή να καταλήξει σε συμφωνία.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#059669;"></span>
+                            <span><b>Σκοπός</b> της ΥΑΣ είναι η εξερεύνηση της δυνατότητας εξωδικαστικής επίλυσης της διαφοράς με αμοιβαία αποδεκτή λύση, εξοικονομώντας χρόνο, κόστος και ενέργεια που απαιτεί μία μακροχρόνια δικαστική διαδικασία.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#059669;"></span>
+                            <span>Ακόμη και αν δεν επιτευχθεί συμφωνία, η ΥΑΣ παρέχει στα μέρη <b>πλήρη ενημέρωση</b> για τις επιλογές τους και ανοίγει διαύλους διαλόγου που συχνά οδηγούν σε μεταγενέστερη επίλυση.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ΔΙΑΦΑΝΕΙΑ 3 — Αναστολή Παραγραφής -->
+            <div class="yas-slide">
+                <div class="yas-slide-num">03</div>
+                <div class="yas-slide-body">
+                    <div class="yas-slide-title">⏸️ Αναστολή Παραγραφής &amp; Δικονομικών Προθεσμιών</div>
+                    <div class="yas-slide-subtitle">Άρθρο 9 ν. 4640/2019</div>
+                    <div class="yas-points">
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#d97706;"></span>
+                            <span>Η έγγραφη γνωστοποίηση του διαμεσολαβητή προς τα μέρη <b>αναστέλλει αυτοδικαίως</b> την παραγραφή και την αποσβεστική προθεσμία άσκησης των αξιώσεων, εφόσον αυτές έχουν αρχίσει να τρέχουν βάσει των διατάξεων του ουσιαστικού δικαίου.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#d97706;"></span>
+                            <span>Αναστέλλονται επίσης οι δικονομικές προθεσμίες των <b>άρθρων 237 και 238 Κώδικα Πολιτικής Δικονομίας</b> (κατάθεση προτάσεων) για όσο χρόνο διαρκεί η διαδικασία διαμεσολάβησης.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#d97706;"></span>
+                            <span>Η αναστολή ισχύει <b>από την ημερομηνία κοινοποίησης</b> της γνωστοποίησης/πρόσκλησης (Έντυπο 3) και λήγει με την περάτωση της διαδικασίας διαμεσολάβησης.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ΔΙΑΦΑΝΕΙΑ 4 — Αποτέλεσμα / Επόμενα βήματα -->
+            <div class="yas-slide">
+                <div class="yas-slide-num">04</div>
+                <div class="yas-slide-body">
+                    <div class="yas-slide-title">📋 Αποτέλεσμα &amp; Επόμενα Βήματα</div>
+                    <div class="yas-slide-subtitle">Άρθρο 7 παρ. 4 &amp; άρθρο 8 παρ. 3 ν. 4640/2019</div>
+                    <div class="yas-points">
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#7c3aed;"></span>
+                            <span><b>Αν επιτευχθεί συμφωνία:</b> Συντάσσεται Πρακτικό Επίτευξης Συμφωνίας το οποίο υπογράφεται από τα μέρη και τον διαμεσολαβητή. Η συμφωνία αποτελεί εκτελεστό τίτλο μετά από κατάθεση στη Γραμματεία του αρμόδιου Πρωτοδικείου.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#7c3aed;"></span>
+                            <span><b>Αν δεν επιτευχθεί συμφωνία:</b> Ο διαμεσολαβητής συντάσσει Πρακτικό Περάτωσης Υποχρεωτικής Αρχικής Συνεδρίας Διαμεσολάβησης, το οποίο προσκομίζεται υποχρεωτικά μαζί με τις προτάσεις στο δικαστήριο.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#7c3aed;"></span>
+                            <span>Σε κάθε περίπτωση, τα μέρη <b>ολοκλήρωσαν τη νόμιμη υποχρέωσή τους</b> βάσει του ν. 4640/2019 και μπορούν πλέον να προχωρήσουν ανεμπόδιστα στη δικαστική διαδικασία, εφόσον το επιθυμούν.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ΔΙΑΦΑΝΕΙΑ 5 — Συναλλακτική ευθύτητα + Επικοινωνιακός πολιτισμός -->
+            <div class="yas-slide">
+                <div class="yas-slide-num">05</div>
+                <div class="yas-slide-body">
+                    <div class="yas-slide-title">🌟 Συναλλακτική Ευθύτητα &amp; Επικοινωνιακός Πολιτισμός</div>
+                    <div class="yas-slide-subtitle">Αρχές Διαμεσολάβησης — Κώδικας Δεοντολογίας</div>
+                    <div class="yas-points">
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#dc2626;"></span>
+                            <span>Η διαμεσολάβηση λειτουργεί στο πλαίσιο <b>καλής πίστης και συναλλακτικής ευθύτητας</b>. Τα μέρη αναμένεται να συμμετέχουν με ειλικρίνεια, σεβόμενα τόσο τη διαδικασία όσο και το ένα το άλλο.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#dc2626;"></span>
+                            <span>Ο <b>επικοινωνιακός πολιτισμός</b> αποτελεί θεμέλιο της διαδικασίας. Ο διαμεσολαβητής διασφαλίζει ότι κάθε μέρος μπορεί να εκφραστεί ελεύθερα, να ακουστεί και να γίνει κατανοητό, εντός ενός κλίματος αμοιβαίου σεβασμού.</span>
+                        </div>
+                        <div class="yas-point">
+                            <span class="yas-dot" style="background:#dc2626;"></span>
+                            <span>Η επίτευξη συμφωνίας, πέρα από νομικό αποτέλεσμα, αντιπροσωπεύει <b>υψηλό επίπεδο πολιτισμικής ωριμότητας</b> των εμπλεκόμενων μερών και συμβάλλει στην αποσυμφόρηση του δικαστικού συστήματος.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center; color:#94a3b8; font-size:0.78rem; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e2e8f0;">
+                Παναγιώτης Ζαρογουλίδης — Διαπιστευμένος Διαμεσολαβητής (Αριθμός Μητρώου Διαμεσολαβητών 2341) &nbsp;|&nbsp; Πενταπλάτανος Γιαννιτσών
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <script src="script.js"></script>
