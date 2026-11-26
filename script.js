@@ -174,40 +174,38 @@ async function saveLawyerToSheet(idx, isResp) {
 }
 
 async function saveCaseToSheet() {
-    const subj  = document.getElementById('p_subj')?.value?.trim();
-    const court = document.getElementById('p_court')?.value?.trim();
-    const court_n = document.getElementById('p_court_n')?.value?.trim();
-    const court_d = document.getElementById('p_court_d')?.value?.trim();
-    const doc_date = document.getElementById('doc_date')?.value?.trim();
-    const basis_art = document.getElementById('basis_art')?.value || '';
+    const subj    = document.getElementById('p_subj')?.value?.trim();
+    const court   = document.getElementById('p_court')?.value?.trim()   || '';
+    const court_n = document.getElementById('p_court_n')?.value?.trim() || '';
+    const court_d = document.getElementById('p_court_d')?.value?.trim() || '';
+    const basis_art         = document.getElementById('basis_art')?.value         || '';
     const proposal_deadline = document.getElementById('proposal_deadline')?.value?.trim() || '';
+    const doc_date = new Date().toLocaleDateString('el-GR');
 
     if (!subj) {
         showToast('⚠️ Συμπληρώστε το αντικείμενο της διαφοράς', '#f59e0b');
         return;
     }
 
-    const req_afm  = reqs.map(r => r.afm).filter(Boolean).join(', ') || '';
+    const req_afm  = reqs.map(r => r.afm).filter(Boolean).join(', ')  || '';
     const resp_afm = resps.map(r => r.afm).filter(Boolean).join(', ') || '';
 
     showToast('⏳ Αποθήκευση υπόθεσης...', '#3b82f6');
 
-    const params = new URLSearchParams({
-        action: 'writeCase',
-        doc_date,
-        subj,
-        court:    court    || '',
-        court_n:  court_n  || '',
-        court_d:  court_d  || '',
-        basis_art,
-        proposal_deadline,
-        req_afm,
-        resp_afm,
-        med_am:   m_data.am || ''
-    });
+    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeCase`
+        + `&doc_date=${encodeURIComponent(doc_date)}`
+        + `&subj=${encodeURIComponent(subj)}`
+        + `&court=${encodeURIComponent(court)}`
+        + `&court_n=${encodeURIComponent(court_n)}`
+        + `&court_d=${encodeURIComponent(court_d)}`
+        + `&basis_art=${encodeURIComponent(basis_art)}`
+        + `&proposal_deadline=${encodeURIComponent(proposal_deadline)}`
+        + `&req_afm=${encodeURIComponent(req_afm)}`
+        + `&resp_afm=${encodeURIComponent(resp_afm)}`
+        + `&med_am=${encodeURIComponent(m_data.am || '')}`;
 
     try {
-        const res  = await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`);
+        const res  = await fetch(url);
         const data = await res.json();
         if (data.status === 'success') {
             showToast('✅ Η υπόθεση αποθηκεύτηκε στο Google Sheet!', '#10b981');
