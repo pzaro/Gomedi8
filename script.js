@@ -742,10 +742,7 @@ ${respsHtml}
 <div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:14pt;letter-spacing:0.3pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
 
 <div style="margin-bottom:14pt;">
-<b>${mediatorFullName}</b>${m_data.f?' του '+m_data.f:''}<br>
-${m_data.addr?'Διεύθυνση: '+m_data.addr+'<br>':''}
-Αριθμός Μητρώου Διαμεσολαβητή (ΑΜΔ): ${m_data.am}<br>
-${m_data.email?'Email: '+m_data.email+'<br>':''}
+<b>${mediatorFullName}</b>
 </div>
 
 <hr class="doc-divider">
@@ -754,16 +751,8 @@ ${m_data.email?'Email: '+m_data.email+'<br>':''}
 
 <p style="font-style:italic;">${d.subj}</p>
 
-<p><b>ΑΡΜΟΔΙΟ ΔΙΚΑΣΤΗΡΙΟ:</b> ${d.court} &nbsp;&nbsp; <b>ΑΡ. ΚΑΤΑΘΕΣΗΣ / ΗΜΕΡΟΜΗΝΙΑ ΑΓΩΓΗΣ:</b> ${d.court_n} / ${d.court_d}</p>
-
-<p><b>ΠΡΟΘΕΣΜΙΑ ΚΑΤΑΘΕΣΗΣ ΠΡΟΤΑΣΕΩΝ:</b> ${d.proposal_deadline}</p>
-
-<div class="doc-sig-mediator">
-    <div class="sig-inner">
-        <div>Πενταπλάτανος Γιαννιτσών, ${d.doc_date}</div>
-        <div class="sig-line"></div>
-        <div class="sig-name">Ο Διαμεσολαβητής</div>
-    </div>
+<div style="margin-top:20pt;text-align:right;">
+    <div style="font-size:10pt;">Ο Διαμεσολαβητής</div>
 </div>
 
 <div class="doc-footnote">
