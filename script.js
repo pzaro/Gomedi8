@@ -758,12 +758,6 @@ ${m_data.email?'Email: '+m_data.email+'<br>':''}
 
 <p><b>ΠΡΟΘΕΣΜΙΑ ΚΑΤΑΘΕΣΗΣ ΠΡΟΤΑΣΕΩΝ:</b> ${d.proposal_deadline}</p>
 
-<hr class="doc-divider">
-
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΑΜΟΙΒΗ ΔΙΑΜΕΣΟΛΑΒΗΤΗ</div>
-
-<p>Η αμοιβή για τη διεξαγωγή της Εισαγωγικής Συνεδρίας Διαμεσολάβησης ανέρχεται στο ποσό των <b>${d.feeInfo.perPartyText}</b> ανά μέρος (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>) και καταβάλλεται πριν από την έναρξη στον λογαριασμό ${m_data.iban ? '<b>'+m_data.iban+'</b>, Τράπεζα '+m_data.bank : '..............'}.</p>
-
 <div class="doc-sig-mediator">
     <div class="sig-inner">
         <div>Πενταπλάτανος Γιαννιτσών, ${d.doc_date}</div>
