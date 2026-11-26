@@ -685,92 +685,98 @@ function draw() {
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_mob||r.l_tel||''}</td>
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_email||''}</td></tr>`).join('');
 
-        // βάση υπαγωγής — κενά checkboxes, ο χρήστης τσεκάρει χειρόγραφα
-        const basisOptions = [
-            'άρθρου 76 παρ. 1α του ν. 5344/2026 (οικογενειακή διαφορά)',
-            'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Μονομελούς Πρωτοδικείου άνω των 30.000 ευρώ)',
-            'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Πολυμελούς Πρωτοδικείου)',
-            'άρθρου 76 παρ. 1γ του ν. 5344/2026 (ρήτρα διαμεσολάβησης)',
-            'άρθρου 76 παρ. 1δ του ν. 5344/2026 (κτηματολογική διαφορά)',
-        ];
-        const basisHtml = basisOptions.map(text =>
-            `<div style="display:flex;align-items:baseline;gap:8pt;margin:5pt 0;">
-                <span style="font-size:13pt;line-height:1;">☐</span>
-                <span>${text}</span>
-            </div>`
-        ).join('');
-
-        // μέρη HTML
-        const reqsHtml = reqs.map((r,i) => {
-            const lName = getFullName(r.l_n, r.l_s);
-            return `<div style="margin-bottom:16pt;">
-<div style="font-weight:bold;margin-bottom:6pt;">Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος</div>
-<div style="margin-left:10pt;line-height:1.9;">
-${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}<br>
-${r.addr||''}<br>
-Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${r.afm||''}
-</div>
-<div style="font-weight:bold;margin:8pt 0 4pt 0;">Νομικός Παραστάτης</div>
-<div style="margin-left:10pt;line-height:1.9;">
-${lName||''}${r.l_addr?'<br>'+r.l_addr:''}
-</div>
-</div>`;
-        }).join('');
-
-        const respsHtml = resps.map((r,i) => {
-            const lName = getFullName(r.l_n, r.l_s);
-            return `<div style="margin-bottom:16pt;">
-<div style="font-weight:bold;margin-bottom:6pt;">Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος</div>
-<div style="margin-left:10pt;line-height:1.9;">
-${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}<br>
-${r.addr||''}<br>
-Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${r.afm||''}
-</div>
-<div style="font-weight:bold;margin:8pt 0 4pt 0;">Νομικός Παραστάτης</div>
-<div style="margin-left:10pt;line-height:1.9;">
-${lName||''}${r.l_addr?'<br>'+r.l_addr:''}
-</div>
-</div>`;
-        }).join('');
+        const dot = '..................................';
+        const dotS = '………………..';
 
         activeHtml = `
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10pt;">
-    <div></div>
-    <div class="doc-form-badge">ΕΝΤΥΠΟ 1</div>
-</div>
+<div class="doc-form-badge">ΕΝΤΥΠΟ 1</div>
 <div class="doc-title-block">
     <span class="doc-main-title">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</span>
 </div>
 
-<p style="margin-top:14pt;">Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (ΥΑΣΔ) βάσει εφαρμογής του:</p>
+<p style="margin-top:14pt;line-height:1.7;">Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) διαμεσολάβησης βάσει εφαρμογής του:</p>
 
-<div style="margin:10pt 0 18pt 16pt;font-size:11pt;">
-${basisHtml}
+<div style="margin:10pt 0 18pt 10pt;line-height:2.2;">
+<div style="display:flex;justify-content:space-between;">
+    <span>· &nbsp; άρθρου 76 παρ. 1α του ν. 5344/2026 (οικογενειακή διαφορά)</span>
+    <span>☐</span>
+</div>
+<div style="display:flex;justify-content:space-between;">
+    <span>· &nbsp; άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Μον/λούς άνω 30.000 ευρώ)</span>
+    <span>☐</span>
+</div>
+<div style="display:flex;justify-content:space-between;">
+    <span>· &nbsp; άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Πολυμελούς)</span>
+    <span>☐</span>
+</div>
+<div style="display:flex;justify-content:space-between;">
+    <span>· &nbsp; άρθρου 76 παρ. 1γ του ν. 5344/2026 (ρήτρα διαμεσολάβησης)</span>
+    <span>☐</span>
+</div>
+<div style="display:flex;justify-content:space-between;">
+    <span>· &nbsp; άρθρου 76 παρ. 1δ του ν. 5344/2026 (κτηματολογική διαφορά)</span>
+    <span>☐</span>
+</div>
 </div>
 
-<hr class="doc-divider">
+<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;margin:14pt 0 10pt;">ΣΥΜΜΕΤΕΧΟΝΤΑ ΜΕΡΗ</div>
 
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:14pt;letter-spacing:0.3pt;">ΣΥΜΜΕΤΕΧΟΝΤΑ ΜΕΡΗ</div>
+<p style="margin-bottom:6pt;"><b>Α. Επισπεύδον μέρος / Επισπεύδοντα μέρη:</b></p>
+<div style="line-height:2.2;margin-left:4pt;">
+Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
+Διεύθυνση: ${dot}<br>
+ΑΦΜ: ${dot}<br>
+Αριθμός τηλεφώνου: ${dot}<br>
+Email: ${dot}
+</div>
 
-${reqsHtml}
-${respsHtml}
+<p style="margin-top:12pt;margin-bottom:6pt;"><b>Νομικός Παραστάτης:</b></p>
+<div style="line-height:2.2;margin-left:4pt;">
+Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
+Διεύθυνση: ${dot}<br>
+ΑΜ/ΔΣ: ${dot}<br>
+Αριθμός τηλεφώνου: ${dot}<br>
+Email: ${dot}
+</div>
 
-<hr class="doc-divider">
+<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;margin:18pt 0 10pt;">Β. Έτερο μέρος / Έτερα μέρη:</div>
+<div style="line-height:2.2;margin-left:4pt;">
+Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
+Διεύθυνση: ${dot}<br>
+ΑΦΜ: ${dot}<br>
+Αριθμός τηλεφώνου: ${dot}<br>
+Email: ${dot}
+</div>
 
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
+<p style="margin-top:12pt;margin-bottom:6pt;"><b>Νομικός Παραστάτης:</b></p>
+<div style="line-height:2.2;margin-left:4pt;">
+Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
+Διεύθυνση: ${dot}<br>
+ΑΜ/ΔΣ: ${dot}<br>
+Αριθμός τηλεφώνου: ${dot}<br>
+Email: ${dot}
+</div>
 
-<div style="margin-bottom:16pt;font-weight:bold;">${mediatorFullName}</div>
+<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;margin:18pt 0 10pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
+<div style="line-height:2.2;margin-left:4pt;">
+Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
+Διεύθυνση: ${dot}<br>
+ΑΦΜ: ${dot}<br>
+Αριθμός τηλεφώνου: ${dot}<br>
+Email: ${dot}
+</div>
 
-<hr class="doc-divider">
+<div style="font-weight:bold;margin:20pt 0 8pt;">Σύντομη περιγραφή του αντικειμένου της διαφοράς</div>
+<div style="line-height:2.4;color:#333;">
+${dot}${dot}${dot}<br>
+${dot}${dot}${dot}<br>
+${dot}${dot}${dot}<br>
+${dot}${dot}${dot}
+</div>
 
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΣΥΝΤΟΜΗ ΠΕΡΙΓΡΑΦΗ ΤΟΥ ΑΝΤΙΚΕΙΜΕΝΟΥ ΤΗΣ ΔΙΑΦΟΡΑΣ</div>
-
-<p style="font-style:italic;line-height:1.8;">${d.subj}</p>
-
-<div style="margin-top:28pt;text-align:right;font-size:10pt;">Ο Διαμεσολαβητής</div>
-
-<div class="doc-footnote">
-Το παρόν Φύλλο Βασικών Στοιχείων (Έντυπο 1) συντάσσεται κατ' άρθρο 77 παρ. 1 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών, Φύλλο Εφημερίδας της Κυβερνήσεως Α΄ 168/16-10-2026) και επισυνάπτεται υποχρεωτικά στη Γνωστοποίηση/Πρόσκληση (Έντυπο 3) και στο Πρακτικό Περάτωσης ΕΣΔ.
+<div class="doc-footnote" style="margin-top:28pt;">
+<b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΗ ΧΡΗΣΗ ΤΟΥ ΕΝΤΥΠΟΥ 1</b><br>
+Το Φύλλο Βασικών Στοιχείων (Έντυπο 1) περιλαμβάνει τα στοιχεία όλων όσων αφορά η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) και την περιγραφή του αντικειμένου της διαφοράς. Για τη διευκόλυνση της διαδικασίας συμπλήρωσης των υπολοίπων εντύπων, το Φύλλο Βασικών Στοιχείων επισυνάπτεται σε καθένα από αυτά, αποτελώντας αναπόσπαστο μέρος τους. Συντάσσεται κατ' άρθρο 77 παρ. 1 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών, Φύλλο Εφημερίδας της Κυβερνήσεως Α΄ 168/16-10-2026).
 </div>`;
 
     } else if (d.type === 'email') {
