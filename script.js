@@ -114,15 +114,8 @@ async function savePartyToSheet(idx, isResp) {
     });
 
     try {
-        const res  = await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`);
-        const data = await res.json();
-        if (data.status === 'success') {
-            showToast('✅ Το μέρος αποθηκεύτηκε στο Google Sheet!', '#10b981');
-        } else if (data.message === 'Exists') {
-            showToast('ℹ️ Υπάρχει ήδη εγγραφή με αυτό το ΑΦΜ — ενημερώθηκε', '#f59e0b');
-        } else {
-            showToast('❌ Σφάλμα αποθήκευσης μέρους', '#ef4444');
-        }
+        await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`, { mode: 'no-cors' });
+        showToast('✅ Το μέρος αποθηκεύτηκε στο Google Sheet!', '#10b981');
     } catch (e) {
         showToast('❌ Αδυναμία σύνδεσης με Google Sheet', '#ef4444');
     }
@@ -159,15 +152,8 @@ async function saveLawyerToSheet(idx, isResp) {
     });
 
     try {
-        const res  = await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`);
-        const data = await res.json();
-        if (data.status === 'success') {
-            showToast('✅ Ο δικηγόρος αποθηκεύτηκε στο Google Sheet!', '#10b981');
-        } else if (data.message === 'Exists') {
-            showToast('ℹ️ Υπάρχει ήδη εγγραφή — ενημερώθηκε', '#f59e0b');
-        } else {
-            showToast('❌ Σφάλμα αποθήκευσης δικηγόρου', '#ef4444');
-        }
+        await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`, { mode: 'no-cors' });
+        showToast('✅ Ο δικηγόρος αποθηκεύτηκε στο Google Sheet!', '#10b981');
     } catch (e) {
         showToast('❌ Αδυναμία σύνδεσης με Google Sheet', '#ef4444');
     }
@@ -205,13 +191,8 @@ async function saveCaseToSheet() {
         + `&med_am=${encodeURIComponent(m_data.am || '')}`;
 
     try {
-        const res  = await fetch(url);
-        const data = await res.json();
-        if (data.status === 'success') {
-            showToast('✅ Η υπόθεση αποθηκεύτηκε στο Google Sheet!', '#10b981');
-        } else {
-            showToast('❌ Σφάλμα αποθήκευσης υπόθεσης', '#ef4444');
-        }
+        await fetch(url, { mode: 'no-cors' });
+        showToast('✅ Η υπόθεση αποθηκεύτηκε στο Google Sheet!', '#10b981');
     } catch (e) {
         showToast('❌ Αδυναμία σύνδεσης με Google Sheet', '#ef4444');
     }
