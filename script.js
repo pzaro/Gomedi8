@@ -704,15 +704,7 @@ function draw() {
             return `<div style="margin-bottom:14pt;">
 <b>Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος</b><br><br>
 ${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}, ${r.addr||'...............'}, με Αριθμό Φορολογικού Μητρώου (ΑΦΜ) ${r.afm||'...................'}<br><br>
-${tel}<br>
-${r.email||''}<br><br>
-<b>Νομικός Παραστάτης:</b><br>
-${lName||'...............'}<br>
-${r.l_addr?r.l_addr+'<br>':''}
-${r.l_am||'.......'} / ${r.l_ds||'.......'}<br>
-${r.l_afm||'...................'}<br>
-${r.l_mob||r.l_tel||'...............'}<br>
-${r.l_email||''}
+<b>Νομικός Παραστάτης:</b> ${lName||'...............'}${r.l_addr?' — '+r.l_addr:''}
 </div>`;
         }).join('');
 
@@ -722,15 +714,7 @@ ${r.l_email||''}
             return `<div style="margin-bottom:14pt;">
 <b>Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος</b><br><br>
 ${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}, ${r.addr||'...............'}, με Αριθμό Φορολογικού Μητρώου (ΑΦΜ) ${r.afm||'...................'}<br><br>
-${tel}<br>
-${r.email||''}<br><br>
-<b>Νομικός Παραστάτης:</b><br>
-${lName||'...............'}<br>
-${r.l_addr?r.l_addr+'<br>':''}
-${r.l_am||'.......'} / ${r.l_ds||'.......'}<br>
-${r.l_afm||'...................'}<br>
-${r.l_mob||r.l_tel||'...............'}<br>
-${r.l_email||''}
+<b>Νομικός Παραστάτης:</b> ${lName||'...............'}${r.l_addr?' — '+r.l_addr:''}
 </div>`;
         }).join('');
 
@@ -768,7 +752,7 @@ ${m_data.email?'Email: '+m_data.email+'<br>':''}
 
 <div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΣΥΝΤΟΜΗ ΠΕΡΙΓΡΑΦΗ ΤΟΥ ΑΝΤΙΚΕΙΜΕΝΟΥ ΤΗΣ ΔΙΑΦΟΡΑΣ</div>
 
-<p style="font-style:italic;"><b>${d.subj}</b></p>
+<p style="font-style:italic;">${d.subj}</p>
 
 <p><b>ΑΡΜΟΔΙΟ ΔΙΚΑΣΤΗΡΙΟ:</b> ${d.court} &nbsp;&nbsp; <b>ΑΡ. ΚΑΤΑΘΕΣΗΣ / ΗΜΕΡΟΜΗΝΙΑ ΑΓΩΓΗΣ:</b> ${d.court_n} / ${d.court_d}</p>
 
