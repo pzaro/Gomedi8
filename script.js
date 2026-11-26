@@ -685,48 +685,66 @@ function draw() {
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_mob||r.l_tel||''}</td>
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_email||''}</td></tr>`).join('');
 
-        // βάση υπαγωγής checkboxes
+        // βάση υπαγωγής — κενά checkboxes, ο χρήστης τσεκάρει χειρόγραφα
         const basisOptions = [
-            {v:'a', text:'άρθρου 76 παρ. 1α του ν. 5344/2026 (οικογενειακή διαφορά)'},
-            {v:'b', text:'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Μονομελούς άνω 30.000 ευρώ)'},
-            {v:'c', text:'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Πολυμελούς)'},
-            {v:'d', text:'άρθρου 76 παρ. 1γ του ν. 5344/2026 (ρήτρα διαμεσολάβησης)'},
-            {v:'e', text:'άρθρου 76 παρ. 1δ του ν. 5344/2026 (κτηματολογική διαφορά)'},
+            'άρθρου 76 παρ. 1α του ν. 5344/2026 (οικογενειακή διαφορά)',
+            'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Μονομελούς Πρωτοδικείου άνω των 30.000 ευρώ)',
+            'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Πολυμελούς Πρωτοδικείου)',
+            'άρθρου 76 παρ. 1γ του ν. 5344/2026 (ρήτρα διαμεσολάβησης)',
+            'άρθρου 76 παρ. 1δ του ν. 5344/2026 (κτηματολογική διαφορά)',
         ];
-        const basisHtml = basisOptions.map(o =>
-            `<div style="margin:3pt 0;">- ${o.text} &nbsp;&nbsp; ${o.v === d.basis_art ? '☒' : '☐'}</div>`
+        const basisHtml = basisOptions.map(text =>
+            `<div style="display:flex;align-items:baseline;gap:8pt;margin:5pt 0;">
+                <span style="font-size:13pt;line-height:1;">☐</span>
+                <span>${text}</span>
+            </div>`
         ).join('');
 
-        // μέρη HTML — ακολουθεί τη δομή του υποδείγματος
+        // μέρη HTML
         const reqsHtml = reqs.map((r,i) => {
-            const tel = r.mob || r.tel || '.....................';
             const lName = getFullName(r.l_n, r.l_s);
-            return `<div style="margin-bottom:14pt;">
-<b>Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος</b><br><br>
-${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}, ${r.addr||'...............'}, με Αριθμό Φορολογικού Μητρώου (ΑΦΜ) ${r.afm||'...................'}<br><br>
-<b>Νομικός Παραστάτης:</b> ${lName||'...............'}${r.l_addr?' — '+r.l_addr:''}
+            return `<div style="margin-bottom:16pt;">
+<div style="font-weight:bold;margin-bottom:6pt;">Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος</div>
+<div style="margin-left:10pt;line-height:1.9;">
+${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}<br>
+${r.addr||''}<br>
+Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${r.afm||''}
+</div>
+<div style="font-weight:bold;margin:8pt 0 4pt 0;">Νομικός Παραστάτης</div>
+<div style="margin-left:10pt;line-height:1.9;">
+${lName||''}${r.l_addr?'<br>'+r.l_addr:''}
+</div>
 </div>`;
         }).join('');
 
         const respsHtml = resps.map((r,i) => {
-            const tel = r.mob || r.tel || '.....................';
             const lName = getFullName(r.l_n, r.l_s);
-            return `<div style="margin-bottom:14pt;">
-<b>Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος</b><br><br>
-${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}, ${r.addr||'...............'}, με Αριθμό Φορολογικού Μητρώου (ΑΦΜ) ${r.afm||'...................'}<br><br>
-<b>Νομικός Παραστάτης:</b> ${lName||'...............'}${r.l_addr?' — '+r.l_addr:''}
+            return `<div style="margin-bottom:16pt;">
+<div style="font-weight:bold;margin-bottom:6pt;">Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος</div>
+<div style="margin-left:10pt;line-height:1.9;">
+${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}<br>
+${r.addr||''}<br>
+Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${r.afm||''}
+</div>
+<div style="font-weight:bold;margin:8pt 0 4pt 0;">Νομικός Παραστάτης</div>
+<div style="margin-left:10pt;line-height:1.9;">
+${lName||''}${r.l_addr?'<br>'+r.l_addr:''}
+</div>
 </div>`;
         }).join('');
 
         activeHtml = `
-<div class="doc-form-badge">ΕΝΤΥΠΟ 1</div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10pt;">
+    <div></div>
+    <div class="doc-form-badge">ΕΝΤΥΠΟ 1</div>
+</div>
 <div class="doc-title-block">
     <span class="doc-main-title">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</span>
 </div>
 
-<p>Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (ΥΑΣΔ) βάσει εφαρμογής του:</p>
+<p style="margin-top:14pt;">Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (ΥΑΣΔ) βάσει εφαρμογής του:</p>
 
-<div style="margin:10pt 0 18pt 12pt;font-size:11pt;line-height:2;">
+<div style="margin:10pt 0 18pt 16pt;font-size:11pt;">
 ${basisHtml}
 </div>
 
@@ -739,21 +757,17 @@ ${respsHtml}
 
 <hr class="doc-divider">
 
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:14pt;letter-spacing:0.3pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
 
-<div style="margin-bottom:14pt;">
-<b>${mediatorFullName}</b>
-</div>
+<div style="margin-bottom:16pt;font-weight:bold;">${mediatorFullName}</div>
 
 <hr class="doc-divider">
 
 <div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΣΥΝΤΟΜΗ ΠΕΡΙΓΡΑΦΗ ΤΟΥ ΑΝΤΙΚΕΙΜΕΝΟΥ ΤΗΣ ΔΙΑΦΟΡΑΣ</div>
 
-<p style="font-style:italic;">${d.subj}</p>
+<p style="font-style:italic;line-height:1.8;">${d.subj}</p>
 
-<div style="margin-top:20pt;text-align:right;">
-    <div style="font-size:10pt;">Ο Διαμεσολαβητής</div>
-</div>
+<div style="margin-top:28pt;text-align:right;font-size:10pt;">Ο Διαμεσολαβητής</div>
 
 <div class="doc-footnote">
 Το παρόν Φύλλο Βασικών Στοιχείων (Έντυπο 1) συντάσσεται κατ' άρθρο 77 παρ. 1 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών, Φύλλο Εφημερίδας της Κυβερνήσεως Α΄ 168/16-10-2026) και επισυνάπτεται υποχρεωτικά στη Γνωστοποίηση/Πρόσκληση (Έντυπο 3) και στο Πρακτικό Περάτωσης ΕΣΔ.
