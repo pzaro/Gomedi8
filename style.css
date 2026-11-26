@@ -216,6 +216,8 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 .btn-party-recall { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
 .btn-party-save:hover { background: #047857; }
 .btn-party-recall:hover { background: #1d4ed8; }
+.btn-save-case { background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; margin: 10px 0 6px; width: 100%; }
+.btn-save-case:hover { background: #6d28d9; }
 
 /* Κατάσταση χειροκίνητης επεξεργασίας του εγγράφου */
 .printable.editing {

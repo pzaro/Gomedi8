@@ -173,6 +173,52 @@ async function saveLawyerToSheet(idx, isResp) {
     }
 }
 
+async function saveCaseToSheet() {
+    const subj  = document.getElementById('p_subj')?.value?.trim();
+    const court = document.getElementById('p_court')?.value?.trim();
+    const court_n = document.getElementById('p_court_n')?.value?.trim();
+    const court_d = document.getElementById('p_court_d')?.value?.trim();
+    const doc_date = document.getElementById('doc_date')?.value?.trim();
+    const basis_art = document.getElementById('basis_art')?.value || '';
+    const proposal_deadline = document.getElementById('proposal_deadline')?.value?.trim() || '';
+
+    if (!subj) {
+        showToast('⚠️ Συμπληρώστε το αντικείμενο της διαφοράς', '#f59e0b');
+        return;
+    }
+
+    const req_afm  = reqs.map(r => r.afm).filter(Boolean).join(', ') || '';
+    const resp_afm = resps.map(r => r.afm).filter(Boolean).join(', ') || '';
+
+    showToast('⏳ Αποθήκευση υπόθεσης...', '#3b82f6');
+
+    const params = new URLSearchParams({
+        action: 'writeCase',
+        doc_date,
+        subj,
+        court:    court    || '',
+        court_n:  court_n  || '',
+        court_d:  court_d  || '',
+        basis_art,
+        proposal_deadline,
+        req_afm,
+        resp_afm,
+        med_am:   m_data.am || ''
+    });
+
+    try {
+        const res  = await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+            showToast('✅ Η υπόθεση αποθηκεύτηκε στο Google Sheet!', '#10b981');
+        } else {
+            showToast('❌ Σφάλμα αποθήκευσης υπόθεσης', '#ef4444');
+        }
+    } catch (e) {
+        showToast('❌ Αδυναμία σύνδεσης με Google Sheet', '#ef4444');
+    }
+}
+
 async function registerLawyer() {
     const afm = document.getElementById('reg_l_afm').value.trim();
     const mob = document.getElementById('reg_l_mob').value.trim();
@@ -772,6 +818,15 @@ ${m_data.email?'Email: '+m_data.email:''}
 
 <div style="font-weight:bold;margin:20pt 0 8pt;">Σύντομη περιγραφή του αντικειμένου της διαφοράς</div>
 <p style="line-height:1.9;font-style:italic;">${d.subj || '..............................................................................................................................................................'}</p>
+
+<div style="margin-top:40pt;display:flex;justify-content:flex-end;">
+    <div style="text-align:center;min-width:200pt;">
+        <div style="margin-bottom:4pt;font-size:9.5pt;">Ο Διαμεσολαβητής</div>
+        <div style="border-top:1pt solid #333;width:200pt;margin:0 auto;padding-top:6pt;">
+            <div style="font-size:9pt;color:#555;">Σφραγίδα &amp; Υπογραφή</div>
+        </div>
+    </div>
+</div>
 
 <div class="doc-footnote" style="margin-top:28pt;">
 <b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΗ ΧΡΗΣΗ ΤΟΥ ΕΝΤΥΠΟΥ 1</b><br>
