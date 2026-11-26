@@ -654,17 +654,7 @@ function draw() {
     let activeHtml = '';
     const mediatorFullName = `${m_data.n} ${m_data.s}`;
 
-    // Κεφαλίδα διαμεσολαβητή (εμφανίζεται σε όλα εκτός email/enarktiri)
-    const docHeader = `
-<div class="doc-header">
-    <div class="doc-header-left">
-        <div class="doc-header-title">${mediatorFullName}</div>
-        <div class="doc-header-sub">Διαπιστευμένος Διαμεσολαβητής &nbsp;|&nbsp; ΑΜΔ ${m_data.am}</div>
-        ${m_data.addr ? `<div class="doc-header-sub">${m_data.addr}</div>` : ''}
-        ${m_data.email ? `<div class="doc-header-sub">${m_data.email}</div>` : ''}
-    </div>
-    <div class="doc-header-badge">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ<br>ΑΜΔ ${m_data.am}</div>
-</div>`;
+    // (κεφαλίδα αφαιρέθηκε — ο χρήστης τοποθετεί επικεφαλίδα/σφραγίδα χειροκίνητα)
 
     if (d.type === 'fyllo') {
         const allParties = [...reqs, ...resps];
@@ -693,10 +683,10 @@ function draw() {
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_mob||r.l_tel||''}</td>
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_email||''}</td></tr>`).join('');
 
-        activeHtml = `${docHeader}
+        activeHtml = `
+<div class="doc-form-badge">ΕΝΤΥΠΟ 1</div>
 <div class="doc-title-block">
-    <span class="doc-main-title">ΕΝΤΥΠΟ 1</span>
-    <div class="doc-law-ref">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</div>
+    <span class="doc-main-title">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</span>
     <div class="doc-subtitle">(άρθρο 77 παρ. 1 του ν. 5344/2026 — Κώδικας Εναλλακτικής Επίλυσης Διαφορών)</div>
 </div>
 
@@ -748,7 +738,7 @@ ${m_data.email?`<tr><td style="padding:3pt 0;font-weight:bold;">Email:</td><td>$
     <div class="sig-inner">
         <div>Πενταπλάτανος Γιαννιτσών, ${d.doc_date}</div>
         <div class="sig-line"></div>
-        <div class="sig-name">Ο Διαμεσολαβητής<br>${mediatorFullName}</div>
+        <div class="sig-name">Ο Διαμεσολαβητής</div>
     </div>
 </div>
 
@@ -799,10 +789,10 @@ ${mediatorFullName}`;
         const pName = getFullName(p.n, p.s);
         const pAFM = p.afm || "........";
 
-        activeHtml = `${docHeader}
+        activeHtml = `
+<div class="doc-form-badge">ΕΝΤΥΠΟ 3</div>
 <div class="doc-title-block">
-    <span class="doc-main-title">ΕΝΤΥΠΟ 3</span>
-    <div class="doc-law-ref">ΓΝΩΣΤΟΠΟΙΗΣΗ / ΠΡΟΣΚΛΗΣΗ ΓΙΑ ΤΗΝ ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</div>
+    <span class="doc-main-title">ΓΝΩΣΤΟΠΟΙΗΣΗ / ΠΡΟΣΚΛΗΣΗ ΓΙΑ ΤΗΝ ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</span>
     <div class="doc-subtitle">(άρθρο 78 παρ. 2 του ν. 5344/2026)<br>Απευθύνεται προς όλα τα μέρη της διαφοράς, όπως αναφέρονται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων</div>
 </div>
 
@@ -828,14 +818,11 @@ ${zoomFrameEntypo}
 
 <div class="doc-sig-mediator">
     <div class="sig-inner">
+        <div>Πενταπλάτανος Γιαννιτσών, ${d.doc_date}</div>
         <div class="sig-line"></div>
-        <div class="sig-name">Ο Διαμεσολαβητής<br>${mediatorFullName}</div>
+        <div class="sig-name">Ο Διαμεσολαβητής</div>
     </div>
 </div>
-
-<hr class="doc-divider">
-<p><b>* ΠΑΡΕΛΗΦΘΗ</b> την …………………….......<br>
-Ο παραλαβών — Όνομα: ………………………………. &nbsp;&nbsp; Υπογραφή: ………………………….</p>
 
 <div class="doc-footnote">
 *(Ο διαμεσολαβητής δεν απαιτείται να ζητήσει επιβεβαίωση της παραλαβής, αν αυτή αποδεικνύεται μέσω ηλεκτρονικής αλληλογραφίας ή από αποδεικτικό αποστολής συστημένης επιστολής ή από άλλο νόμιμο τρόπο.)<br><br>
@@ -843,10 +830,10 @@ ${zoomFrameEntypo}
 </div>`;
 
     } else if (d.type === 'praktiko') {
-        activeHtml = `${docHeader}
+        activeHtml = `
 <div class="doc-title-block">
     <span class="doc-main-title">ΠΡΑΚΤΙΚΟ ΠΕΡΑΤΩΣΗΣ ΑΡΧΙΚΗΣ ΥΠΟΧΡΕΩΤΙΚΗΣ ΣΥΝΕΔΡΙΑΣ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</span>
-    <div class="doc-law-ref">(άρθρο 79 παρ. 4 του ν. 5344/2026)</div>
+    <div class="doc-subtitle">(άρθρο 79 παρ. 4 του ν. 5344/2026)</div>
 </div>
 
 <p>Ο διαμεσολαβητής <b>${mediatorFullName}</b> του ${m_data.f} (ΑΜΔ ${m_data.am}) βεβαιώνω ότι περατώθηκε η Εισαγωγική Συνεδρία Διαμεσολάβησης (ΕΣΔ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων (Έντυπο 1), κατά την οποία παραστάθηκαν τα μέρη όπως παρακάτω αναφέρεται.</p>
@@ -868,7 +855,7 @@ ${praktikoRespHTML}
     <div>Ονοματεπώνυμο: <b>${mediatorFullName}</b> &nbsp;|&nbsp; Πατρώνυμο: ${m_data.f} &nbsp;|&nbsp; ΑΜΔ: ${m_data.am}</div>
     <div class="doc-party-row">
         <div>Πενταπλάτανος Γιαννιτσών, την ${d.doc_date}</div>
-        <div class="sig-block">Υπογραφή Διαμεσολαβητή<br>…………………………….</div>
+        <div class="sig-block" style="min-width:160pt;border-top:1pt solid #333;padding-top:4pt;margin-top:28pt;">Ο Διαμεσολαβητής</div>
     </div>
 </div>
 

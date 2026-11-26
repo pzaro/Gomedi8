@@ -63,48 +63,21 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
     counter-reset: none;
 }
 
-/* Κεφαλίδα εγγράφου */
-.doc-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    border-bottom: 2.5pt solid #1e3a6e;
-    padding-bottom: 10pt;
-    margin-bottom: 18pt;
-    gap: 16pt;
-}
-.doc-header-left {
-    flex: 1;
-}
-.doc-header-title {
-    font-size: 10pt;
+/* Badge ΕΝΤΥΠΟ πάνω δεξιά */
+.doc-form-badge {
+    text-align: right;
+    font-size: 9pt;
     font-weight: bold;
+    color: #1e3a6e;
     text-transform: uppercase;
     letter-spacing: 0.5pt;
-    color: #1e3a6e;
-    line-height: 1.4;
-    margin-bottom: 3pt;
-}
-.doc-header-sub {
-    font-size: 9pt;
-    color: #444;
-    line-height: 1.4;
-}
-.doc-header-badge {
-    background: #1e3a6e;
-    color: #fff;
-    font-size: 8.5pt;
-    font-weight: bold;
-    padding: 4pt 10pt;
-    border-radius: 3pt;
-    text-align: center;
-    white-space: nowrap;
-    letter-spacing: 0.3pt;
+    margin-bottom: 6pt;
 }
 
-/* Τίτλος εγγράφου */
+/* Τίτλος εγγράφου — justify */
 .doc-title-block {
-    text-align: center;
+    text-align: justify;
+    text-align-last: center;
     margin: 0 0 16pt 0;
 }
 .doc-title-block .doc-main-title {
@@ -115,16 +88,19 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
     text-decoration: underline;
     display: block;
     margin-bottom: 3pt;
+    text-align: center;
 }
 .doc-title-block .doc-law-ref {
     font-size: 10pt;
     color: #333;
+    text-align: center;
 }
 .doc-title-block .doc-subtitle {
-    font-size: 10pt;
+    font-size: 9.5pt;
+    color: #777;
+    margin-top: 4pt;
+    text-align: center;
     font-style: italic;
-    color: #555;
-    margin-top: 3pt;
 }
 
 /* Ενότητα μέρους στο πρακτικό */
@@ -167,16 +143,17 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
     background: #f0f7ff;
     padding: 12pt 16pt;
     margin: 14pt 0;
-    text-align: center;
+    text-align: left;
     page-break-inside: avoid;
 }
 .doc-zoom-box .zoom-title {
     font-weight: bold;
     font-size: 11pt;
     text-decoration: underline;
-    margin-bottom: 8pt;
+    margin-bottom: 10pt;
     color: #1e3a6e;
     display: block;
+    text-align: center;
 }
 
 /* Υπογραφή διαμεσολαβητή */
@@ -191,11 +168,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); outlin
 }
 .doc-sig-mediator .sig-line {
     border-top: 1pt solid #333;
-    margin: 24pt 0 4pt;
+    margin: 32pt 0 6pt;
 }
 .doc-sig-mediator .sig-name {
     font-size: 10pt;
-    font-weight: bold;
+    font-weight: normal;
 }
 
 /* Footnote / κατευθυντήριες */
