@@ -728,42 +728,40 @@ function draw() {
         // μέρη — αυτόματη συμπλήρωση από τα στοιχεία της φόρμας
         const f = v => v || '..............................';
         const reqsHtml = reqs.map((r,i) => {
-            const lName = getFullName(r.l_n, r.l_s);
             return `<p style="margin-bottom:4pt;"><b>Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος${reqs.length>1?' '+(i+1):''}:</b></p>
 <div style="line-height:2.1;margin-left:4pt;">
-Όνομα: <b>${f(r.n)}</b> &nbsp; Επίθετο: <b>${f(r.s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.f)}</b><br>
-Διεύθυνση: ${f(r.addr)}<br>
-Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${f(r.afm)}<br>
-Αριθμός τηλεφώνου: ${f(r.mob||r.tel)}<br>
-Email: ${f(r.email)}
+<b>Όνομα:</b> ${f(r.n)} &nbsp; <b>Επίθετο:</b> ${f(r.s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.f)}<br>
+<b>Διεύθυνση:</b> ${f(r.addr)}<br>
+<b>Αριθμός Φορολογικού Μητρώου (ΑΦΜ):</b> ${f(r.afm)}<br>
+<b>Αριθμός τηλεφώνου:</b> ${f(r.mob||r.tel)}<br>
+<b>Email:</b> ${f(r.email)}
 </div>
 <p style="margin:10pt 0 4pt;"><b>Νομικός Παραστάτης:</b></p>
 <div style="line-height:2.1;margin-left:4pt;">
-Όνομα: <b>${f(r.l_n)}</b> &nbsp; Επίθετο: <b>${f(r.l_s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.l_f)}</b><br>
-Διεύθυνση: ${f(r.l_addr)}<br>
-Αριθμός Μητρώου / Δικηγορικός Σύλλογος (ΑΜ/ΔΣ): ${f(r.l_am)} / ${f(r.l_ds)}<br>
-Αριθμός τηλεφώνου: ${f(r.l_mob||r.l_tel)}<br>
-Email: ${f(r.l_email)}
+<b>Όνομα:</b> ${f(r.l_n)} &nbsp; <b>Επίθετο:</b> ${f(r.l_s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.l_f)}<br>
+<b>Διεύθυνση:</b> ${f(r.l_addr)}<br>
+<b>Αρ Μητρ./Δικηγορικός Σύλλογος (ΑΜ/ΔΣ):</b> ${f(r.l_am)} / ${f(r.l_ds)}<br>
+<b>Αριθμός τηλεφώνου:</b> ${f(r.l_mob||r.l_tel)}<br>
+<b>Email:</b> ${f(r.l_email)}
 </div>`;
         }).join('<div style="margin:16pt 0;border-top:0.5pt dashed #ccc;"></div>');
 
         const respsHtml = resps.map((r,i) => {
-            const lName = getFullName(r.l_n, r.l_s);
             return `<p style="margin-bottom:4pt;"><b>Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος${resps.length>1?' '+(i+1):''}:</b></p>
 <div style="line-height:2.1;margin-left:4pt;">
-Όνομα: <b>${f(r.n)}</b> &nbsp; Επίθετο: <b>${f(r.s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.f)}</b><br>
-Διεύθυνση: ${f(r.addr)}<br>
-Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${f(r.afm)}<br>
-Αριθμός τηλεφώνου: ${f(r.mob||r.tel)}<br>
-Email: ${f(r.email)}
+<b>Όνομα:</b> ${f(r.n)} &nbsp; <b>Επίθετο:</b> ${f(r.s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.f)}<br>
+<b>Διεύθυνση:</b> ${f(r.addr)}<br>
+<b>Αριθμός Φορολογικού Μητρώου (ΑΦΜ):</b> ${f(r.afm)}<br>
+<b>Αριθμός τηλεφώνου:</b> ${f(r.mob||r.tel)}<br>
+<b>Email:</b> ${f(r.email)}
 </div>
 <p style="margin:10pt 0 4pt;"><b>Νομικός Παραστάτης:</b></p>
 <div style="line-height:2.1;margin-left:4pt;">
-Όνομα: <b>${f(r.l_n)}</b> &nbsp; Επίθετο: <b>${f(r.l_s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.l_f)}</b><br>
-Διεύθυνση: ${f(r.l_addr)}<br>
-Αριθμός Μητρώου / Δικηγορικός Σύλλογος (ΑΜ/ΔΣ): ${f(r.l_am)} / ${f(r.l_ds)}<br>
-Αριθμός τηλεφώνου: ${f(r.l_mob||r.l_tel)}<br>
-Email: ${f(r.l_email)}
+<b>Όνομα:</b> ${f(r.l_n)} &nbsp; <b>Επίθετο:</b> ${f(r.l_s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.l_f)}<br>
+<b>Διεύθυνση:</b> ${f(r.l_addr)}<br>
+<b>Αρ Μητρ./Δικηγορικός Σύλλογος (ΑΜ/ΔΣ):</b> ${f(r.l_am)} / ${f(r.l_ds)}<br>
+<b>Αριθμός τηλεφώνου:</b> ${f(r.l_mob||r.l_tel)}<br>
+<b>Email:</b> ${f(r.l_email)}
 </div>`;
         }).join('<div style="margin:16pt 0;border-top:0.5pt dashed #ccc;"></div>');
 
@@ -789,21 +787,19 @@ ${respsHtml}
 
 <div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin:18pt 0 12pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
 <div style="line-height:2.1;margin-left:4pt;">
-Όνομα: <b>${m_data.n}</b> &nbsp; Επίθετο: <b>${m_data.s}</b> &nbsp; Πατρώνυμο: <b>${m_data.f}</b><br>
-${m_data.addr?'Διεύθυνση: '+m_data.addr+'<br>':''}
-Αριθμός Μητρώου Διαμεσολαβητή (ΑΜΔ): ${m_data.am}<br>
-${m_data.email?'Email: '+m_data.email:''}
+<b>Όνομα:</b> ${f(m_data.n)} &nbsp; <b>Επίθετο:</b> ${f(m_data.s)} &nbsp; <b>Πατρώνυμο:</b> ${f(m_data.f)}<br>
+<b>Διεύθυνση:</b> ${f(m_data.addr)}<br>
+<b>Αριθμός Μητρώου Διαμεσολαβητή (ΑΜΔ):</b> ${f(m_data.am)}<br>
+<b>Email:</b> ${f(m_data.email)}
 </div>
 
 <div style="font-weight:bold;margin:20pt 0 8pt;">Σύντομη περιγραφή του αντικειμένου της διαφοράς</div>
 <p style="line-height:1.9;font-style:italic;">${d.subj || '..............................................................................................................................................................'}</p>
 
-<div style="margin-top:40pt;display:flex;justify-content:flex-end;">
+<div style="margin-top:50pt;display:flex;justify-content:flex-end;">
     <div style="text-align:center;min-width:200pt;">
-        <div style="margin-bottom:4pt;font-size:9.5pt;">Ο Διαμεσολαβητής</div>
-        <div style="border-top:1pt solid #333;width:200pt;margin:0 auto;padding-top:6pt;">
-            <div style="font-size:9pt;color:#555;">Σφραγίδα &amp; Υπογραφή</div>
-        </div>
+        <div style="font-size:9.5pt;margin-bottom:30pt;">Ο Διαμεσολαβητής</div>
+        <div style="font-size:9pt;color:#555;">Σφραγίδα &amp; Υπογραφή</div>
     </div>
 </div>
 
