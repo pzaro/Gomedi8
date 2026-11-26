@@ -585,12 +585,11 @@ function draw() {
     const zoomFrame = `<br>Ημερομηνία: ${fmtD(d.z_date)}<br>Ώρα: ${d.z_time}<br>Μέσο: Μέσω της πλατφόρμας τηλεδιάσκεψης Zoom (εντός της συνημμένης πρόσκλησης θα βρείτε την σύνδεσμο σύνδεσης).<br>`;
     
     const zoomFrameEntypo = `
-<div style="border: 1.5pt solid #2563eb; padding: 15pt; margin: 20pt auto; background-color: #f0f7ff; width: 100%; box-sizing: border-box; text-align: center; border-radius: 8pt;">
-    <div style="font-weight: bold; font-size: 13pt; margin-bottom: 10pt; text-decoration: underline;">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</div>
+<div class="doc-zoom-box">
+    <span class="zoom-title">ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</span>
     <b>Ημερομηνία:</b> ${fmtD(d.z_date)} &nbsp;&nbsp;&nbsp; <b>Ώρα:</b> ${d.z_time}<br><br>
     <b>Σύνδεσμος/Link:</b> <a href="${d.z_link}" style="color: #2563eb;">${d.z_link}</a><br><br>
-    <b>Meeting ID:</b> ${d.z_id}<br>
-    <b>Passcode:</b> ${d.z_pass}
+    <b>Meeting ID:</b> ${d.z_id} &nbsp;&nbsp;&nbsp; <b>Passcode:</b> ${d.z_pass}
 </div>`;
 
     const reqsEnarktiria = reqs.map(r => `τον/την ${getFullName(r.n, r.s)}, ο/η οποίος/α εκπροσωπείται από τον δικηγόρο του/της, ${getFullName(r.l_n, r.l_s) || "......."}`).join(' και ');
@@ -604,26 +603,24 @@ function draw() {
         let chkLawNot = !r.p_law ? '[ ☒ ]' : '[ ☐ ]';
         
         praktikoReqHTML += `
-<div style="text-align:left;"><b>Α. ΕΠΙΣΠΕΥΔΟΝ ΜΕΡΟΣ ${reqs.length > 1 ? i+1 : ''}</b></div>
-<div style="text-align:left;">Ονοματεπώνυμο: ${getFullName(r.n, r.s)} του ${r.f || "......."}</div>
-<div style="text-align:left;">Παραστάθηκε: ${chkParty} δεν παραστάθηκε: ${chkPartyNot}</div>
-<div style="text-align:left;">Ημερομηνία: ${d.doc_date}</div>
-<div style="text-align:right; padding-right:50px;">Υπογραφή επισπεύδοντας<br>…………………………….</div>
-<div style="text-align:left;">Μέσο γνωστοποίησης:</div>
-<div style="text-align:left;">Συστημένη Επιστολή &nbsp; [ ☐ ]</div>
-<div style="text-align:left;">Email &nbsp; [ ☒ ]</div>
-<div style="text-align:left;">Άλλο (προσδιορίστε) [ ☐ ] ........................</div>
-<div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;">Νομικός παραστάτης επισπεύδοντας</div>
-<div style="text-align:left;">Ονοματεπώνυμο: ${getFullName(r.l_n, r.l_s) || "......."}</div>
-<div style="text-align:left;">παραστάθηκε: ${chkLaw} &nbsp;&nbsp; δεν παραστάθηκε: ${chkLawNot}</div>
-<div style="text-align:left;">Ημερομηνία: ${d.doc_date}</div>
-<div style="text-align:right; padding-right:50px;">Υπογραφή νομικού παραστάτη<br>…………………………….</div>
-<div style="text-align:left;">Μέσο γνωστοποίησης:</div>
-<div style="text-align:left;">Συστημένη Επιστολή &nbsp; [ ☐ ]</div>
-<div style="text-align:left;">Email &nbsp; [ ☒ ]</div>
-<div style="text-align:left;">Άλλο (προσδιορίστε) [ ☐ ] ........................</div>
-<div style="text-align:left;">&nbsp;</div>`;
+<div class="doc-party-block">
+    <div class="party-label">Α. ΕΠΙΣΠΕΥΔΟΝ ΜΕΡΟΣ${reqs.length > 1 ? ' ' + (i+1) : ''}</div>
+    <div>Ονοματεπώνυμο: <b>${getFullName(r.n, r.s)}</b> του ${r.f || "......."}</div>
+    <div style="margin-top:6pt;">Παραστάθηκε: ${chkParty} &nbsp;&nbsp; δεν παραστάθηκε: ${chkPartyNot}</div>
+    <div style="font-size:9.5pt;color:#555;margin-top:4pt;">Μέσο γνωστοποίησης: &nbsp; Συστημένη Επιστολή [&nbsp;☐&nbsp;] &nbsp; Email [&nbsp;☒&nbsp;] &nbsp; Άλλο [&nbsp;☐&nbsp;] ...............</div>
+    <div class="doc-party-row">
+        <div style="font-size:10pt;">Ημερομηνία: ${d.doc_date}</div>
+        <div class="sig-block">Υπογραφή επισπεύδοντας<br>…………………………….</div>
+    </div>
+    <hr class="doc-divider" style="margin:10pt 0;">
+    <div>Νομικός παραστάτης: <b>${getFullName(r.l_n, r.l_s) || "......."}</b></div>
+    <div style="margin-top:6pt;">Παραστάθηκε: ${chkLaw} &nbsp;&nbsp; δεν παραστάθηκε: ${chkLawNot}</div>
+    <div style="font-size:9.5pt;color:#555;margin-top:4pt;">Μέσο γνωστοποίησης: &nbsp; Συστημένη Επιστολή [&nbsp;☐&nbsp;] &nbsp; Email [&nbsp;☒&nbsp;] &nbsp; Άλλο [&nbsp;☐&nbsp;] ...............</div>
+    <div class="doc-party-row">
+        <div style="font-size:10pt;">Ημερομηνία: ${d.doc_date}</div>
+        <div class="sig-block">Υπογραφή νομικού παραστάτη<br>…………………………….</div>
+    </div>
+</div>`;
     });
 
     let praktikoRespHTML = '';
@@ -634,27 +631,132 @@ function draw() {
         let chkLawNot = !r.p_law ? '[ ☒ ]' : '[ ☐ ]';
 
         praktikoRespHTML += `
-<div style="text-align:left;"><b>Β. ΕΤΕΡΑ ΜΕΡΟΣ ${resps.length > 1 ? i+1 : ''}</b></div>
-<div style="text-align:left;">Ονοματεπώνυμο: ${getFullName(r.n, r.s)} του ${r.f || "......."}</div>
-<div style="text-align:left;">παραστάθηκε: ${chkParty} &nbsp;&nbsp; δεν παραστάθηκε: ${chkPartyNot}</div>
-<div style="text-align:left;">Ημερομηνία: ${d.doc_date}</div>
-<div style="text-align:right; padding-right:50px;">Υπογραφή ετέρου μέρους<br>…………………………….</div>
-<div style="text-align:left;">Μέσο γνωστοποίησης:</div>
-<div style="text-align:left;">Συστημένη Επιστολή &nbsp; [ ☐ ]</div>
-<div style="text-align:left;">Email &nbsp; [ ☒ ]</div>
-<div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;">Νομικός παραστάτης ετέρου μέρους</div>
-<div style="text-align:left;">Ονοματεπώνυμο: ${getFullName(r.l_n, r.l_s) || "......."}</div>
-<div style="text-align:left;">παραστάθηκε: ${chkLaw} &nbsp;&nbsp; δεν παραστάθηκε: ${chkLawNot}</div>
-<div style="text-align:left;">Ημερομηνία: ${d.doc_date}</div>
-<div style="text-align:right; padding-right:50px;">Υπογραφή νομικού παραστάτη<br>…………………………….</div>
-<div style="text-align:left;">&nbsp;</div>`;
+<div class="doc-party-block">
+    <div class="party-label">Β. ΕΤΕΡΟ ΜΕΡΟΣ${resps.length > 1 ? ' ' + (i+1) : ''}</div>
+    <div>Ονοματεπώνυμο: <b>${getFullName(r.n, r.s)}</b> του ${r.f || "......."}</div>
+    <div style="margin-top:6pt;">Παραστάθηκε: ${chkParty} &nbsp;&nbsp; δεν παραστάθηκε: ${chkPartyNot}</div>
+    <div style="font-size:9.5pt;color:#555;margin-top:4pt;">Μέσο γνωστοποίησης: &nbsp; Συστημένη Επιστολή [&nbsp;☐&nbsp;] &nbsp; Email [&nbsp;☒&nbsp;] &nbsp; Άλλο [&nbsp;☐&nbsp;] ...............</div>
+    <div class="doc-party-row">
+        <div style="font-size:10pt;">Ημερομηνία: ${d.doc_date}</div>
+        <div class="sig-block">Υπογραφή ετέρου μέρους<br>…………………………….</div>
+    </div>
+    <hr class="doc-divider" style="margin:10pt 0;">
+    <div>Νομικός παραστάτης: <b>${getFullName(r.l_n, r.l_s) || "......."}</b></div>
+    <div style="margin-top:6pt;">Παραστάθηκε: ${chkLaw} &nbsp;&nbsp; δεν παραστάθηκε: ${chkLawNot}</div>
+    <div style="font-size:9.5pt;color:#555;margin-top:4pt;">Μέσο γνωστοποίησης: &nbsp; Συστημένη Επιστολή [&nbsp;☐&nbsp;] &nbsp; Email [&nbsp;☒&nbsp;] &nbsp; Άλλο [&nbsp;☐&nbsp;] ...............</div>
+    <div class="doc-party-row">
+        <div style="font-size:10pt;">Ημερομηνία: ${d.doc_date}</div>
+        <div class="sig-block">Υπογραφή νομικού παραστάτη<br>…………………………….</div>
+    </div>
+</div>`;
     });
 
     let activeHtml = '';
     const mediatorFullName = `${m_data.n} ${m_data.s}`;
 
-    if (d.type === 'email') {
+    // Κεφαλίδα διαμεσολαβητή (εμφανίζεται σε όλα εκτός email/enarktiri)
+    const docHeader = `
+<div class="doc-header">
+    <div class="doc-header-left">
+        <div class="doc-header-title">${mediatorFullName}</div>
+        <div class="doc-header-sub">Διαπιστευμένος Διαμεσολαβητής &nbsp;|&nbsp; ΑΜΔ ${m_data.am}</div>
+        ${m_data.addr ? `<div class="doc-header-sub">${m_data.addr}</div>` : ''}
+        ${m_data.email ? `<div class="doc-header-sub">${m_data.email}</div>` : ''}
+    </div>
+    <div class="doc-header-badge">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ<br>ΑΜΔ ${m_data.am}</div>
+</div>`;
+
+    if (d.type === 'fyllo') {
+        const allParties = [...reqs, ...resps];
+        let reqRows = reqs.map((r,i) => `
+<tr><td style="font-weight:bold;padding:4pt 8pt;background:#f0f4fa;border:0.5pt solid #c8d6ea;">${reqs.length>1?'Επισπεύδων '+(i+1):'Επισπεύδων'}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${getFullName(r.n,r.s)}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.f||''}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.afm||''}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.mob||r.tel||''}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.email||''}</td></tr>
+<tr><td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;color:#555;">Νομ. Παρ.</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;" colspan="2">${getFullName(r.l_n,r.l_s)||'—'}</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_afm||''}</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_mob||r.l_tel||''}</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_email||''}</td></tr>`).join('');
+        let respRows = resps.map((r,i) => `
+<tr><td style="font-weight:bold;padding:4pt 8pt;background:#f0f4fa;border:0.5pt solid #c8d6ea;">${resps.length>1?'Έτερο μέρος '+(i+1):'Έτερο μέρος'}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${getFullName(r.n,r.s)}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.f||''}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.afm||''}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.mob||r.tel||''}</td>
+<td style="padding:4pt 8pt;border:0.5pt solid #c8d6ea;">${r.email||''}</td></tr>
+<tr><td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;color:#555;">Νομ. Παρ.</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;" colspan="2">${getFullName(r.l_n,r.l_s)||'—'}</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_afm||''}</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_mob||r.l_tel||''}</td>
+<td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_email||''}</td></tr>`).join('');
+
+        activeHtml = `${docHeader}
+<div class="doc-title-block">
+    <span class="doc-main-title">ΕΝΤΥΠΟ 1</span>
+    <div class="doc-law-ref">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</div>
+    <div class="doc-subtitle">(άρθρο 77 παρ. 1 του ν. 5344/2026 — Κώδικας Εναλλακτικής Επίλυσης Διαφορών)</div>
+</div>
+
+<table style="width:100%;border-collapse:collapse;font-size:10.5pt;margin-bottom:16pt;">
+<thead>
+<tr style="background:#1e3a6e;color:#fff;">
+    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΡΟΛΟΣ</th>
+    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΟΝΟΜΑΤΕΠΩΝΥΜΟ</th>
+    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΠΑΤΡΩΝΥΜΟ</th>
+    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΑΦΜ</th>
+    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΤΗΛΕΦΩΝΟ</th>
+    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">EMAIL</th>
+</tr>
+</thead>
+<tbody>
+${reqRows}
+${respRows}
+</tbody>
+</table>
+
+<div style="margin-bottom:14pt;">
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:8pt;">Α. Στοιχεία Διαμεσολαβητή</div>
+<table style="width:100%;font-size:10.5pt;border-collapse:collapse;">
+<tr><td style="width:36%;padding:3pt 0;font-weight:bold;">Ονοματεπώνυμο:</td><td>${mediatorFullName} του ${m_data.f}</td></tr>
+<tr><td style="padding:3pt 0;font-weight:bold;">Αριθμός Μητρώου Διαμεσολαβητή:</td><td>${m_data.am}</td></tr>
+${m_data.addr?`<tr><td style="padding:3pt 0;font-weight:bold;">Διεύθυνση:</td><td>${m_data.addr}</td></tr>`:''}
+${m_data.iban?`<tr><td style="padding:3pt 0;font-weight:bold;">IBAN:</td><td>${m_data.iban} (${m_data.bank})</td></tr>`:''}
+${m_data.email?`<tr><td style="padding:3pt 0;font-weight:bold;">Email:</td><td>${m_data.email}</td></tr>`:''}
+</table>
+</div>
+
+<div style="margin-bottom:14pt;">
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:8pt;">Β. Στοιχεία Υπόθεσης</div>
+<table style="width:100%;font-size:10.5pt;border-collapse:collapse;">
+<tr><td style="width:36%;padding:3pt 0;font-weight:bold;">Αντικείμενο διαφοράς:</td><td>${d.subj}</td></tr>
+<tr><td style="padding:3pt 0;font-weight:bold;">Αρμόδιο Δικαστήριο:</td><td>${d.court}</td></tr>
+<tr><td style="padding:3pt 0;font-weight:bold;">Αριθμός / Ημερομηνία αγωγής:</td><td>${d.court_n} / ${d.court_d}</td></tr>
+<tr><td style="padding:3pt 0;font-weight:bold;">Ημερομηνία ΕΣΔ:</td><td>${fmtD(d.z_date)} &nbsp;|&nbsp; Ώρα: ${d.z_time}</td></tr>
+<tr><td style="padding:3pt 0;font-weight:bold;">Τόπος ΕΣΔ:</td><td>ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ — μέσω τηλεδιάσκεψης Zoom</td></tr>
+</table>
+</div>
+
+<div style="margin-bottom:14pt;">
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:8pt;">Γ. Αμοιβή Διαμεσολαβητή</div>
+<p style="margin:0;font-size:10.5pt;">Η αμοιβή για τη διεξαγωγή της Εισαγωγικής Συνεδρίας Διαμεσολάβησης (ΕΣΔ) ανέρχεται στο ποσό των <b>${d.feeInfo.perPartyText}</b> ανά μέρος (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>). Καταβάλλεται πριν από την έναρξη της ΕΣΔ στον λογαριασμό <b>${m_data.iban}</b>, Τράπεζα ${m_data.bank}.</p>
+</div>
+
+<div class="doc-sig-mediator">
+    <div class="sig-inner">
+        <div>Πενταπλάτανος Γιαννιτσών, ${d.doc_date}</div>
+        <div class="sig-line"></div>
+        <div class="sig-name">Ο Διαμεσολαβητής<br>${mediatorFullName}</div>
+    </div>
+</div>
+
+<div class="doc-footnote">
+Το παρόν Φύλλο Βασικών Στοιχείων (Έντυπο 1) συντάσσεται κατ' άρθρο 77 παρ. 1 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών, Φύλλο Εφημερίδας της Κυβερνήσεως Α΄ 168/16-10-2026) και επισυνάπτεται υποχρεωτικά στη Γνωστοποίηση/Πρόσκληση (Έντυπο 3) και στο Πρακτικό Περάτωσης ΕΣΔ.
+</div>`;
+
+    } else if (d.type === 'email') {
         activeHtml = `Αξιότιμες κυρίες, Αξιότιμοι κύριοι,<br><br>
 Ονομάζομαι ${mediatorFullName} και είμαι Διαπιστευμένος Διαμεσολαβητής. Σε συνέχεια του διορισμού μου από την Κεντρική Επιτροπή Διαμεσολάβησης (ΚΕΔ), επικοινωνώ μαζί σας σχετικά με την ιδιωτική διαφορά που έχει ανακύψει μεταξύ σας, η οποία αποτελεί αντικείμενο της από ${d.court_d} αγωγής που κατατέθηκε στο ${d.court} με αριθμό κατάθεσης ${d.court_n}.<br><br>
 Με την παρούσα επιστολή, σας προσκαλώ στην Εισαγωγική Συνεδρία Διαμεσολάβησης (ΕΣΔ), η οποία θα διεξαχθεί <b>μέσω τηλεδιάσκεψης</b>:<br>
@@ -697,74 +799,92 @@ ${mediatorFullName}`;
         const pName = getFullName(p.n, p.s);
         const pAFM = p.afm || "........";
 
-        activeHtml = `<div style="text-align:center;"><b>ΕΝΤΥΠΟ 3</b><br>
-<b>ΓΝΩΣΤΟΠΟΙΗΣΗ/ΠΡΟΣΚΛΗΣΗ ΓΙΑ ΤΗΝ ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</b><br>
-(άρθρο 78 παρ. 2 του ν. 5344/2026)<br>
-<span style="font-size:10pt;">(Απευθύνεται προς όλα τα μέρη της διαφοράς, όπως αναφέρονται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων)</span></div><br><br>
+        activeHtml = `${docHeader}
+<div class="doc-title-block">
+    <span class="doc-main-title">ΕΝΤΥΠΟ 3</span>
+    <div class="doc-law-ref">ΓΝΩΣΤΟΠΟΙΗΣΗ / ΠΡΟΣΚΛΗΣΗ ΓΙΑ ΤΗΝ ΥΠΟΧΡΕΩΤΙΚΗ ΑΡΧΙΚΗ ΣΥΝΕΔΡΙΑ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</div>
+    <div class="doc-subtitle">(άρθρο 78 παρ. 2 του ν. 5344/2026)<br>Απευθύνεται προς όλα τα μέρη της διαφοράς, όπως αναφέρονται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων</div>
+</div>
 
-Δια της παρούσης γνωστοποιώ προς <b>${pName}</b> με ΑΦΜ <b>${pAFM}</b> ότι η Εισαγωγική Συνεδρία Διαμεσολάβησης, όπως ορίζεται στο άρθρο 78 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών), θα λάβει χώρα την ${fmtD(d.z_date)}, ημέρα ${getDay(d.z_date)} και ώρα ${d.z_time} και σας καλώ να παραστείτε σε αυτή με το νομικό παραστάτη σας, όπου και όπως κατωτέρω αναφέρεται.<br><br>
-Τόπος διεξαγωγής ΕΣΔ ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ / Διεύθυνση: ΑΝΕΥ<br>
-Η Εισαγωγική Συνεδρία Διαμεσολάβησης (ΕΣΔ) θα λάβει χώρα μέσω τηλεδιάσκεψης με κωδικούς σύνδεσης:<br>
+<p>Δια της παρούσης γνωστοποιώ προς <b>${pName}</b> με ΑΦΜ <b>${pAFM}</b> ότι η Εισαγωγική Συνεδρία Διαμεσολάβησης, όπως ορίζεται στο άρθρο 78 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών), θα λάβει χώρα την <b>${fmtD(d.z_date)}</b>, ημέρα <b>${getDay(d.z_date)}</b> και ώρα <b>${d.z_time}</b>, και σας καλώ να παραστείτε σε αυτή με το νομικό παραστάτη σας.</p>
 
-${zoomFrameEntypo}<br>
+<p><b>Τόπος διεξαγωγής ΕΣΔ:</b> ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ — μέσω τηλεδιάσκεψης με κωδικούς σύνδεσης:</p>
 
-Επισυνάπτεται το Φύλλο Βασικών Στοιχείων, όπου περιλαμβάνονται αναλυτικά τα στοιχεία όλων των μερών της διαφοράς, σύντομη περιγραφή της υπόθεσης και τα στοιχεία μου ως διαμεσολαβητή.<br><br>
-Σημειώνεται ότι:<br>
-Σκοπός της Υποχρεωτικής Αρχικής Συνεδρίας είναι να εξετάσετε τη δυνατότητα εξωδικαστικής επίλυσης της διαφοράς σας με διαμεσολάβηση. Αν μετά την Υποχρεωτική Αρχική Συνεδρία δεν επιθυμείτε να συνεχίσετε τη διαδικασία της διαμεσολάβησης, μπορείτε να αποχωρήσετε χωρίς οποιαδήποτε αιτιολογία, κύρωση ή ποινή.<br>
-Σύμφωνα με το άρθρο 18 του ν. 5344/2026, εάν δεν προσέλθετε στην Εισαγωγική Συνεδρία δύναται να σας επιβληθεί από το δικαστήριο χρηματική κύρωση, εφόσον η υπόθεσή σας προχωρήσει σε δικαστική διαδικασία.<br>
-Η αμοιβή του διαμεσολαβητή ορίζεται στα ${d.feeInfo.perPartyText} <b>ανά μέρος</b> (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>), βαρύνει τα μέρη κατ' ισομοιρία και καταβάλλεται στον λογαριασμό ${m_data.iban}, Τράπεζα ${m_data.bank}, πριν από την έναρξη της διαδικασίας.<br><br>
-Η παρούσα γνωστοποίηση αποστέλλεται σε σας σύμφωνα με το άρθρο 7 παρ. 2 ως εξής:<br>
-[ ☒ ] Με email<br>
-[ ☐ ] Με συστημένη επιστολή<br>
-[ ☐ ] Άλλως: .........................<br><br>
+${zoomFrameEntypo}
 
-Τόπος ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ, την ${d.doc_date}<br><br>
-<div style="text-align:right; padding-right: 50px;">
-Ο διαμεσολαβητής<br>
-(Υπογραφή)<br>
-${mediatorFullName}
-</div><br>
+<p>Επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1), όπου περιλαμβάνονται αναλυτικά τα στοιχεία όλων των μερών της διαφοράς, σύντομη περιγραφή της υπόθεσης και τα στοιχεία του διαμεσολαβητή.</p>
 
-*ΠΑΡΕΛΗΦΘΗ την…………………….......<br>
-Ο παραλαβών<br>
-Όνομα ……………………………….<br>
-Υπογραφή ………………………….<br>
+<div class="doc-notes-block">
+<b>Σημειώνεται ότι:</b><br>
+Σκοπός της Υποχρεωτικής Αρχικής Συνεδρίας είναι να εξετάσετε τη δυνατότητα εξωδικαστικής επίλυσης της διαφοράς σας με διαμεσολάβηση. Αν μετά την Υποχρεωτική Αρχική Συνεδρία δεν επιθυμείτε να συνεχίσετε τη διαδικασία, μπορείτε να αποχωρήσετε χωρίς οποιαδήποτε αιτιολογία, κύρωση ή ποινή.<br><br>
+Σύμφωνα με το άρθρο 18 του ν. 5344/2026, εάν δεν προσέλθετε στην Εισαγωγική Συνεδρία δύναται να σας επιβληθεί από το δικαστήριο χρηματική κύρωση, εφόσον η υπόθεσή σας προχωρήσει σε δικαστική διαδικασία.<br><br>
+Η αμοιβή του διαμεσολαβητή ορίζεται στα <b>${d.feeInfo.perPartyText}</b> ανά μέρος (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>), βαρύνει τα μέρη κατ' ισομοιρία και καταβάλλεται στον λογαριασμό <b>${m_data.iban}</b>, Τράπεζα ${m_data.bank}, πριν από την έναρξη της διαδικασίας.
+</div>
 
-<div style="font-size: 10pt; color: #777777; margin-top: 25pt;">
-*(Ο διαμεσολαβητής δεν απαιτείται να ζητήσει επιβεβαίωση της παραλαβής της γνωστοποίησης, αν αυτή αποδεικνύεται μέσω ηλεκτρονικής αλληλογραφίας ή από αποδεικτικό αποστολής συστημένης επιστολής ή από άλλο νόμιμο τρόπο)<br><br>
-<b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΟ ΕΝΤΥΠΟ 3</b><br>
-Στο παρόν έγγραφο επισυνάπτεται και το Φύλλο Βασικών Στοιχείων (Έντυπο 1), στο οποίο περιλαμβάνονται τα ονόματα και τα στοιχεία όλων των συμμετεχόντων, του διαμεσολαβητή, καθώς και μία σύντομη περιγραφή της διαφοράς.<br>
-Η γνωστοποίηση - πρόσκληση απευθύνεται προς όλους τους συμμετέχοντες και αποστέλλεται από τον διαμεσολαβητή ξεχωριστά σε καθέναν από αυτούς τουλάχιστον πέντε (5) ημέρες πριν από την ημερομηνία της Υποχρεωτικής Αρχικής Συνεδρίας. Ο ελάχιστος αριθμός αποστελλόμενων προσκλήσεων από τον διαμεσολαβητή είναι δύο (μία για το επισπεύδον μέρος και μία για το έτερο μέρος της διαφοράς). Οι νομικοί παραστάτες των μερών δεν απαιτείται να λαμβάνουν ξεχωριστή έγγραφη γνωστοποίηση/πρόσκληση.
+<p>Η παρούσα γνωστοποίηση αποστέλλεται σύμφωνα με το άρθρο 7 παρ. 2:<br>
+[&nbsp;☒&nbsp;] Με email &nbsp;&nbsp; [&nbsp;☐&nbsp;] Με συστημένη επιστολή &nbsp;&nbsp; [&nbsp;☐&nbsp;] Άλλως: .........................</p>
+
+<p>Πενταπλάτανος Γιαννιτσών, την ${d.doc_date}</p>
+
+<div class="doc-sig-mediator">
+    <div class="sig-inner">
+        <div class="sig-line"></div>
+        <div class="sig-name">Ο Διαμεσολαβητής<br>${mediatorFullName}</div>
+    </div>
+</div>
+
+<hr class="doc-divider">
+<p><b>* ΠΑΡΕΛΗΦΘΗ</b> την …………………….......<br>
+Ο παραλαβών — Όνομα: ………………………………. &nbsp;&nbsp; Υπογραφή: ………………………….</p>
+
+<div class="doc-footnote">
+*(Ο διαμεσολαβητής δεν απαιτείται να ζητήσει επιβεβαίωση της παραλαβής, αν αυτή αποδεικνύεται μέσω ηλεκτρονικής αλληλογραφίας ή από αποδεικτικό αποστολής συστημένης επιστολής ή από άλλο νόμιμο τρόπο.)<br><br>
+<b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΟ ΕΝΤΥΠΟ 3:</b> Στο παρόν έγγραφο επισυνάπτεται και το Φύλλο Βασικών Στοιχείων (Έντυπο 1), στο οποίο περιλαμβάνονται τα ονόματα και τα στοιχεία όλων των συμμετεχόντων, του διαμεσολαβητή, καθώς και μία σύντομη περιγραφή της διαφοράς. Η γνωστοποίηση/πρόσκληση αποστέλλεται ξεχωριστά σε καθέναν από αυτούς τουλάχιστον πέντε (5) ημέρες πριν από την ΕΣΔ. Οι νομικοί παραστάτες των μερών δεν απαιτείται να λαμβάνουν ξεχωριστή έγγραφη γνωστοποίηση/πρόσκληση.
 </div>`;
 
     } else if (d.type === 'praktiko') {
-        activeHtml = `
-<div style="text-align:center;"><b>ΠΡΑΚΤΙΚΟ ΠΕΡΑΤΩΣΗΣ ΑΡΧΙΚΗΣ ΥΠΟΧΡΕΩΤΙΚΗΣ ΣΥΝΕΔΡΙΑΣ</b></div>
-<div style="text-align:center;">(άρθρο 79 παρ. 4 του ν. 5344/2026)</div>
-<div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;">Ο διαμεσολαβητής ${mediatorFullName} του ${m_data.f} (ΑΜΔ ${m_data.am}) βεβαιώνω ότι περατώθηκε η Εισαγωγική Συνεδρία Διαμεσολάβησης (ΕΣΔ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων, κατά την οποία παραστάθηκαν τα μέρη, όπως παρακάτω αναφέρεται.</div>
-<div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;">Ημερομηνία ΕΣΔ : ${fmtD(d.z_date)}</div>
-<div style="text-align:left;">Τόπος (διεύθυνση) ΕΣΔ: ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ ΜΕΣΩ ΤΗΛΕΔΙΑΣΚΕΨΗΣ</div>
-<div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;"><b>ΣΥΜΜΕΤΕΧΟΝΤΕΣ ΣΤΗΝ ΕΣΔ:</b></div>
-<div style="text-align:left;">&nbsp;</div>
+        activeHtml = `${docHeader}
+<div class="doc-title-block">
+    <span class="doc-main-title">ΠΡΑΚΤΙΚΟ ΠΕΡΑΤΩΣΗΣ ΑΡΧΙΚΗΣ ΥΠΟΧΡΕΩΤΙΚΗΣ ΣΥΝΕΔΡΙΑΣ ΔΙΑΜΕΣΟΛΑΒΗΣΗΣ</span>
+    <div class="doc-law-ref">(άρθρο 79 παρ. 4 του ν. 5344/2026)</div>
+</div>
+
+<p>Ο διαμεσολαβητής <b>${mediatorFullName}</b> του ${m_data.f} (ΑΜΔ ${m_data.am}) βεβαιώνω ότι περατώθηκε η Εισαγωγική Συνεδρία Διαμεσολάβησης (ΕΣΔ) για τη διαφορά που περιγράφεται στο επισυναπτόμενο Φύλλο Βασικών Στοιχείων (Έντυπο 1), κατά την οποία παραστάθηκαν τα μέρη όπως παρακάτω αναφέρεται.</p>
+
+<table style="width:100%;font-size:10.5pt;border-collapse:collapse;margin-bottom:16pt;">
+<tr><td style="width:36%;padding:3pt 0;font-weight:bold;">Ημερομηνία ΕΣΔ:</td><td>${fmtD(d.z_date)}</td></tr>
+<tr><td style="padding:3pt 0;font-weight:bold;">Τόπος ΕΣΔ:</td><td>ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ — μέσω τηλεδιάσκεψης</td></tr>
+</table>
+
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;margin-bottom:12pt;letter-spacing:0.3pt;">ΣΥΜΜΕΤΕΧΟΝΤΕΣ ΣΤΗΝ ΕΣΔ:</div>
+
 ${praktikoReqHTML}
 ${praktikoRespHTML}
-<div style="text-align:left;"><b>Ο ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</b></div>
-<div style="text-align:left;">Ονοματεπώνυμο: ${mediatorFullName} Πατρώνυμο: ${m_data.f}</div>
-<div style="text-align:left;">Πενταπλάτανος Γιαννιτσών, την ${d.doc_date}</div>
-<div style="text-align:right; padding-right:50px;">Υπογραφή Διαμεσολαβητή<br>……………………</div>
-<div style="text-align:left;">&nbsp;</div>
-<div style="text-align:left;"><b>Παρατηρήσεις:</b></div>
-<div style="text-align:left;">- Στο παρόν πρακτικό περάτωσης της Εισαγωγικής Συνεδρίας Διαμεσολάβησης επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1), καθώς και Γνωστοποίηση/Πρόσκληση για την Εισαγωγική Συνεδρία Διαμεσολάβησης (Έντυπο 3), σύμφωνα με το άρθρο 78 παρ. 2 του ν. 5344/2026, τα οποία αποτελούν αναπόσπαστο μέρος του παρόντος. Συντάσσεται από το διαμεσολαβητή μετά την περάτωση της Υποχρεωτικής Αρχικής Συνεδρίας, υπογράφεται από όλους τους παρισταμένους και το διαμεσολαβητή και καθένας λαμβάνει από ένα όμοιο πρωτότυπο.</div>
-<div style="text-align:left;"><b>- Η διαδικασία έλαβε χώρα δια τηλεδιασκέψεως.</b></div>
-<div style="text-align:left;">- Σύμφωνα με το άρθρο 78 παρ. 2 του ν. 5344/2026, ο διαμεσολαβητής γνωστοποίησε την ${fmtD(d.notify_date)}, εγγράφως με μήνυμα ηλεκτρονικού ταχυδρομείου, ήτοι τριάντα (30) τουλάχιστον ημέρες πριν από την διεξαγωγή της Εισαγωγικής Συνεδρίας (για υποθέσεις κτηματολογικής διαμεσολάβησης με συμμετοχή Δημοσίου), στα μέρη την ημερομηνία καθώς και τον τόπο διεξαγωγής της εισαγωγικής συνεδρίας διαμεσολάβησης (Έντυπο 3), αλλά και το φύλλο Βασικών Στοιχείων (Έντυπο 1), και έλαβε απόδειξη παραλαβής της γνωστοποίησης.</div>
-<div style="text-align:left;">- Σύμφωνα με το άρθρο 84 του ν. 5344/2026, η έγγραφη αυτή γνωστοποίηση του διαμεσολαβητή προς τα μέρη για τη διεξαγωγή της εισαγωγικής συνεδρίας (Έντυπο 3), αναστέλλει την παραγραφή και την αποσβεστική προθεσμία άσκησης των αξιώσεων και των δικαιωμάτων, εφόσον αυτές έχουν αρχίσει σύμφωνα με τις διατάξεις του ουσιαστικού δικαίου, καθώς και τις δικονομικές προθεσμίες των άρθρων 237 και 238 του Κώδικα Πολιτικής Δικονομίας, για όσο χρόνο διαρκεί η διαδικασία διαμεσολάβησης.</div>
-<div style="text-align:left;">- Η Εισαγωγική Συνεδρία διαμεσολάβησης έχει εμπιστευτικό χαρακτήρα (άρθρο 79 παρ. 3 ν. 5344/2026). Πριν από την έναρξη της διαδικασίας όλοι οι συμμετέχοντες δεσμεύτηκαν να τηρήσουν το απόρρητο της διαδικασίας της Υποχρεωτικής Αρχικής Συνεδρίας διαμεσολάβησης.</div>
-<div style="text-align:left;">- Το παρόν Πρακτικό Περάτωσης Υποχρεωτικής Αρχικής Συνεδρίας διαμεσολάβησης αφορά στη διαφορά των μερών που αναλυτικά περιγράφεται στην αγωγή που κατατέθηκε στο ${d.court} με Αριθμό Κατάθεσης αγωγής: ${d.court_n} και θα προσκομισθεί μαζί με τις προτάσεις.</div>
 
-<div style="font-size: 10pt; color: #777777; margin-top: 25pt; border-top: 1pt dashed #ccc; padding-top: 15pt;"><b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ:</b> Στο παρόν πρακτικό περάτωσης της Υποχρεωτικής Αρχικής Συνεδρίας επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1), το οποίο αποτελεί αναπόσπαστο μέρος του παρόντος. Συντάσσεται από το διαμεσολαβητή μετά την περάτωση της Υποχρεωτικής Αρχικής Συνεδρίας, υπογράφεται από όλους τους παρισταμένους και το διαμεσολαβητή και καθένας λαμβάνει από ένα όμοιο πρωτότυπο. Μπορείτε να προσθέσετε περισσότερα ονόματα ανάλογα με τους συμμετέχοντες.</div>`;
+<hr class="doc-divider">
+
+<div class="doc-party-block">
+    <div class="party-label">Ο ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
+    <div>Ονοματεπώνυμο: <b>${mediatorFullName}</b> &nbsp;|&nbsp; Πατρώνυμο: ${m_data.f} &nbsp;|&nbsp; ΑΜΔ: ${m_data.am}</div>
+    <div class="doc-party-row">
+        <div>Πενταπλάτανος Γιαννιτσών, την ${d.doc_date}</div>
+        <div class="sig-block">Υπογραφή Διαμεσολαβητή<br>…………………………….</div>
+    </div>
+</div>
+
+<div class="doc-notes-block" style="margin-top:16pt;">
+<b>Παρατηρήσεις:</b><br>
+— Στο παρόν πρακτικό επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1) και η Γνωστοποίηση/Πρόσκληση (Έντυπο 3) κατ' άρθρο 78 παρ. 2 ν. 5344/2026, τα οποία αποτελούν αναπόσπαστο μέρος του παρόντος. Συντάσσεται από τον διαμεσολαβητή, υπογράφεται από όλους τους παρισταμένους και καθένας λαμβάνει από ένα όμοιο πρωτότυπο.<br>
+— <b>Η διαδικασία έλαβε χώρα μέσω τηλεδιάσκεψης.</b><br>
+— Σύμφωνα με το άρθρο 78 παρ. 2 ν. 5344/2026, ο διαμεσολαβητής γνωστοποίησε στα μέρη εγγράφως, την ${fmtD(d.notify_date)}, με μήνυμα ηλεκτρονικού ταχυδρομείου, την ημερομηνία και τον τόπο διεξαγωγής της ΕΣΔ (Έντυπο 3), καθώς και το Φύλλο Βασικών Στοιχείων (Έντυπο 1), και έλαβε απόδειξη παραλαβής.<br>
+— Σύμφωνα με το άρθρο 84 ν. 5344/2026, η έγγραφη γνωστοποίηση αναστέλλει την παραγραφή και την αποσβεστική προθεσμία άσκησης αξιώσεων, εφόσον αυτές έχουν αρχίσει κατά τις διατάξεις του ουσιαστικού δικαίου, καθώς και τις δικονομικές προθεσμίες των άρθρων 237 και 238 Κώδικα Πολιτικής Δικονομίας, για όσο χρόνο διαρκεί η διαδικασία διαμεσολάβησης.<br>
+— Η ΕΣΔ έχει εμπιστευτικό χαρακτήρα (άρθρο 79 παρ. 3 ν. 5344/2026). Πριν από την έναρξη, όλοι οι συμμετέχοντες δεσμεύτηκαν να τηρήσουν το απόρρητο της διαδικασίας.<br>
+— Το παρόν αφορά τη διαφορά που περιγράφεται στην αγωγή που κατατέθηκε στο ${d.court} με Αριθμό Κατάθεσης: ${d.court_n} και θα προσκομισθεί μαζί με τις προτάσεις.
+</div>
+
+<div class="doc-footnote">
+<b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ:</b> Στο παρόν πρακτικό περάτωσης της Υποχρεωτικής Αρχικής Συνεδρίας επισυνάπτεται το Φύλλο Βασικών Στοιχείων (Έντυπο 1), το οποίο αποτελεί αναπόσπαστο μέρος του παρόντος. Συντάσσεται από τον διαμεσολαβητή μετά την περάτωση της Υποχρεωτικής Αρχικής Συνεδρίας, υπογράφεται από όλους τους παρισταμένους και ο καθένας λαμβάνει από ένα όμοιο πρωτότυπο. Μπορείτε να προσθέσετε περισσότερα ονόματα ανάλογα με τους συμμετέχοντες.
+</div>`;
     } else if (d.type === 'slides_yas') {
         const slidesData = [
             {
