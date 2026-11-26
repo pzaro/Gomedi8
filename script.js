@@ -572,6 +572,8 @@ function draw() {
         z_pass: document.getElementById('z_pass').value || "................",
         notify_date: document.getElementById('notify_date').value,
         doc_date: document.getElementById('doc_date').value || "................",
+        proposal_deadline: document.getElementById('proposal_deadline')?.value || "................",
+        basis_art: document.getElementById('basis_art')?.value || 'b',
         type: document.getElementById('doc_type').value
     };
 
@@ -683,56 +685,100 @@ function draw() {
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_mob||r.l_tel||''}</td>
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_email||''}</td></tr>`).join('');
 
+        // βάση υπαγωγής checkboxes
+        const basisOptions = [
+            {v:'a', text:'άρθρου 76 παρ. 1α του ν. 5344/2026 (οικογενειακή διαφορά)'},
+            {v:'b', text:'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Μονομελούς άνω 30.000 ευρώ)'},
+            {v:'c', text:'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Πολυμελούς)'},
+            {v:'d', text:'άρθρου 76 παρ. 1γ του ν. 5344/2026 (ρήτρα διαμεσολάβησης)'},
+            {v:'e', text:'άρθρου 76 παρ. 1δ του ν. 5344/2026 (κτηματολογική διαφορά)'},
+        ];
+        const basisHtml = basisOptions.map(o =>
+            `<div style="margin:3pt 0;">- ${o.text} &nbsp;&nbsp; ${o.v === d.basis_art ? '☒' : '☐'}</div>`
+        ).join('');
+
+        // μέρη HTML — ακολουθεί τη δομή του υποδείγματος
+        const reqsHtml = reqs.map((r,i) => {
+            const tel = r.mob || r.tel || '.....................';
+            const lName = getFullName(r.l_n, r.l_s);
+            return `<div style="margin-bottom:14pt;">
+<b>Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος</b><br><br>
+${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}, ${r.addr||'...............'}, με Αριθμό Φορολογικού Μητρώου (ΑΦΜ) ${r.afm||'...................'}<br><br>
+Αριθμός τηλεφώνου: ${tel}<br>
+Email: ${r.email||''}<br><br>
+<b>Νομικός Παραστάτης:</b><br>
+Ονοματεπώνυμο: ${lName||'...............'}<br>
+${r.l_addr?'Διεύθυνση: '+r.l_addr+'<br>':''}
+Αριθμός Μητρώου / Δικηγορικός Σύλλογος (ΑΜ/ΔΣ): ${r.l_am||'.......'} / ${r.l_ds||'.......'}<br>
+Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${r.l_afm||'...................'}<br>
+Αριθμός τηλεφώνου: ${r.l_mob||r.l_tel||'...............'}<br>
+Email: ${r.l_email||''}
+</div>`;
+        }).join('');
+
+        const respsHtml = resps.map((r,i) => {
+            const tel = r.mob || r.tel || '.....................';
+            const lName = getFullName(r.l_n, r.l_s);
+            return `<div style="margin-bottom:14pt;">
+<b>Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος</b><br><br>
+${getFullName(r.n,r.s)}${r.f?' του '+r.f:''}, ${r.addr||'...............'}, με Αριθμό Φορολογικού Μητρώου (ΑΦΜ) ${r.afm||'...................'}<br><br>
+Αριθμός τηλεφώνου: ${tel}<br>
+Email: ${r.email||''}<br><br>
+<b>Νομικός Παραστάτης:</b><br>
+Ονοματεπώνυμο: ${lName||'...............'}<br>
+${r.l_addr?'Διεύθυνση: '+r.l_addr+'<br>':''}
+Αριθμός Μητρώου / Δικηγορικός Σύλλογος (ΑΜ/ΔΣ): ${r.l_am||'.......'} / ${r.l_ds||'.......'}<br>
+Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${r.l_afm||'...................'}<br>
+Αριθμός τηλεφώνου: ${r.l_mob||r.l_tel||'...............'}<br>
+Email: ${r.l_email||''}
+</div>`;
+        }).join('');
+
         activeHtml = `
 <div class="doc-form-badge">ΕΝΤΥΠΟ 1</div>
 <div class="doc-title-block">
     <span class="doc-main-title">ΦΥΛΛΟ ΒΑΣΙΚΩΝ ΣΤΟΙΧΕΙΩΝ</span>
-    <div class="doc-subtitle">(άρθρο 77 παρ. 1 του ν. 5344/2026 — Κώδικας Εναλλακτικής Επίλυσης Διαφορών)</div>
 </div>
 
-<table style="width:100%;border-collapse:collapse;font-size:10.5pt;margin-bottom:16pt;">
-<thead>
-<tr style="background:#1e3a6e;color:#fff;">
-    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΡΟΛΟΣ</th>
-    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΟΝΟΜΑΤΕΠΩΝΥΜΟ</th>
-    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΠΑΤΡΩΝΥΜΟ</th>
-    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΑΦΜ</th>
-    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">ΤΗΛΕΦΩΝΟ</th>
-    <th style="padding:5pt 8pt;text-align:left;border:0.5pt solid #1e3a6e;font-size:9pt;">EMAIL</th>
-</tr>
-</thead>
-<tbody>
-${reqRows}
-${respRows}
-</tbody>
-</table>
+<p>Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (ΥΑΣΔ) βάσει εφαρμογής του:</p>
 
-<div style="margin-bottom:14pt;">
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:8pt;">Α. Στοιχεία Διαμεσολαβητή</div>
-<table style="width:100%;font-size:10.5pt;border-collapse:collapse;">
-<tr><td style="width:36%;padding:3pt 0;font-weight:bold;">Ονοματεπώνυμο:</td><td>${mediatorFullName} του ${m_data.f}</td></tr>
-<tr><td style="padding:3pt 0;font-weight:bold;">Αριθμός Μητρώου Διαμεσολαβητή:</td><td>${m_data.am}</td></tr>
-${m_data.addr?`<tr><td style="padding:3pt 0;font-weight:bold;">Διεύθυνση:</td><td>${m_data.addr}</td></tr>`:''}
-${m_data.iban?`<tr><td style="padding:3pt 0;font-weight:bold;">IBAN:</td><td>${m_data.iban} (${m_data.bank})</td></tr>`:''}
-${m_data.email?`<tr><td style="padding:3pt 0;font-weight:bold;">Email:</td><td>${m_data.email}</td></tr>`:''}
-</table>
+<div style="margin:10pt 0 18pt 12pt;font-size:11pt;line-height:2;">
+${basisHtml}
 </div>
+
+<hr class="doc-divider">
+
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:14pt;letter-spacing:0.3pt;">ΣΥΜΜΕΤΕΧΟΝΤΑ ΜΕΡΗ</div>
+
+${reqsHtml}
+${respsHtml}
+
+<hr class="doc-divider">
+
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:14pt;letter-spacing:0.3pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
 
 <div style="margin-bottom:14pt;">
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:8pt;">Β. Στοιχεία Υπόθεσης</div>
-<table style="width:100%;font-size:10.5pt;border-collapse:collapse;">
-<tr><td style="width:36%;padding:3pt 0;font-weight:bold;">Αντικείμενο διαφοράς:</td><td>${d.subj}</td></tr>
-<tr><td style="padding:3pt 0;font-weight:bold;">Αρμόδιο Δικαστήριο:</td><td>${d.court}</td></tr>
-<tr><td style="padding:3pt 0;font-weight:bold;">Αριθμός / Ημερομηνία αγωγής:</td><td>${d.court_n} / ${d.court_d}</td></tr>
-<tr><td style="padding:3pt 0;font-weight:bold;">Ημερομηνία ΕΣΔ:</td><td>${fmtD(d.z_date)} &nbsp;|&nbsp; Ώρα: ${d.z_time}</td></tr>
-<tr><td style="padding:3pt 0;font-weight:bold;">Τόπος ΕΣΔ:</td><td>ΠΕΝΤΑΠΛΑΤΑΝΟΣ ΓΙΑΝΝΙΤΣΩΝ — μέσω τηλεδιάσκεψης Zoom</td></tr>
-</table>
+<b>${mediatorFullName}</b>${m_data.f?' του '+m_data.f:''}<br>
+${m_data.addr?'Διεύθυνση: '+m_data.addr+'<br>':''}
+Αριθμός Μητρώου Διαμεσολαβητή (ΑΜΔ): ${m_data.am}<br>
+${m_data.email?'Email: '+m_data.email+'<br>':''}
 </div>
 
-<div style="margin-bottom:14pt;">
-<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:8pt;">Γ. Αμοιβή Διαμεσολαβητή</div>
-<p style="margin:0;font-size:10.5pt;">Η αμοιβή για τη διεξαγωγή της Εισαγωγικής Συνεδρίας Διαμεσολάβησης (ΕΣΔ) ανέρχεται στο ποσό των <b>${d.feeInfo.perPartyText}</b> ανά μέρος (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>). Καταβάλλεται πριν από την έναρξη της ΕΣΔ στον λογαριασμό <b>${m_data.iban}</b>, Τράπεζα ${m_data.bank}.</p>
-</div>
+<hr class="doc-divider">
+
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΣΥΝΤΟΜΗ ΠΕΡΙΓΡΑΦΗ ΤΟΥ ΑΝΤΙΚΕΙΜΕΝΟΥ ΤΗΣ ΔΙΑΦΟΡΑΣ</div>
+
+<p style="font-style:italic;">${d.subj}</p>
+
+<p><b>ΑΡΜΟΔΙΟ ΔΙΚΑΣΤΗΡΙΟ:</b> ${d.court} &nbsp;&nbsp; <b>ΑΡ. ΚΑΤΑΘΕΣΗΣ / ΗΜΕΡΟΜΗΝΙΑ ΑΓΩΓΗΣ:</b> ${d.court_n} / ${d.court_d}</p>
+
+<p><b>ΠΡΟΘΕΣΜΙΑ ΚΑΤΑΘΕΣΗΣ ΠΡΟΤΑΣΕΩΝ:</b> ${d.proposal_deadline}</p>
+
+<hr class="doc-divider">
+
+<div style="font-weight:bold;font-size:10pt;text-transform:uppercase;color:#1e3a6e;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin-bottom:10pt;letter-spacing:0.3pt;">ΑΜΟΙΒΗ ΔΙΑΜΕΣΟΛΑΒΗΤΗ</div>
+
+<p>Η αμοιβή για τη διεξαγωγή της Εισαγωγικής Συνεδρίας Διαμεσολάβησης ανέρχεται στο ποσό των <b>${d.feeInfo.perPartyText}</b> ανά μέρος (${d.feeInfo.totalParties} μέρη × ${d.feeInfo.grossPerParty}€ = <b>${d.feeInfo.totalGross}€ συνολικά</b>) και καταβάλλεται πριν από την έναρξη στον λογαριασμό ${m_data.iban ? '<b>'+m_data.iban+'</b>, Τράπεζα '+m_data.bank : '..............'}.</p>
 
 <div class="doc-sig-mediator">
     <div class="sig-inner">

@@ -78,6 +78,18 @@
                     <div class="form-group"><label>Ημερομηνία Γνωστοποίησης</label><input type="date" id="notify_date" oninput="draw()"></div>
                     <div class="form-group"><label>Ημερομηνία Σύνταξης</label><input type="text" id="doc_date" oninput="draw()"></div>
                 </div>
+                <div class="row-2" style="margin-top:4px;">
+                    <div class="form-group"><label>Προθεσμία Κατάθεσης Προτάσεων</label><input type="text" id="proposal_deadline" placeholder="πχ. 15/03/2027" oninput="draw()"></div>
+                    <div class="form-group"><label>Βάση Υπαγωγής</label>
+                        <select id="basis_art" onchange="draw()" style="font-size:0.88rem;">
+                            <option value="a">άρθρο 76 παρ. 1α — οικογενειακή διαφορά</option>
+                            <option value="b" selected>άρθρο 76 παρ. 1β — τακτική Μον/λούς άνω 30.000€</option>
+                            <option value="c">άρθρο 76 παρ. 1β — τακτική Πολυμελούς</option>
+                            <option value="d">άρθρο 76 παρ. 1γ — ρήτρα διαμεσολάβησης</option>
+                            <option value="e">άρθρο 76 παρ. 1δ — κτηματολογική διαφορά</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div class="group-header">📄 ΤΥΠΟΣ ΕΓΓΡΑΦΟΥ</div>
                 <select id="doc_type" onchange="draw()" style="background: #eff6ff; font-weight:800; padding: 14px; border: 2px solid #bfdbfe;">
