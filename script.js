@@ -488,11 +488,9 @@ function renderLists() {
                 <label class="chk-label"><input type="checkbox" ${isLegal?'checked':''} onchange="${arrName}[${idx}].is_legal=this.checked; renderLists(); draw()"> ⚖️ Νομικό Πρόσωπο</label>
             </div>
             ${isLegal ? `
-            <div class="row-2">
-                <div class="form-group"><label>Επωνυμία</label><input value="${r.company}" oninput="${arrName}[${idx}].company=this.value; draw()"></div>
-                <div class="form-group"><label>ΑΦΜ 🔍</label><input value="${r.afm}" placeholder="ΑΦΜ & Enter..." oninput="${arrName}[${idx}].afm=this.value; draw()" onchange="autoFillParty(this.value, ${idx}, ${isResp})"></div>
-            </div>
+            <div class="form-group"><label>Επωνυμία</label><input value="${r.company}" oninput="${arrName}[${idx}].company=this.value; draw()"></div>
             <div class="form-group"><label>Όπως νομίμως εκπροσωπείται από</label><input value="${r.rep}" oninput="${arrName}[${idx}].rep=this.value; draw()"></div>
+            <div class="form-group"><label>ΑΦΜ 🔍</label><input value="${r.afm}" placeholder="ΑΦΜ & Enter..." oninput="${arrName}[${idx}].afm=this.value; draw()" onchange="autoFillParty(this.value, ${idx}, ${isResp})"></div>
             <div class="row-2">
                 <div class="form-group"><label>Διεύθυνση</label><input value="${r.addr}" oninput="${arrName}[${idx}].addr=this.value; draw()"></div>
                 <div class="form-group"><label>Email</label><input value="${r.email}" oninput="${arrName}[${idx}].email=this.value; draw()"></div>
