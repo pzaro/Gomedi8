@@ -9,7 +9,7 @@
 <body>
 
 <header>
-    <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΣΥΣΤΗΜΑ ΔΙΚΟΓΡΑΦΩΝ & ΕΡΓΑΛΕΙΑ ΥΑΣ</div>
+    <div style="font-weight: 900; letter-spacing: 1px; font-size: 1.3rem;">ΣΥΣΤΗΜΑ ΔΙΚΟΓΡΑΦΩΝ & ΕΡΓΑΛΕΙΑ ΕΣΔ</div>
     <div class="mediator-login" style="display: flex; gap: 10px; align-items: center;">
         <span style="font-size: 0.85rem; color: #cbd5e1;">ΑΜΔ Διαμεσολαβητή:</span>
         <input type="text" id="mediator_amd_input" placeholder="π.χ. 2341" style="width: 100px; padding: 5px; border-radius: 4px; border: none; text-align: center; font-weight: bold;">
@@ -63,11 +63,11 @@
                 <div class="group-header">🌐 ΣΥΝΕΔΡΙΑ (ZOOM) & ΕΓΓΡΑΦΑ</div>
                 <div class="row-2">
                     <div class="form-group">
-                        <label>Ημερομηνία ΥΑΣ</label>
+                        <label>Ημερομηνία ΕΣΔ</label>
                         <input type="date" id="yas_date" oninput="draw(); showYasDay(this.value)">
                         <span id="yas_day_label" style="display:inline-block; margin-top:4px; font-weight:600; color:#1d4ed8; font-size:0.92rem;"></span>
                     </div>
-                    <div class="form-group"><label>Ώρα ΥΑΣ</label><input type="time" id="yas_time" oninput="draw()"></div>
+                    <div class="form-group"><label>Ώρα ΕΣΔ</label><input type="time" id="yas_time" oninput="draw()"></div>
                 </div>
                 <div class="form-group"><label>Link Τηλεδιάσκεψης</label><input type="text" id="z_link" oninput="draw()"></div>
                 <div class="row-2">
@@ -82,10 +82,10 @@
                 <div class="group-header">📄 ΤΥΠΟΣ ΕΓΓΡΑΦΟΥ</div>
                 <select id="doc_type" onchange="draw()" style="background: #eff6ff; font-weight:800; padding: 14px; border: 2px solid #bfdbfe;">
                     <option value="email">1. Πρώτο Email Ενημέρωσης</option>
-                    <option value="enarktiri">2. Εναρκτήρια Δήλωση ΥΑΣ</option>
+                    <option value="enarktiri">2. Εναρκτήρια Δήλωση ΕΣΔ</option>
                     <option value="prosklisi">3. Έντυπο 3: Γνωστοποίηση (Ατομική)</option>
-                    <option value="praktiko">4. Πρακτικό Περάτωσης ΥΑΣ</option>
-                    <option value="slides_yas">5. Διαφάνεια ΥΑΣ — Βασικά Σημεία</option>
+                    <option value="praktiko">4. Πρακτικό Περάτωσης ΕΣΔ</option>
+                    <option value="slides_yas">5. Διαφάνεια ΕΣΔ — Βασικά Σημεία</option>
                 </select>
 
                 <div id="party_select_container">
@@ -283,7 +283,7 @@
         </div>
     </div>
 
-    <!-- ===== ΚΑΡΤΕΛΑ: ΔΙΑΦΑΝΕΙΑ ΥΑΣ ===== -->
+    <!-- ===== ΚΑΡΤΕΛΑ: ΔΙΑΦΑΝΕΙΑ ΕΣΔ ===== -->
     <div id="slides_yas" class="tab-content">
         <div style="max-width:960px; margin:0 auto; padding:1rem 0;">
 
@@ -307,7 +307,7 @@
                     <div class="yas-points">
                         <div class="yas-point">
                             <span class="yas-dot" style="background:#2563eb;"></span>
-                            <span>Η Υποχρεωτική Αρχική Συνεδρία Διαμεσολάβησης (ΥΑΣ) διέπεται από <b>απόλυτη εμπιστευτικότητα</b>. Οτιδήποτε λεχθεί ή αποκαλυφθεί κατά τη διαδικασία δεν δύναται να χρησιμοποιηθεί ως αποδεικτικό στοιχείο σε μελλοντική δικαστική ή διαιτητική διαδικασία.</span>
+                            <span>Η Εισαγωγική Συνεδρία Διαμεσολάβησης (ΕΣΔ) διέπεται από <b>απόλυτη εμπιστευτικότητα</b>. Οτιδήποτε λεχθεί ή αποκαλυφθεί κατά τη διαδικασία δεν δύναται να χρησιμοποιηθεί ως αποδεικτικό στοιχείο σε μελλοντική δικαστική ή διαιτητική διαδικασία.</span>
                         </div>
                         <div class="yas-point">
                             <span class="yas-dot" style="background:#2563eb;"></span>
@@ -315,7 +315,7 @@
                         </div>
                         <div class="yas-point">
                             <span class="yas-dot" style="background:#2563eb;"></span>
-                            <span>Πριν από την έναρξη της ΥΑΣ, <b>όλοι οι συμμετέχοντες</b> — μέρη, νομικοί παραστάτες και διαμεσολαβητής — δεσμεύονται εγγράφως να τηρήσουν το απόρρητο της διαδικασίας.</span>
+                            <span>Πριν από την έναρξη της Εισαγωγικής Συνεδρίας Διαμεσολάβησης (ΕΣΔ), <b>όλοι οι συμμετέχοντες</b> — μέρη, νομικοί παραστάτες και διαμεσολαβητής — δεσμεύονται εγγράφως να τηρήσουν το απόρρητο της διαδικασίας.</span>
                         </div>
                     </div>
                 </div>
@@ -334,11 +334,11 @@
                         </div>
                         <div class="yas-point">
                             <span class="yas-dot" style="background:#059669;"></span>
-                            <span><b>Σκοπός</b> της ΥΑΣ είναι η εξερεύνηση της δυνατότητας εξωδικαστικής επίλυσης της διαφοράς με αμοιβαία αποδεκτή λύση, εξοικονομώντας χρόνο, κόστος και ενέργεια που απαιτεί μία μακροχρόνια δικαστική διαδικασία.</span>
+                            <span><b>Σκοπός</b> της Εισαγωγικής Συνεδρίας Διαμεσολάβησης (ΕΣΔ) είναι η εξερεύνηση της δυνατότητας εξωδικαστικής επίλυσης της διαφοράς με αμοιβαία αποδεκτή λύση, εξοικονομώντας χρόνο, κόστος και ενέργεια που απαιτεί μία μακροχρόνια δικαστική διαδικασία.</span>
                         </div>
                         <div class="yas-point">
                             <span class="yas-dot" style="background:#059669;"></span>
-                            <span>Ακόμη και αν δεν επιτευχθεί συμφωνία, η ΥΑΣ παρέχει στα μέρη <b>πλήρη ενημέρωση</b> για τις επιλογές τους και ανοίγει διαύλους διαλόγου που συχνά οδηγούν σε μεταγενέστερη επίλυση.</span>
+                            <span>Ακόμη και αν δεν επιτευχθεί συμφωνία, η Εισαγωγική Συνεδρία Διαμεσολάβησης (ΕΣΔ) παρέχει στα μέρη <b>πλήρη ενημέρωση</b> για τις επιλογές τους και ανοίγει διαύλους διαλόγου που συχνά οδηγούν σε μεταγενέστερη επίλυση.</span>
                         </div>
                     </div>
                 </div>
