@@ -489,7 +489,12 @@ function renderLists() {
             </div>
             ${isLegal ? `
             <div class="form-group"><label>Επωνυμία</label><input value="${r.company}" oninput="${arrName}[${idx}].company=this.value; draw()"></div>
-            <div class="form-group"><label>Όπως νομίμως εκπροσωπείται από</label><input value="${r.rep}" oninput="${arrName}[${idx}].rep=this.value; draw()"></div>
+            <div style="margin:4px 0 2px; font-size:0.78rem; color:#64748b; font-weight:600;">Όπως νομίμως εκπροσωπείται από:</div>
+            <div class="row-3">
+                <div class="form-group"><label>Όνομα Εκπροσώπου</label><input value="${r.rep_n||''}" oninput="${arrName}[${idx}].rep_n=this.value; draw()"></div>
+                <div class="form-group"><label>Επώνυμο Εκπροσώπου</label><input value="${r.rep_s||''}" oninput="${arrName}[${idx}].rep_s=this.value; draw()"></div>
+                <div class="form-group"><label>Ιδιότητα</label><input value="${r.rep_role||''}" placeholder="π.χ. Διευθύνων Σύμβουλος" oninput="${arrName}[${idx}].rep_role=this.value; draw()"></div>
+            </div>
             <div class="form-group"><label>ΑΦΜ 🔍</label><input value="${r.afm}" placeholder="ΑΦΜ & Enter..." oninput="${arrName}[${idx}].afm=this.value; draw()" onchange="autoFillParty(this.value, ${idx}, ${isResp})"></div>
             <div class="row-2">
                 <div class="form-group"><label>Διεύθυνση</label><input value="${r.addr}" oninput="${arrName}[${idx}].addr=this.value; draw()"></div>
@@ -745,7 +750,7 @@ function draw() {
         const partyBlock = (r, label) => r.is_legal ? `
 <div style="line-height:2.1;margin-left:4pt;">
 <b>Επωνυμία:</b> ${f(r.company)}<br>
-<b>Όπως νομίμως εκπροσωπείται από:</b> ${f(r.rep)}<br>
+<b>Όπως νομίμως εκπροσωπείται από:</b> ${[r.rep_n, r.rep_s].filter(Boolean).join(' ') || '..............................'}${r.rep_role ? ', ' + r.rep_role : ''}<br>
 <b>Διεύθυνση:</b> ${f(r.addr)}<br>
 <b>Αριθμός Φορολογικού Μητρώου (ΑΦΜ):</b> ${f(r.afm)}<br>
 <b>Email:</b> ${f(r.email)}
