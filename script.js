@@ -747,8 +747,7 @@ function draw() {
         const f = v => v || '..............................';
         const partyBlock = (r, label) => r.is_legal ? `
 <div style="line-height:2.1;margin-left:4pt;">
-<b>Επωνυμία:</b> ${f(r.company)}<br>
-<b>Όπως νομίμως εκπροσωπείται</b><br>
+<b>Επωνυμία:</b> ${f(r.company)}, όπως νομίμως εκπροσωπείται<br>
 <b>Διεύθυνση:</b> ${f(r.addr)}<br>
 <b>Αριθμός Φορολογικού Μητρώου (ΑΦΜ):</b> ${f(r.afm)}<br>
 <b>Email:</b> ${f(r.email)}
