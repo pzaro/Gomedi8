@@ -95,8 +95,12 @@ async function savePartyToSheet(idx, isResp) {
         showToast('⚠️ Συμπληρώστε ΑΦΜ ή Κινητό για αποθήκευση', '#f59e0b');
         return;
     }
-    if (!r.n || !r.s) {
+    if (!r.is_legal && (!r.n || !r.s)) {
         showToast('⚠️ Συμπληρώστε Όνομα και Επώνυμο', '#f59e0b');
+        return;
+    }
+    if (r.is_legal && !r.company) {
+        showToast('⚠️ Συμπληρώστε Επωνυμία', '#f59e0b');
         return;
     }
 
