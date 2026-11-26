@@ -178,20 +178,20 @@ async function saveCaseToSheet() {
 
     showToast('⏳ Αποθήκευση υπόθεσης...', '#3b82f6');
 
-    const url = `${GOOGLE_APP_SCRIPT_URL}?action=writeCase`
-        + `&doc_date=${encodeURIComponent(doc_date)}`
-        + `&subj=${encodeURIComponent(subj)}`
-        + `&court=${encodeURIComponent(court)}`
-        + `&court_n=${encodeURIComponent(court_n)}`
-        + `&court_d=${encodeURIComponent(court_d)}`
-        + `&basis_art=${encodeURIComponent(basis_art)}`
-        + `&proposal_deadline=${encodeURIComponent(proposal_deadline)}`
-        + `&req_afm=${encodeURIComponent(req_afm)}`
-        + `&resp_afm=${encodeURIComponent(resp_afm)}`
-        + `&med_am=${encodeURIComponent(m_data.am || '')}`;
+    const params = new URLSearchParams({
+        action: 'writeCase',
+        doc_date, subj, court, court_n, court_d,
+        basis_art, proposal_deadline, req_afm, resp_afm,
+        med_am: m_data.am || ''
+    });
 
     try {
-        await fetch(url, { mode: 'no-cors' });
+        await fetch(GOOGLE_APP_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        });
         showToast('✅ Η υπόθεση αποθηκεύτηκε στο Google Sheet!', '#10b981');
     } catch (e) {
         showToast('❌ Αδυναμία σύνδεσης με Google Sheet', '#ef4444');
