@@ -85,6 +85,94 @@ async function loadMediator() {
     }
 }
 
+async function savePartyToSheet(idx, isResp) {
+    const arr = isResp ? resps : reqs;
+    const r = arr[idx];
+    if (!r) return;
+
+    if (!r.afm && !r.mob) {
+        showToast('⚠️ Συμπληρώστε ΑΦΜ ή Κινητό για αποθήκευση', '#f59e0b');
+        return;
+    }
+    if (!r.n || !r.s) {
+        showToast('⚠️ Συμπληρώστε Όνομα και Επώνυμο', '#f59e0b');
+        return;
+    }
+
+    showToast('⏳ Αποθήκευση μέρους...', '#3b82f6');
+
+    const params = new URLSearchParams({
+        action: 'writeParty',
+        afm:   r.afm   || '',
+        mob:   r.mob   || '',
+        tel:   r.tel   || '',
+        n:     r.n     || '',
+        s:     r.s     || '',
+        f:     r.f     || '',
+        addr:  r.addr  || '',
+        email: r.email || ''
+    });
+
+    try {
+        const res  = await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+            showToast('✅ Το μέρος αποθηκεύτηκε στο Google Sheet!', '#10b981');
+        } else if (data.message === 'Exists') {
+            showToast('ℹ️ Υπάρχει ήδη εγγραφή με αυτό το ΑΦΜ — ενημερώθηκε', '#f59e0b');
+        } else {
+            showToast('❌ Σφάλμα αποθήκευσης μέρους', '#ef4444');
+        }
+    } catch (e) {
+        showToast('❌ Αδυναμία σύνδεσης με Google Sheet', '#ef4444');
+    }
+}
+
+async function saveLawyerToSheet(idx, isResp) {
+    const arr = isResp ? resps : reqs;
+    const r = arr[idx];
+    if (!r) return;
+
+    if (!r.l_afm && !r.l_mob) {
+        showToast('⚠️ Συμπληρώστε ΑΦΜ ή Κινητό δικηγόρου', '#f59e0b');
+        return;
+    }
+    if (!r.l_n || !r.l_s) {
+        showToast('⚠️ Συμπληρώστε Όνομα και Επώνυμο δικηγόρου', '#f59e0b');
+        return;
+    }
+
+    showToast('⏳ Αποθήκευση δικηγόρου...', '#3b82f6');
+
+    const params = new URLSearchParams({
+        action: 'writeLawyer',
+        afm:   r.l_afm  || '',
+        mob:   r.l_mob  || '',
+        tel:   r.l_tel  || '',
+        n:     r.l_n    || '',
+        s:     r.l_s    || '',
+        f:     r.l_f    || '',
+        am:    r.l_am   || '',
+        ds:    r.l_ds   || '',
+        addr:  r.l_addr || '',
+        email: r.l_email|| ''
+    });
+
+    try {
+        const res  = await fetch(`${GOOGLE_APP_SCRIPT_URL}?${params}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+            showToast('✅ Ο δικηγόρος αποθηκεύτηκε στο Google Sheet!', '#10b981');
+        } else if (data.message === 'Exists') {
+            showToast('ℹ️ Υπάρχει ήδη εγγραφή — ενημερώθηκε', '#f59e0b');
+        } else {
+            showToast('❌ Σφάλμα αποθήκευσης δικηγόρου', '#ef4444');
+        }
+    } catch (e) {
+        showToast('❌ Αδυναμία σύνδεσης με Google Sheet', '#ef4444');
+    }
+}
+
 async function registerLawyer() {
     const afm = document.getElementById('reg_l_afm').value.trim();
     const mob = document.getElementById('reg_l_mob').value.trim();
@@ -382,8 +470,11 @@ function renderLists() {
                 <div class="form-group"><label>Κινητό</label><input value="${r.mob}" oninput="${arrName}[${idx}].mob=this.value; draw()"></div>
                 <div class="form-group"><label>Email</label><input value="${r.email}" oninput="${arrName}[${idx}].email=this.value; draw()"></div>
             </div>
-            <label class="chk-label"><input type="checkbox" ${r.p_party?'checked':''} onchange="${arrName}[${idx}].p_party=this.checked; draw()"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΕΣΔ</label>
-            
+            <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
+                <label class="chk-label"><input type="checkbox" ${r.p_party?'checked':''} onchange="${arrName}[${idx}].p_party=this.checked; draw()"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΕΣΔ</label>
+                <button onclick="savePartyToSheet(${idx}, ${isResp})" style="margin-left:auto; padding:5px 14px; background:#10b981; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">💾 Αποθήκευση Μέρους</button>
+            </div>
+
             <div class="sub-title" style="display:flex; justify-content: space-between; align-items: center;">
                 <span>Νομικός Παραστάτης</span>
                 <span style="font-size: 0.7rem; color: #64748b; font-weight: normal; text-transform: none;">Cloud Αναζήτηση (Enter)</span>
@@ -406,7 +497,10 @@ function renderLists() {
                 <div class="form-group"><label>Διεύθυνση Δικηγόρου</label><input value="${r.l_addr}" placeholder="Διεύθυνση..." oninput="${arrName}[${idx}].l_addr=this.value; draw()"></div>
                 <div class="form-group"><label>Email Δικηγόρου</label><input value="${r.l_email}" placeholder="Email..." oninput="${arrName}[${idx}].l_email=this.value; draw()"></div>
             </div>
-            <label class="chk-label"><input type="checkbox" ${r.p_law?'checked':''} onchange="${arrName}[${idx}].p_law=this.checked; draw()"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
+                <label class="chk-label"><input type="checkbox" ${r.p_law?'checked':''} onchange="${arrName}[${idx}].p_law=this.checked; draw()"> ΔΙΚΗΓΟΡΟΣ ΠΑΡΩΝ/ΟΥΣΑ</label>
+                <button onclick="saveLawyerToSheet(${idx}, ${isResp})" style="margin-left:auto; padding:5px 14px; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">💾 Αποθήκευση Δικηγόρου</button>
+            </div>
         </div>`;
     };
     document.getElementById('req_container').innerHTML = reqs.map((_, i) => buildForm(reqs, 'Req', i, false)).join('');
