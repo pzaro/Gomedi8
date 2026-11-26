@@ -797,7 +797,7 @@ ${respsHtml}
 <p style="line-height:1.9;font-style:italic;">${d.subj || '..............................................................................................................................................................'}</p>
 
 <div style="margin-top:50pt;display:flex;justify-content:flex-end;">
-    <div style="text-align:center;min-width:200pt;">
+    <div style="width:200pt;text-align:center;">
         <div style="font-size:9.5pt;margin-bottom:30pt;">Ο Διαμεσολαβητής</div>
         <div style="font-size:9pt;color:#555;">Σφραγίδα &amp; Υπογραφή</div>
     </div>
