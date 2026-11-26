@@ -10,6 +10,7 @@ let m_data = {
 
 const emptyPerson = () => ({
     n: '', s: '', f: '', addr: '', afm: '', tel: '', mob: '', email: '',
+    is_legal: false, company: '', rep: '',
     l_n: '', l_s: '', l_f: '', l_addr: '', l_email: '', l_am: '', l_ds: '', l_afm: '', l_tel: '', l_mob: '',
     p_party: true, p_law: true
 });
@@ -478,10 +479,25 @@ function renderLists() {
         const arrName = isResp ? 'resps' : 'reqs';
         const title = isResp ? `Έτερο Μέρος ${arr.length > 1 ? idx+1 : ''}` : `Επισπεύδων ${arr.length > 1 ? idx+1 : ''}`;
         
+        const isLegal = !!r.is_legal;
         return `
         <div class="party-block">
             <div class="party-title">${title}</div>
             ${idx > 0 ? `<button class="btn-rm" onclick="${isResp?'rmResp':'rmReq'}(${idx})">Διαγραφή</button>` : ''}
+            <div style="margin-bottom:8px;">
+                <label class="chk-label"><input type="checkbox" ${isLegal?'checked':''} onchange="${arrName}[${idx}].is_legal=this.checked; renderLists(); draw()"> ⚖️ Νομικό Πρόσωπο</label>
+            </div>
+            ${isLegal ? `
+            <div class="row-2">
+                <div class="form-group"><label>Επωνυμία</label><input value="${r.company}" oninput="${arrName}[${idx}].company=this.value; draw()"></div>
+                <div class="form-group"><label>ΑΦΜ 🔍</label><input value="${r.afm}" placeholder="ΑΦΜ & Enter..." oninput="${arrName}[${idx}].afm=this.value; draw()" onchange="autoFillParty(this.value, ${idx}, ${isResp})"></div>
+            </div>
+            <div class="form-group"><label>Όπως νομίμως εκπροσωπείται από</label><input value="${r.rep}" oninput="${arrName}[${idx}].rep=this.value; draw()"></div>
+            <div class="row-2">
+                <div class="form-group"><label>Διεύθυνση</label><input value="${r.addr}" oninput="${arrName}[${idx}].addr=this.value; draw()"></div>
+                <div class="form-group"><label>Email</label><input value="${r.email}" oninput="${arrName}[${idx}].email=this.value; draw()"></div>
+            </div>
+            ` : `
             <div class="row-3">
                 <div class="form-group"><label>Όνομα</label><input value="${r.n}" oninput="${arrName}[${idx}].n=this.value; draw()"></div>
                 <div class="form-group"><label>Επώνυμο</label><input value="${r.s}" oninput="${arrName}[${idx}].s=this.value; draw()"></div>
@@ -495,6 +511,7 @@ function renderLists() {
                 <div class="form-group"><label>Κινητό</label><input value="${r.mob}" oninput="${arrName}[${idx}].mob=this.value; draw()"></div>
                 <div class="form-group"><label>Email</label><input value="${r.email}" oninput="${arrName}[${idx}].email=this.value; draw()"></div>
             </div>
+            `}
             <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
                 <label class="chk-label"><input type="checkbox" ${r.p_party?'checked':''} onchange="${arrName}[${idx}].p_party=this.checked; draw()"> ΠΑΡΩΝ/ΟΥΣΑ ΣΤΗΝ ΕΣΔ</label>
                 <button onclick="savePartyToSheet(${idx}, ${isResp})" style="margin-left:auto; padding:5px 14px; background:#10b981; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">💾 Αποθήκευση Μέρους</button>
@@ -727,15 +744,25 @@ function draw() {
 
         // μέρη — αυτόματη συμπλήρωση από τα στοιχεία της φόρμας
         const f = v => v || '..............................';
-        const reqsHtml = reqs.map((r,i) => {
-            return `<p style="margin-bottom:4pt;"><b>Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος${reqs.length>1?' '+(i+1):''}:</b></p>
+        const partyBlock = (r, label) => r.is_legal ? `
+<div style="line-height:2.1;margin-left:4pt;">
+<b>Επωνυμία:</b> ${f(r.company)}<br>
+<b>Όπως νομίμως εκπροσωπείται από:</b> ${f(r.rep)}<br>
+<b>Διεύθυνση:</b> ${f(r.addr)}<br>
+<b>Αριθμός Φορολογικού Μητρώου (ΑΦΜ):</b> ${f(r.afm)}<br>
+<b>Email:</b> ${f(r.email)}
+</div>` : `
 <div style="line-height:2.1;margin-left:4pt;">
 <b>Όνομα:</b> ${f(r.n)} &nbsp; <b>Επίθετο:</b> ${f(r.s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.f)}<br>
 <b>Διεύθυνση:</b> ${f(r.addr)}<br>
 <b>Αριθμός Φορολογικού Μητρώου (ΑΦΜ):</b> ${f(r.afm)}<br>
 <b>Αριθμός τηλεφώνου:</b> ${f(r.mob||r.tel)}<br>
 <b>Email:</b> ${f(r.email)}
-</div>
+</div>`;
+
+        const reqsHtml = reqs.map((r,i) => {
+            return `<p style="margin-bottom:4pt;"><b>Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος${reqs.length>1?' '+(i+1):''}:</b></p>
+${partyBlock(r, 'Α')}
 <p style="margin:10pt 0 4pt;"><b>Νομικός Παραστάτης:</b></p>
 <div style="line-height:2.1;margin-left:4pt;">
 <b>Όνομα:</b> ${f(r.l_n)} &nbsp; <b>Επίθετο:</b> ${f(r.l_s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.l_f)}<br>
@@ -748,13 +775,7 @@ function draw() {
 
         const respsHtml = resps.map((r,i) => {
             return `<p style="margin-bottom:4pt;"><b>Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος${resps.length>1?' '+(i+1):''}:</b></p>
-<div style="line-height:2.1;margin-left:4pt;">
-<b>Όνομα:</b> ${f(r.n)} &nbsp; <b>Επίθετο:</b> ${f(r.s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.f)}<br>
-<b>Διεύθυνση:</b> ${f(r.addr)}<br>
-<b>Αριθμός Φορολογικού Μητρώου (ΑΦΜ):</b> ${f(r.afm)}<br>
-<b>Αριθμός τηλεφώνου:</b> ${f(r.mob||r.tel)}<br>
-<b>Email:</b> ${f(r.email)}
-</div>
+${partyBlock(r, 'Β')}
 <p style="margin:10pt 0 4pt;"><b>Νομικός Παραστάτης:</b></p>
 <div style="line-height:2.1;margin-left:4pt;">
 <b>Όνομα:</b> ${f(r.l_n)} &nbsp; <b>Επίθετο:</b> ${f(r.l_s)} &nbsp; <b>Πατρώνυμο:</b> ${f(r.l_f)}<br>
