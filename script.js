@@ -685,8 +685,62 @@ function draw() {
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_mob||r.l_tel||''}</td>
 <td style="padding:3pt 8pt;background:#fafbfd;border:0.5pt solid #c8d6ea;font-size:9.5pt;">${r.l_email||''}</td></tr>`).join('');
 
-        const dot = '..................................';
-        const dotS = '………………..';
+        // βάση υπαγωγής checkboxes — το επιλεγμένο ☒, τα υπόλοιπα ☐
+        const basisOptions = [
+            {v:'a', text:'άρθρου 76 παρ. 1α του ν. 5344/2026 (οικογενειακή διαφορά)'},
+            {v:'b', text:'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Μον/λούς άνω 30.000 ευρώ)'},
+            {v:'c', text:'άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Πολυμελούς)'},
+            {v:'d', text:'άρθρου 76 παρ. 1γ του ν. 5344/2026 (ρήτρα διαμεσολάβησης)'},
+            {v:'e', text:'άρθρου 76 παρ. 1δ του ν. 5344/2026 (κτηματολογική διαφορά)'},
+        ];
+        const basisHtml = basisOptions.map(o =>
+            `<div style="display:flex;justify-content:space-between;align-items:baseline;margin:4pt 0;">
+                <span>· &nbsp;${o.text}</span>
+                <span style="margin-left:12pt;">${o.v === d.basis_art ? '☒' : '☐'}</span>
+            </div>`
+        ).join('');
+
+        // μέρη — αυτόματη συμπλήρωση από τα στοιχεία της φόρμας
+        const f = v => v || '..............................';
+        const reqsHtml = reqs.map((r,i) => {
+            const lName = getFullName(r.l_n, r.l_s);
+            return `<p style="margin-bottom:4pt;"><b>Α${reqs.length>1?' '+(i+1):''}. Επισπεύδον μέρος${reqs.length>1?' '+(i+1):''}:</b></p>
+<div style="line-height:2.1;margin-left:4pt;">
+Όνομα: <b>${f(r.n)}</b> &nbsp; Επίθετο: <b>${f(r.s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.f)}</b><br>
+Διεύθυνση: ${f(r.addr)}<br>
+Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${f(r.afm)}<br>
+Αριθμός τηλεφώνου: ${f(r.mob||r.tel)}<br>
+Email: ${f(r.email)}
+</div>
+<p style="margin:10pt 0 4pt;"><b>Νομικός Παραστάτης:</b></p>
+<div style="line-height:2.1;margin-left:4pt;">
+Όνομα: <b>${f(r.l_n)}</b> &nbsp; Επίθετο: <b>${f(r.l_s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.l_f)}</b><br>
+Διεύθυνση: ${f(r.l_addr)}<br>
+Αριθμός Μητρώου / Δικηγορικός Σύλλογος (ΑΜ/ΔΣ): ${f(r.l_am)} / ${f(r.l_ds)}<br>
+Αριθμός τηλεφώνου: ${f(r.l_mob||r.l_tel)}<br>
+Email: ${f(r.l_email)}
+</div>`;
+        }).join('<div style="margin:16pt 0;border-top:0.5pt dashed #ccc;"></div>');
+
+        const respsHtml = resps.map((r,i) => {
+            const lName = getFullName(r.l_n, r.l_s);
+            return `<p style="margin-bottom:4pt;"><b>Β${resps.length>1?' '+(i+1):''}. Έτερο μέρος${resps.length>1?' '+(i+1):''}:</b></p>
+<div style="line-height:2.1;margin-left:4pt;">
+Όνομα: <b>${f(r.n)}</b> &nbsp; Επίθετο: <b>${f(r.s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.f)}</b><br>
+Διεύθυνση: ${f(r.addr)}<br>
+Αριθμός Φορολογικού Μητρώου (ΑΦΜ): ${f(r.afm)}<br>
+Αριθμός τηλεφώνου: ${f(r.mob||r.tel)}<br>
+Email: ${f(r.email)}
+</div>
+<p style="margin:10pt 0 4pt;"><b>Νομικός Παραστάτης:</b></p>
+<div style="line-height:2.1;margin-left:4pt;">
+Όνομα: <b>${f(r.l_n)}</b> &nbsp; Επίθετο: <b>${f(r.l_s)}</b> &nbsp; Πατρώνυμο: <b>${f(r.l_f)}</b><br>
+Διεύθυνση: ${f(r.l_addr)}<br>
+Αριθμός Μητρώου / Δικηγορικός Σύλλογος (ΑΜ/ΔΣ): ${f(r.l_am)} / ${f(r.l_ds)}<br>
+Αριθμός τηλεφώνου: ${f(r.l_mob||r.l_tel)}<br>
+Email: ${f(r.l_email)}
+</div>`;
+        }).join('<div style="margin:16pt 0;border-top:0.5pt dashed #ccc;"></div>');
 
         activeHtml = `
 <div class="doc-form-badge">ΕΝΤΥΠΟ 1</div>
@@ -696,87 +750,32 @@ function draw() {
 
 <p style="margin-top:14pt;line-height:1.7;">Το παρόν έντυπο περιέχει τα βασικά στοιχεία της παρακάτω συνοπτικώς περιγραφόμενης διαφοράς, η οποία υπάγεται σε Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) διαμεσολάβησης βάσει εφαρμογής του:</p>
 
-<div style="margin:10pt 0 18pt 10pt;line-height:2.2;">
-<div style="display:flex;justify-content:space-between;">
-    <span>· &nbsp; άρθρου 76 παρ. 1α του ν. 5344/2026 (οικογενειακή διαφορά)</span>
-    <span>☐</span>
-</div>
-<div style="display:flex;justify-content:space-between;">
-    <span>· &nbsp; άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Μον/λούς άνω 30.000 ευρώ)</span>
-    <span>☐</span>
-</div>
-<div style="display:flex;justify-content:space-between;">
-    <span>· &nbsp; άρθρου 76 παρ. 1β του ν. 5344/2026 (τακτική Πολυμελούς)</span>
-    <span>☐</span>
-</div>
-<div style="display:flex;justify-content:space-between;">
-    <span>· &nbsp; άρθρου 76 παρ. 1γ του ν. 5344/2026 (ρήτρα διαμεσολάβησης)</span>
-    <span>☐</span>
-</div>
-<div style="display:flex;justify-content:space-between;">
-    <span>· &nbsp; άρθρου 76 παρ. 1δ του ν. 5344/2026 (κτηματολογική διαφορά)</span>
-    <span>☐</span>
-</div>
+<div style="margin:10pt 0 18pt 10pt;">
+${basisHtml}
 </div>
 
-<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;margin:14pt 0 10pt;">ΣΥΜΜΕΤΕΧΟΝΤΑ ΜΕΡΗ</div>
+<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin:16pt 0 12pt;">ΣΥΜΜΕΤΕΧΟΝΤΑ ΜΕΡΗ</div>
 
-<p style="margin-bottom:6pt;"><b>Α. Επισπεύδον μέρος / Επισπεύδοντα μέρη:</b></p>
-<div style="line-height:2.2;margin-left:4pt;">
-Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
-Διεύθυνση: ${dot}<br>
-ΑΦΜ: ${dot}<br>
-Αριθμός τηλεφώνου: ${dot}<br>
-Email: ${dot}
-</div>
+${reqsHtml}
 
-<p style="margin-top:12pt;margin-bottom:6pt;"><b>Νομικός Παραστάτης:</b></p>
-<div style="line-height:2.2;margin-left:4pt;">
-Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
-Διεύθυνση: ${dot}<br>
-ΑΜ/ΔΣ: ${dot}<br>
-Αριθμός τηλεφώνου: ${dot}<br>
-Email: ${dot}
-</div>
+<div style="margin:16pt 0;border-top:0.5pt solid #c8d6ea;"></div>
 
-<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;margin:18pt 0 10pt;">Β. Έτερο μέρος / Έτερα μέρη:</div>
-<div style="line-height:2.2;margin-left:4pt;">
-Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
-Διεύθυνση: ${dot}<br>
-ΑΦΜ: ${dot}<br>
-Αριθμός τηλεφώνου: ${dot}<br>
-Email: ${dot}
-</div>
+${respsHtml}
 
-<p style="margin-top:12pt;margin-bottom:6pt;"><b>Νομικός Παραστάτης:</b></p>
-<div style="line-height:2.2;margin-left:4pt;">
-Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
-Διεύθυνση: ${dot}<br>
-ΑΜ/ΔΣ: ${dot}<br>
-Αριθμός τηλεφώνου: ${dot}<br>
-Email: ${dot}
-</div>
-
-<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;margin:18pt 0 10pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
-<div style="line-height:2.2;margin-left:4pt;">
-Όνομα ${dotS} Επίθετο ${dotS} Πατρώνυμο ${dotS}<br>
-Διεύθυνση: ${dot}<br>
-ΑΦΜ: ${dot}<br>
-Αριθμός τηλεφώνου: ${dot}<br>
-Email: ${dot}
+<div style="font-weight:bold;font-size:10.5pt;text-transform:uppercase;border-bottom:0.5pt solid #c8d6ea;padding-bottom:4pt;margin:18pt 0 12pt;">ΔΙΑΜΕΣΟΛΑΒΗΤΗΣ</div>
+<div style="line-height:2.1;margin-left:4pt;">
+Όνομα: <b>${m_data.n}</b> &nbsp; Επίθετο: <b>${m_data.s}</b> &nbsp; Πατρώνυμο: <b>${m_data.f}</b><br>
+${m_data.addr?'Διεύθυνση: '+m_data.addr+'<br>':''}
+Αριθμός Μητρώου Διαμεσολαβητή (ΑΜΔ): ${m_data.am}<br>
+${m_data.email?'Email: '+m_data.email:''}
 </div>
 
 <div style="font-weight:bold;margin:20pt 0 8pt;">Σύντομη περιγραφή του αντικειμένου της διαφοράς</div>
-<div style="line-height:2.4;color:#333;">
-${dot}${dot}${dot}<br>
-${dot}${dot}${dot}<br>
-${dot}${dot}${dot}<br>
-${dot}${dot}${dot}
-</div>
+<p style="line-height:1.9;font-style:italic;">${d.subj || '..............................................................................................................................................................'}</p>
 
 <div class="doc-footnote" style="margin-top:28pt;">
 <b>ΚΑΤΕΥΘΥΝΤΗΡΙΕΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΗ ΧΡΗΣΗ ΤΟΥ ΕΝΤΥΠΟΥ 1</b><br>
-Το Φύλλο Βασικών Στοιχείων (Έντυπο 1) περιλαμβάνει τα στοιχεία όλων όσων αφορά η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) και την περιγραφή του αντικειμένου της διαφοράς. Για τη διευκόλυνση της διαδικασίας συμπλήρωσης των υπολοίπων εντύπων, το Φύλλο Βασικών Στοιχείων επισυνάπτεται σε καθένα από αυτά, αποτελώντας αναπόσπαστο μέρος τους. Συντάσσεται κατ' άρθρο 77 παρ. 1 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών, Φύλλο Εφημερίδας της Κυβερνήσεως Α΄ 168/16-10-2026).
+Το Φύλλο Βασικών Στοιχείων (Έντυπο 1) περιλαμβάνει τα στοιχεία όλων όσων αφορά η Υποχρεωτική Αρχική Συνεδρία (ΥΑΣ) και την περιγραφή του αντικειμένου της διαφοράς. Επισυνάπτεται υποχρεωτικά στη Γνωστοποίηση/Πρόσκληση (Έντυπο 3) και στο Πρακτικό Περάτωσης ΕΣΔ. Συντάσσεται κατ' άρθρο 77 παρ. 1 του ν. 5344/2026 (Κώδικας Εναλλακτικής Επίλυσης Διαφορών, Φύλλο Εφημερίδας της Κυβερνήσεως Α΄ 168/16-10-2026).
 </div>`;
 
     } else if (d.type === 'email') {
